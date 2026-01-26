@@ -1,0 +1,49 @@
+# Production Dockerfile for API Gateway Service
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build TypeScript
+RUN npm run build:api-gateway
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 apigateway
+RUN adduser --system --uid 1001 apigateway
+
+# Copy built application
+COPY --from=builder --chown=apigateway:apigateway /app/dist/server ./
+COPY --from=builder --chown=apigateway:apigateway /app/node_modules ./node_modules
+COPY --from=builder /app/scripts/health-check-api.js ./scripts/
+
+USER apigateway
+
+EXPOSE 8080
+
+ENV PORT=8080
+ENV HOSTNAME="0.0.0.0"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node scripts/health-check-api.js || exit 1
+
+# Start the API Gateway
+CMD ["node", "api-gateway-server.js"]

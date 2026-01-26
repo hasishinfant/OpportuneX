@@ -1,0 +1,527 @@
+[
+  {
+    "_id": "mkv82ybuttqx3nhevx",
+    "title": "HackMIT 2026 - Innovation Challenge",
+    "description": "Join us for the premier hackathon at MIT! Build innovative solutions that can change the world. 48 hours of coding, mentorship, and networking with top tech companies.",
+    "organizer": "MIT Computer Science Department",
+    "type": "hackathon",
+    "mode": "hybrid",
+    "location": {
+      "city": "Cambridge",
+      "state": "MA",
+      "country": "USA",
+      "venue": "MIT Campus"
+    },
+    "dates": {
+      "start_date": "2026-02-10T13:48:15.747Z",
+      "end_date": "2026-02-12T13:48:15.747Z",
+      "registration_deadline": "2026-01-31T13:48:15.747Z"
+    },
+    "skills_required": [
+      "JavaScript",
+      "Python",
+      "React",
+      "Node.js",
+      "Machine Learning",
+      "AI"
+    ],
+    "external_url": "https://hackmit.org",
+    "source": {
+      "platform": "MLH",
+      "source_id": "hackmit-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "student",
+      "competition",
+      "innovation"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate"
+      ],
+      "other_requirements": "Must be a current student"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 1000
+    },
+    "difficulty_level": "intermediate",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "AI/ML",
+      "Web Development",
+      "Mobile Apps",
+      "Blockchain",
+      "IoT"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$10000",
+        "description": "Best Overall Project"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$5000",
+        "description": "Most Innovative Solution"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$2500",
+        "description": "Best Technical Implementation"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.018Z",
+    "updatedAt": "2026-01-26T13:48:15.749Z"
+  },
+  {
+    "_id": "mkv82ybuynbgkakuts",
+    "title": "Stanford TreeHacks 2026 - Build the Future",
+    "description": "Stanford's premier hackathon brings together the brightest minds to tackle real-world problems. Focus on sustainability, healthcare, and social impact projects.",
+    "organizer": "Stanford University",
+    "type": "hackathon",
+    "mode": "offline",
+    "location": {
+      "city": "Stanford",
+      "state": "CA",
+      "country": "USA",
+      "venue": "Stanford University Campus"
+    },
+    "dates": {
+      "start_date": "2026-03-12T13:48:15.747Z",
+      "end_date": "2026-03-15T13:48:15.747Z",
+      "registration_deadline": "2026-02-26T13:48:15.747Z"
+    },
+    "skills_required": [
+      "Python",
+      "TensorFlow",
+      "React",
+      "Swift",
+      "Data Science",
+      "UI/UX"
+    ],
+    "external_url": "https://treehacks.com",
+    "source": {
+      "platform": "MLH",
+      "source_id": "treehacks-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "sustainability",
+      "social-impact",
+      "stanford"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate",
+        "high_school"
+      ],
+      "other_requirements": "Open to all students worldwide"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 1500
+    },
+    "difficulty_level": "all",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "Sustainability",
+      "Healthcare",
+      "Education",
+      "Social Impact",
+      "Climate Tech"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$15000",
+        "description": "Grand Prize Winner"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$8000",
+        "description": "Runner Up"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$4000",
+        "description": "Third Place"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.018Z",
+    "updatedAt": "2026-01-26T13:48:15.750Z"
+  },
+  {
+    "_id": "mkv82ybvetpy0hasini",
+    "title": "PennApps XXVI - The Ultimate Hackathon Experience",
+    "description": "America's first student-run hackathon continues its legacy! Join 1000+ hackers for an incredible weekend of innovation, learning, and fun at the University of Pennsylvania.",
+    "organizer": "University of Pennsylvania",
+    "type": "hackathon",
+    "mode": "hybrid",
+    "location": {
+      "city": "Philadelphia",
+      "state": "PA",
+      "country": "USA",
+      "venue": "University of Pennsylvania"
+    },
+    "dates": {
+      "start_date": "2026-02-25T13:48:15.747Z",
+      "end_date": "2026-02-27T13:48:15.747Z",
+      "registration_deadline": "2026-02-18T13:48:15.747Z"
+    },
+    "skills_required": [
+      "JavaScript",
+      "Python",
+      "Java",
+      "C++",
+      "Mobile Development",
+      "Web Development"
+    ],
+    "external_url": "https://pennapps.com",
+    "source": {
+      "platform": "MLH",
+      "source_id": "pennapps-xxvi-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "student",
+      "competition",
+      "pennapps"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate",
+        "high_school"
+      ],
+      "other_requirements": "Must be a student"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 1200
+    },
+    "difficulty_level": "all",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "Fintech",
+      "Gaming",
+      "Productivity",
+      "Entertainment",
+      "Developer Tools"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$8000",
+        "description": "Best Overall Hack"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$4000",
+        "description": "Most Creative"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$2000",
+        "description": "Best Technical Achievement"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.019Z",
+    "updatedAt": "2026-01-26T13:48:15.751Z"
+  },
+  {
+    "_id": "mkv82ybv98vdcasc9kr",
+    "title": "HackGT 10 - Hexlabs Innovation Challenge",
+    "description": "Georgia Tech's flagship hackathon returns! Build amazing projects with cutting-edge technology. Featuring workshops, mentorship, and networking opportunities.",
+    "organizer": "Georgia Institute of Technology",
+    "type": "hackathon",
+    "mode": "offline",
+    "location": {
+      "city": "Atlanta",
+      "state": "GA",
+      "country": "USA",
+      "venue": "Georgia Tech Campus"
+    },
+    "dates": {
+      "start_date": "2026-03-27T13:48:15.747Z",
+      "end_date": "2026-03-29T13:48:15.747Z",
+      "registration_deadline": "2026-03-12T13:48:15.747Z"
+    },
+    "skills_required": [
+      "React",
+      "Node.js",
+      "Python",
+      "Machine Learning",
+      "Blockchain",
+      "DevOps"
+    ],
+    "external_url": "https://hack.gt",
+    "source": {
+      "platform": "MLH",
+      "source_id": "hackgt-10-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "georgia-tech",
+      "innovation",
+      "technology"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate"
+      ],
+      "other_requirements": "Students and recent graduates welcome"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 800
+    },
+    "difficulty_level": "intermediate",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "AR/VR",
+      "Cybersecurity",
+      "Fintech",
+      "Health Tech",
+      "Smart Cities"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$6000",
+        "description": "Grand Prize"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$3000",
+        "description": "Second Place"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$1500",
+        "description": "Third Place"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.019Z",
+    "updatedAt": "2026-01-26T13:48:15.751Z"
+  },
+  {
+    "_id": "mkv82ybvse3b734sq8b",
+    "title": "CalHacks 11.0 - Berkeley's Premier Hackathon",
+    "description": "UC Berkeley's largest hackathon! Join us for 36 hours of hacking, learning, and building amazing projects. Open to hackers of all skill levels worldwide.",
+    "organizer": "UC Berkeley",
+    "type": "hackathon",
+    "mode": "hybrid",
+    "location": {
+      "city": "Berkeley",
+      "state": "CA",
+      "country": "USA",
+      "venue": "UC Berkeley Campus"
+    },
+    "dates": {
+      "start_date": "2026-04-11T13:48:15.747Z",
+      "end_date": "2026-04-13T13:48:15.747Z",
+      "registration_deadline": "2026-03-27T13:48:15.747Z"
+    },
+    "skills_required": [
+      "JavaScript",
+      "Python",
+      "Swift",
+      "Kotlin",
+      "Data Science",
+      "Design"
+    ],
+    "external_url": "https://calhacks.io",
+    "source": {
+      "platform": "MLH",
+      "source_id": "calhacks-11-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "berkeley",
+      "california",
+      "innovation"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate",
+        "high_school"
+      ],
+      "other_requirements": "Open to all students"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 2000
+    },
+    "difficulty_level": "all",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "Social Good",
+      "Entertainment",
+      "Productivity",
+      "Education",
+      "Open Innovation"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$12000",
+        "description": "Best Overall Project"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$6000",
+        "description": "Most Impactful"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$3000",
+        "description": "Most Creative"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.019Z",
+    "updatedAt": "2026-01-26T13:48:15.753Z"
+  },
+  {
+    "_id": "mkv82ybvh13mkpiyprk",
+    "title": "MHacks 16 - University of Michigan Hackathon",
+    "description": "The Midwest's premier hackathon! Build, learn, and connect with fellow hackers. Featuring industry mentors, workshops, and amazing prizes.",
+    "organizer": "University of Michigan",
+    "type": "hackathon",
+    "mode": "offline",
+    "location": {
+      "city": "Ann Arbor",
+      "state": "MI",
+      "country": "USA",
+      "venue": "University of Michigan Campus"
+    },
+    "dates": {
+      "start_date": "2026-04-26T13:48:15.747Z",
+      "end_date": "2026-04-28T13:48:15.747Z",
+      "registration_deadline": "2026-04-11T13:48:15.747Z"
+    },
+    "skills_required": [
+      "C++",
+      "Java",
+      "Python",
+      "React Native",
+      "Flutter",
+      "Game Development"
+    ],
+    "external_url": "https://mhacks.org",
+    "source": {
+      "platform": "MLH",
+      "source_id": "mhacks-16-2026",
+      "last_updated": "2026-01-26T13:48:15.747Z"
+    },
+    "tags": [
+      "mlh",
+      "hackathon",
+      "michigan",
+      "midwest",
+      "university"
+    ],
+    "eligibility": {
+      "education_level": [
+        "undergraduate",
+        "graduate"
+      ],
+      "other_requirements": "Current students only"
+    },
+    "registration": {
+      "is_open": true,
+      "fee": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "max_participants": 1000
+    },
+    "difficulty_level": "intermediate",
+    "team_size": {
+      "min": 1,
+      "max": 4
+    },
+    "themes": [
+      "Gaming",
+      "Hardware",
+      "Mobile Apps",
+      "Web Development",
+      "AI/ML"
+    ],
+    "prizes": [
+      {
+        "position": "1st Place",
+        "amount": "$7000",
+        "description": "Grand Prize Winner"
+      },
+      {
+        "position": "2nd Place",
+        "amount": "$3500",
+        "description": "Runner Up"
+      },
+      {
+        "position": "3rd Place",
+        "amount": "$1750",
+        "description": "Third Place"
+      }
+    ],
+    "is_active": true,
+    "createdAt": "2026-01-26T13:48:03.019Z",
+    "updatedAt": "2026-01-26T13:48:15.753Z"
+  }
+]

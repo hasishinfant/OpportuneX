@@ -1,0 +1,71 @@
+# Elasticsearch Production Configuration for OpportuneX
+
+# Cluster
+cluster.name: opportunex-cluster
+node.name: opportunex-node-1
+node.roles: [ master, data, ingest ]
+
+# Network
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# Discovery
+discovery.type: single-node
+cluster.initial_master_nodes: ["opportunex-node-1"]
+
+# Memory
+bootstrap.memory_lock: true
+indices.memory.index_buffer_size: 20%
+indices.memory.min_index_buffer_size: 96mb
+
+# Index Settings
+index.number_of_shards: 1
+index.number_of_replicas: 0
+index.refresh_interval: 30s
+index.max_result_window: 50000
+
+# Search Settings
+search.max_buckets: 65536
+indices.query.bool.max_clause_count: 10000
+
+# Thread Pools
+thread_pool.search.size: 4
+thread_pool.search.queue_size: 1000
+thread_pool.write.size: 4
+thread_pool.write.queue_size: 200
+
+# Circuit Breakers
+indices.breaker.total.limit: 70%
+indices.breaker.fielddata.limit: 40%
+indices.breaker.request.limit: 40%
+
+# Logging
+logger.level: INFO
+logger.org.elasticsearch.discovery: WARN
+logger.org.elasticsearch.cluster.service: DEBUG
+
+# Security (disabled for simplicity)
+xpack.security.enabled: false
+xpack.monitoring.enabled: false
+xpack.watcher.enabled: false
+xpack.ml.enabled: false
+
+# Performance
+indices.cache.cleanup_interval: 1m
+indices.fielddata.cache.size: 20%
+indices.requests.cache.size: 2%
+
+# Indexing
+index.codec: best_compression
+index.store.preload: ["nvd", "dvd"]
+
+# Recovery
+cluster.routing.allocation.node_concurrent_recoveries: 2
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 85%
+cluster.routing.allocation.disk.watermark.high: 90%
+cluster.routing.allocation.disk.watermark.flood_stage: 95%
+
+# Snapshot
+path.repo: ["/usr/share/elasticsearch/backup"]

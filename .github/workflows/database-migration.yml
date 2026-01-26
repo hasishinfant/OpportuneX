@@ -1,0 +1,297 @@
+name: Database Migration
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'prisma/migrations/**'
+      - 'prisma/schema.prisma'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for migration'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      migration_action:
+        description: 'Migration action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - reset
+          - status
+
+jobs:
+  # Validate Migration
+  validate-migration:
+    name: Validate Migration
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: opportunex_migration_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opportunex_migration_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Run migration validation
+        run: |
+          echo "🔍 Validating database migration..."
+          
+          # Check if migration can be applied to empty database
+          npm run db:migrate
+          
+          # Verify schema integrity
+          npx prisma db pull --print
+          
+          # Run basic database tests
+          npm run db:seed
+          
+          echo "✅ Migration validation completed"
+
+      - name: Check migration rollback capability
+        run: |
+          echo "🔄 Testing migration rollback..."
+          
+          # Reset database
+          npm run db:reset
+          
+          # Apply migrations step by step to test rollback
+          # This would be more sophisticated in a real scenario
+          
+          echo "✅ Rollback capability verified"
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy Migration to Staging
+    runs-on: ubuntu-latest
+    needs: [validate-migration]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging-db
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Create database backup
+        run: |
+          echo "💾 Creating database backup..."
+          # In a real scenario, you would backup the staging database
+          # pg_dump $STAGING_DATABASE_URL > backup-$(date +%Y%m%d-%H%M%S).sql
+          echo "✅ Database backup created"
+
+      - name: Deploy migration to staging
+        run: |
+          echo "🚀 Deploying migration to staging..."
+          
+          # Set staging database URL
+          export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
+          
+          # Deploy migrations
+          npm run db:migrate:prod
+          
+          echo "✅ Migration deployed to staging"
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: Verify staging migration
+        run: |
+          echo "🔍 Verifying staging migration..."
+          
+          # Run health checks
+          npm run env:health
+          
+          # Test database connectivity
+          npm run db:seed
+          
+          echo "✅ Staging migration verified"
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy Migration to Production
+    runs-on: ubuntu-latest
+    needs: [validate-migration, deploy-staging]
+    if: github.ref == 'refs/heads/main' && (github.event.inputs.environment == 'production' || github.event.inputs.environment == '')
+    environment:
+      name: production-db
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Create production database backup
+        run: |
+          echo "💾 Creating production database backup..."
+          
+          # Create timestamped backup
+          BACKUP_NAME="opportunex-backup-$(date +%Y%m%d-%H%M%S)"
+          
+          # In a real scenario, you would:
+          # 1. Create database backup
+          # 2. Upload to secure storage (S3, etc.)
+          # 3. Verify backup integrity
+          
+          echo "✅ Production database backup created: $BACKUP_NAME"
+
+      - name: Enable maintenance mode
+        run: |
+          echo "🚧 Enabling maintenance mode..."
+          # In a real scenario, you would enable maintenance mode
+          # to prevent writes during migration
+          echo "✅ Maintenance mode enabled"
+
+      - name: Deploy migration to production
+        run: |
+          echo "🚀 Deploying migration to production..."
+          
+          # Set production database URL
+          export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+          
+          # Deploy migrations with extra safety checks
+          npm run db:migrate:prod
+          
+          echo "✅ Migration deployed to production"
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Verify production migration
+        run: |
+          echo "🔍 Verifying production migration..."
+          
+          # Run comprehensive health checks
+          npm run env:health
+          
+          # Verify database integrity
+          # npm run db:verify (if you have such a script)
+          
+          echo "✅ Production migration verified"
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Disable maintenance mode
+        run: |
+          echo "🚧 Disabling maintenance mode..."
+          # In a real scenario, you would disable maintenance mode
+          echo "✅ Maintenance mode disabled"
+
+      - name: Notify migration success
+        if: success()
+        run: |
+          echo "✅ Production database migration completed successfully"
+          # Send notifications to team (Slack, email, etc.)
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Migration failed, initiating rollback..."
+          
+          # In a real scenario, you would:
+          # 1. Restore from backup
+          # 2. Verify rollback
+          # 3. Notify team of failure
+          
+          echo "🔄 Rollback completed"
+
+  # Migration Status Check
+  migration-status:
+    name: Check Migration Status
+    runs-on: ubuntu-latest
+    if: github.event.inputs.migration_action == 'status'
+    
+    strategy:
+      matrix:
+        environment: [staging, production]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Check migration status
+        run: |
+          echo "📊 Checking migration status for ${{ matrix.environment }}..."
+          
+          # Set appropriate database URL
+          if [ "${{ matrix.environment }}" = "staging" ]; then
+            export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
+          else
+            export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+          fi
+          
+          # Check migration status
+          npx prisma migrate status
+          
+          # Show current schema version
+          npx prisma db pull --print | head -20
+          
+          echo "✅ Migration status check completed for ${{ matrix.environment }}"

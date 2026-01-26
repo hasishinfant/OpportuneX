@@ -1,0 +1,14 @@
+{
+  "name": "opportunex-mvp-simple",
+  "version": "1.0.0",
+  "description": "OpportuneX MVP - Simple version that works out of the box",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

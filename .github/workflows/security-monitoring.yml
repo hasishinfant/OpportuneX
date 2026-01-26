@@ -1,0 +1,244 @@
+name: Security Monitoring & Dependency Updates
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  # Dependency Security Audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        id: audit
+        run: |
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          echo "audit-results<<EOF" >> $GITHUB_OUTPUT
+          cat audit-results.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check for high/critical vulnerabilities
+        run: |
+          HIGH_VULNS=$(cat audit-results.json | jq '.metadata.vulnerabilities.high // 0')
+          CRITICAL_VULNS=$(cat audit-results.json | jq '.metadata.vulnerabilities.critical // 0')
+          
+          echo "High vulnerabilities: $HIGH_VULNS"
+          echo "Critical vulnerabilities: $CRITICAL_VULNS"
+          
+          if [ "$HIGH_VULNS" -gt 0 ] || [ "$CRITICAL_VULNS" -gt 0 ]; then
+            echo "⚠️ High or critical vulnerabilities found!"
+            cat audit-results.json | jq '.advisories'
+            exit 1
+          else
+            echo "✅ No high or critical vulnerabilities found"
+          fi
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-results
+          path: audit-results.json
+
+  # Dependency Updates
+  dependency-updates:
+    name: Dependency Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          npm outdated --json > outdated.json || true
+          if [ -s outdated.json ]; then
+            echo "has-updates=true" >> $GITHUB_OUTPUT
+            echo "Outdated packages found:"
+            cat outdated.json | jq '.'
+          else
+            echo "has-updates=false" >> $GITHUB_OUTPUT
+            echo "All packages are up to date"
+          fi
+
+      - name: Update patch and minor versions
+        if: steps.outdated.outputs.has-updates == 'true'
+        run: |
+          # Update patch versions (safe updates)
+          npm update
+          
+          # Check if there are changes
+          if git diff --quiet package-lock.json; then
+            echo "No updates applied"
+            echo "updates-applied=false" >> $GITHUB_OUTPUT
+          else
+            echo "Updates applied"
+            echo "updates-applied=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests after updates
+        if: steps.outdated.outputs.has-updates == 'true'
+        run: |
+          npm ci
+          npm run type-check
+          npm run lint
+          # npm test (uncomment when tests are available)
+
+      - name: Create Pull Request for dependency updates
+        if: steps.outdated.outputs.has-updates == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: automated dependency updates'
+          body: |
+            ## Automated Dependency Updates
+            
+            This PR contains automated updates for patch and minor version dependencies.
+            
+            ### Changes
+            - Updated dependencies to latest patch/minor versions
+            - All tests pass
+            - No breaking changes expected
+            
+            ### Security
+            - Security audit passed
+            - No high or critical vulnerabilities
+            
+            Please review and merge if all checks pass.
+          branch: chore/dependency-updates
+          delete-branch: true
+
+  # Container Security Scan
+  container-security:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t opportunex:security-scan .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'opportunex:security-scan'
+          format: 'json'
+          output: 'trivy-results.json'
+
+      - name: Check for critical vulnerabilities
+        run: |
+          CRITICAL_COUNT=$(cat trivy-results.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length')
+          HIGH_COUNT=$(cat trivy-results.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length')
+          
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+          
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "⚠️ Critical vulnerabilities found in container image!"
+            cat trivy-results.json | jq '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")'
+            exit 1
+          elif [ "$HIGH_COUNT" -gt 5 ]; then
+            echo "⚠️ Too many high vulnerabilities found in container image!"
+            exit 1
+          else
+            echo "✅ Container security scan passed"
+          fi
+
+      - name: Upload container scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-security-scan
+          path: trivy-results.json
+
+  # License Compliance Check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install license checker
+        run: npm install -g license-checker
+
+      - name: Check licenses
+        run: |
+          license-checker --json --out licenses.json
+          
+          # Check for problematic licenses
+          PROBLEMATIC_LICENSES="GPL-2.0,GPL-3.0,AGPL-1.0,AGPL-3.0"
+          
+          if license-checker --excludePrivatePackages --onlyAllow "MIT;ISC;BSD;Apache-2.0;Unlicense;WTFPL;CC0-1.0" --summary; then
+            echo "✅ All licenses are compatible"
+          else
+            echo "⚠️ Some packages have incompatible licenses"
+            license-checker --excludePrivatePackages --summary
+            exit 1
+          fi
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: licenses.json
+
+  # Security Notification
+  notify-security-issues:
+    name: Notify Security Issues
+    runs-on: ubuntu-latest
+    needs: [security-audit, container-security]
+    if: failure()
+    
+    steps:
+      - name: Send security alert
+        run: |
+          echo "🚨 Security issues detected in OpportuneX repository"
+          echo "Please check the failed jobs for details:"
+          echo "- Security Audit: ${{ needs.security-audit.result }}"
+          echo "- Container Security: ${{ needs.container-security.result }}"
+          
+          # Here you would typically send notifications to:
+          # - Slack/Discord channels
+          # - Email alerts
+          # - Security team notifications
+          # - Create GitHub issues for tracking

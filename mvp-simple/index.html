@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpportuneX - Discover Your Next Opportunity</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle, .auth-button, .notification-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle:hover, .auth-button:hover, .notification-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .notification-button {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Search Section */
+        .search-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 50px;
+            padding: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .search-input-wrapper:focus-within {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            font-size: 1.2rem;
+            margin-left: 15px;
+            margin-right: 10px;
+            opacity: 0.6;
+        }
+
+        .voice-button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            margin-right: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .voice-button:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .voice-button.recording {
+            background: #e74c3c;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            padding: 15px 10px;
+            background: transparent;
+            color: #333;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-hint {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Content Layout */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Filter Sidebar */
+        .filter-sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-header h3 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .clear-filters {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-filters:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .filter-select,
+        .filter-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .filter-select option {
+            background: #333;
+            color: white;
+        }
+
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Opportunities Section */
+        .opportunities-section {
+            min-height: 400px;
+        }
+
+        .results-header h2 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .opportunities-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Opportunity Cards */
+        .opportunity-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .opportunity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .organizer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .organizer-logo {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .opportunity-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .organizer-name {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .opportunity-type {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .opportunity-description {
+            color: #34495e;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .opportunity-details {
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #5a6c7d;
+            font-size: 0.9rem;
+        }
+
+        .skills-section h4 {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .skill-tag {
+            background: #e8f4fd;
+            color: #2980b9;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #d6eaf8;
+        }
+
+        .deadline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5a6c7d;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        .platform-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f2f6;
+            color: #57606f;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .guide-button,
+        .apply-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .guide-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .guide-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .apply-button {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .apply-button:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content {
+            max-height: calc(90vh - 100px);
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .roadmap-header h3 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .duration-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e8f4fd;
+            color: #2980b9;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .phase-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .phase-number {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .phase-info h4 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .phase-duration {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .phase-tasks {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #34495e;
+            line-height: 1.5;
+        }
+
+        .task-icon {
+            color: #27ae60;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        /* PWA Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* Notification Toast */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+            max-width: 350px;
+        }
+
+        .notification-toast.show {
+            transform: translateX(0);
+        }
+
+        .notification-toast.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .notification-toast.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification-toast.info {
+            border-left: 4px solid #3498db;
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-theme .opportunity-card {
+            background: rgba(52, 73, 94, 0.9);
+            color: white;
+        }
+
+        body.dark-theme .opportunity-title {
+            color: white;
+        }
+
+        body.dark-theme .opportunity-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Voice Search Animation */
+        .voice-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1003;
+            display: none;
+        }
+
+        .voice-animation.active {
+            display: block;
+        }
+
+        .voice-wave {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: voiceWave 1s infinite;
+        }
+
+        @keyframes voiceWave {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* Offline Indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #e74c3c;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            transform: translateY(-100%);
+            transition: all 0.3s ease;
+            z-index: 1004;
+        }
+
+        .offline-indicator.show {
+            transform: translateY(0);
+        }
+
+        /* Search Tags */
+        .search-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Deadline urgent styling */
+        .deadline-urgent {
+            background: #fef9e7 !important;
+            border-left-color: #f39c12 !important;
+            color: #d68910 !important;
+        }
+
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .opportunity-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* Loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .filter-sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .opportunity-type {
+                align-self: flex-end;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1 class="logo">
+                        <span>🎯</span>
+                        OpportuneX
+                    </h1>
+                    <p class="tagline">Discover your next opportunity with AI-powered search</p>
+                </div>
+                <div class="header-actions">
+                    <button class="notification-button" onclick="toggleNotifications()">
+                        🔔
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">3</span>
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                    <button class="auth-button" onclick="toggleAuth()" id="authButton">Login</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="search-section">
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="What opportunities are you looking for? (e.g., 'AI hackathons in Mumbai')"
+                            class="search-input"
+                        />
+                        <button class="voice-button" onclick="toggleVoiceSearch()" id="voiceButton">
+                            🎤
+                        </button>
+                        <button class="search-button" onclick="performSearch()">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <p class="search-hint">
+                    Try: "AI hackathons in Mumbai" or "React internships" or "data science workshops"
+                </p>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="filter-sidebar">
+                    <div class="filter-header">
+                        <h3>Filters</h3>
+                        <button class="clear-filters" onclick="clearFilters()">
+                            Clear All
+                        </button>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Type</label>
+                        <select id="typeFilter" class="filter-select" onchange="applyFilters()">
+                            <option value="all">All Types</option>
+                            <option value="hackathon">Hackathons</option>
+                            <option value="internship">Internships</option>
+                            <option value="workshop">Workshops</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Mode</label>
+                        <select id="modeFilter" class="filter-select" onchange="applyFilters()">
+                            <option value="any">Any Mode</option>
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Skills</label>
+                        <input
+                            type="text"
+                            id="skillsFilter"
+                            placeholder="e.g., React, Python, AI"
+                            class="filter-input"
+                            onchange="applyFilters()"
+                        />
+                        <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; margin-top: 4px; display: block;">
+                            Separate multiple skills with commas
+                        </small>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Location</label>
+                        <input
+                            type="text"
+                            id="locationFilter"
+                            placeholder="e.g., Mumbai, Delhi, Remote"
+                            class="filter-input"
+                            onchange="applyFilters()"
+                        />
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                        <h4 style="color: white; font-size: 1rem; margin-bottom: 12px; font-weight: 500;">Popular Searches</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="search-tag" onclick="quickSearch('React')">React</button>
+                            <button class="search-tag" onclick="quickSearch('Python')">Python</button>
+                            <button class="search-tag" onclick="quickSearch('AI')">AI/ML</button>
+                            <button class="search-tag" onclick="quickSearch('Data Science')">Data Science</button>
+                            <button class="search-tag" onclick="quickSearch('Remote')">Remote</button>
+                            <button class="search-tag" onclick="quickSearch('Mumbai')">Mumbai</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: white; font-size: 1rem; margin-bottom: 12px; font-weight: 500;">Quick Actions</h4>
+                        <button onclick="createAlert()" style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 8px;">
+                            🔔 Create Alert
+                        </button>
+                        <button onclick="viewRecommendations()" style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px; border-radius: 8px; cursor: pointer;">
+                            ⭐ View Recommendations
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="opportunities-section">
+                    <div class="results-header">
+                        <h2 id="resultsCount">Loading opportunities...</h2>
+                    </div>
+                    
+                    <div id="opportunitiesGrid" class="opportunities-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Finding opportunities for you...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PWA Install Prompt -->
+    <div id="installPrompt" class="install-prompt">
+        <span>📱</span>
+        <span>Install OpportuneX for a better experience!</span>
+        <button onclick="installPWA()">Install</button>
+        <button onclick="dismissInstallPrompt()">✕</button>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="notification-toast">
+        <div id="toastContent"></div>
+    </div>
+
+    <!-- Voice Search Animation -->
+    <div id="voiceAnimation" class="voice-animation">
+        <div class="voice-wave"></div>
+        <h3>Listening...</h3>
+        <p>Speak your search query</p>
+        <button onclick="stopVoiceSearch()">Stop</button>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator">
+        📡 You're offline. Some features may not work.
+    </div>
+
+    <!-- Roadmap Modal -->
+    <div id="roadmapModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>
+                    <span>🤖</span>
+                    AI-Generated Preparation Roadmap
+                </h2>
+                <button class="close-button" onclick="closeModal()">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                <!-- Roadmap content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockOpportunities = [
+            {
+                id: '1',
+                title: 'AI/ML Hackathon 2024',
+                description: 'Build innovative AI solutions for real-world problems. Win prizes up to ₹1,00,000!',
+                type: 'hackathon',
+                organizer: {
+                    name: 'TechCorp India',
+                    type: 'corporate',
+                    logo: '🏢'
+                },
+                requirements: {
+                    skills: ['Python', 'Machine Learning', 'TensorFlow'],
+                    experience: 'Beginner to Intermediate',
+                    eligibility: ['Students', 'Working Professionals']
+                },
+                details: {
+                    mode: 'hybrid',
+                    location: 'Mumbai, India',
+                    duration: '48 hours',
+                    prizes: ['₹1,00,000', '₹50,000', '₹25,000']
+                },
+                timeline: {
+                    applicationDeadline: '2024-03-15',
+                    startDate: '2024-03-20',
+                    endDate: '2024-03-22'
+                },
+                externalUrl: 'https://example.com/ai-hackathon',
+                platform: 'DevPost',
+                tags: ['AI', 'Machine Learning', 'Innovation']
+            },
+            {
+                id: '2',
+                title: 'Frontend Developer Internship',
+                description: 'Join our team as a Frontend Developer intern. Work on cutting-edge React applications.',
+                type: 'internship',
+                organizer: {
+                    name: 'StartupXYZ',
+                    type: 'startup',
+                    logo: '🚀'
+                },
+                requirements: {
+                    skills: ['React', 'JavaScript', 'CSS'],
+                    experience: 'Fresher',
+                    eligibility: ['Final year students', 'Recent graduates']
+                },
+                details: {
+                    mode: 'online',
+                    location: 'Remote',
+                    duration: '3 months',
+                    stipend: '₹15,000/month'
+                },
+                timeline: {
+                    applicationDeadline: '2024-02-28',
+                    startDate: '2024-03-01',
+                    endDate: '2024-05-31'
+                },
+                externalUrl: 'https://example.com/frontend-internship',
+                platform: 'AngelList',
+                tags: ['Frontend', 'React', 'Remote']
+            },
+            {
+                id: '3',
+                title: 'Web Development Workshop',
+                description: 'Learn modern web development with hands-on projects. Free workshop for students.',
+                type: 'workshop',
+                organizer: {
+                    name: 'IIT Delhi',
+                    type: 'academic',
+                    logo: '🎓'
+                },
+                requirements: {
+                    skills: ['HTML', 'CSS', 'JavaScript'],
+                    experience: 'Beginner',
+                    eligibility: ['College students']
+                },
+                details: {
+                    mode: 'offline',
+                    location: 'New Delhi, India',
+                    duration: '2 days'
+                },
+                timeline: {
+                    applicationDeadline: '2024-02-20',
+                    startDate: '2024-02-25',
+                    endDate: '2024-02-26'
+                },
+                externalUrl: 'https://example.com/web-workshop',
+                platform: 'Eventbrite',
+                tags: ['Web Development', 'Workshop', 'Free']
+            },
+            {
+                id: '4',
+                title: 'Data Science Competition',
+                description: 'Analyze real-world datasets and build predictive models. Great for portfolio building.',
+                type: 'hackathon',
+                organizer: {
+                    name: 'DataCorp',
+                    type: 'corporate',
+                    logo: '📊'
+                },
+                requirements: {
+                    skills: ['Python', 'Data Science', 'Pandas', 'Scikit-learn'],
+                    experience: 'Intermediate',
+                    eligibility: ['Students', 'Data enthusiasts']
+                },
+                details: {
+                    mode: 'online',
+                    location: 'Online',
+                    duration: '1 month',
+                    prizes: ['₹75,000', '₹40,000', '₹20,000']
+                },
+                timeline: {
+                    applicationDeadline: '2024-03-01',
+                    startDate: '2024-03-05',
+                    endDate: '2024-04-05'
+                },
+                externalUrl: 'https://example.com/data-competition',
+                platform: 'Kaggle',
+                tags: ['Data Science', 'Competition', 'Online']
+            },
+            {
+                id: '5',
+                title: 'Mobile App Development Internship',
+                description: 'Build mobile apps using React Native. Work with experienced developers.',
+                type: 'internship',
+                organizer: {
+                    name: 'MobileFirst Solutions',
+                    type: 'startup',
+                    logo: '📱'
+                },
+                requirements: {
+                    skills: ['React Native', 'JavaScript', 'Mobile Development'],
+                    experience: 'Beginner to Intermediate',
+                    eligibility: ['Students', 'Recent graduates']
+                },
+                details: {
+                    mode: 'hybrid',
+                    location: 'Bangalore, India',
+                    duration: '6 months',
+                    stipend: '₹20,000/month'
+                },
+                timeline: {
+                    applicationDeadline: '2024-02-25',
+                    startDate: '2024-03-10',
+                    endDate: '2024-09-10'
+                },
+                externalUrl: 'https://example.com/mobile-internship',
+                platform: 'LinkedIn',
+                tags: ['Mobile Development', 'React Native', 'Bangalore']
+            }
+        ];
+
+        let filteredOpportunities = [...mockOpportunities];
+        let currentUser = null;
+        let isVoiceRecording = false;
+        let recognition = null;
+        let deferredPrompt = null;
+
+        // PWA and Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
+
+        // PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        // Online/Offline Detection
+        window.addEventListener('online', () => {
+            document.getElementById('offlineIndicator').classList.remove('show');
+            showNotification('You\'re back online!', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('offlineIndicator').classList.add('show');
+        });
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            displayOpportunities(mockOpportunities);
+            initializeVoiceSearch();
+            loadUserData();
+            checkNotifications();
+            
+            // Add search input listener
+            document.getElementById('searchInput').addEventListener('input', debounce(performSearch, 300));
+            
+            // Load theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            }
+        });
+
+        // Voice Search Initialization
+        function initializeVoiceSearch() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    isVoiceRecording = true;
+                    document.getElementById('voiceButton').classList.add('recording');
+                    document.getElementById('voiceAnimation').classList.add('active');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchInput').value = transcript;
+                    performSearch();
+                    showNotification(`Voice search: "${transcript}"`, 'info');
+                };
+
+                recognition.onerror = function(event) {
+                    showNotification('Voice search error. Please try again.', 'error');
+                };
+
+                recognition.onend = function() {
+                    stopVoiceSearch();
+                };
+            } else {
+                // Hide voice button if not supported
+                document.getElementById('voiceButton').style.display = 'none';
+            }
+        }
+
+        // Voice Search Functions
+        function toggleVoiceSearch() {
+            if (isVoiceRecording) {
+                stopVoiceSearch();
+            } else {
+                startVoiceSearch();
+            }
+        }
+
+        function startVoiceSearch() {
+            if (recognition) {
+                recognition.start();
+            }
+        }
+
+        function stopVoiceSearch() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isVoiceRecording = false;
+            document.getElementById('voiceButton').classList.remove('recording');
+            document.getElementById('voiceAnimation').classList.remove('active');
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeButton = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeButton.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeButton.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Authentication Functions
+        function toggleAuth() {
+            const authButton = document.getElementById('authButton');
+            
+            if (currentUser) {
+                // Logout
+                currentUser = null;
+                authButton.textContent = 'Login';
+                localStorage.removeItem('currentUser');
+                showNotification('Logged out successfully', 'info');
+            } else {
+                // Simple mock login
+                const email = prompt('Enter your email:');
+                if (email) {
+                    currentUser = {
+                        id: Date.now(),
+                        email: email,
+                        name: email.split('@')[0],
+                        preferences: {
+                            skills: ['JavaScript', 'React'],
+                            location: 'Mumbai',
+                            types: ['hackathon', 'internship']
+                        }
+                    };
+                    authButton.textContent = `Hi, ${currentUser.name}`;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showNotification(`Welcome back, ${currentUser.name}!`, 'success');
+                    personalizeResults();
+                }
+            }
+        }
+
+        function loadUserData() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('authButton').textContent = `Hi, ${currentUser.name}`;
+                personalizeResults();
+            }
+        }
+
+        function personalizeResults() {
+            if (currentUser && currentUser.preferences) {
+                // Auto-fill user preferences
+                if (currentUser.preferences.location) {
+                    document.getElementById('locationFilter').value = currentUser.preferences.location;
+                }
+                applyFilters();
+            }
+        }
+
+        // Notification Functions
+        function showNotification(message, type = 'info') {
+            const toast = document.getElementById('notificationToast');
+            const content = document.getElementById('toastContent');
+            
+            content.textContent = message;
+            toast.className = `notification-toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleNotifications() {
+            const notifications = [
+                'New AI hackathon in Mumbai - Apply by March 15th',
+                'Frontend internship deadline approaching',
+                'Web development workshop starting tomorrow'
+            ];
+            
+            const message = notifications[Math.floor(Math.random() * notifications.length)];
+            showNotification(message, 'info');
+            
+            // Hide notification badge
+            document.getElementById('notificationBadge').style.display = 'none';
+        }
+
+        function checkNotifications() {
+            // Simulate checking for new notifications
+            setTimeout(() => {
+                document.getElementById('notificationBadge').style.display = 'flex';
+            }, 5000);
+        }
+
+        // PWA Functions
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showNotification('App installed successfully!', 'success');
+                    }
+                    deferredPrompt = null;
+                    dismissInstallPrompt();
+                });
+            }
+        }
+
+        function dismissInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        // Quick Search Functions
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            performSearch();
+        }
+
+        // Advanced Features
+        function createAlert() {
+            if (!currentUser) {
+                showNotification('Please login to create alerts', 'error');
+                return;
+            }
+            
+            const keywords = prompt('Enter keywords for your alert (e.g., "AI hackathon"):');
+            if (keywords) {
+                showNotification(`Alert created for "${keywords}"`, 'success');
+                // In real app, would call API to create alert
+            }
+        }
+
+        function viewRecommendations() {
+            if (!currentUser) {
+                showNotification('Please login to view recommendations', 'error');
+                return;
+            }
+            
+            // Filter opportunities based on user preferences
+            const recommended = mockOpportunities.filter(opp => {
+                if (currentUser.preferences.skills.length > 0) {
+                    return opp.requirements.skills.some(skill =>
+                        currentUser.preferences.skills.some(userSkill =>
+                            skill.toLowerCase().includes(userSkill.toLowerCase())
+                        )
+                    );
+                }
+                return true;
+            });
+            
+            displayOpportunities(recommended);
+            showNotification(`Showing ${recommended.length} personalized recommendations`, 'success');
+        }
+
+        // Enhanced Search with Analytics
+        function performSearchWithAnalytics() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredOpportunities = mockOpportunities.filter(opp => {
+                return opp.title.toLowerCase().includes(query) ||
+                       opp.description.toLowerCase().includes(query) ||
+                       opp.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                       opp.requirements.skills.some(skill => skill.toLowerCase().includes(query));
+            });
+            
+            // Track search analytics
+            if (query) {
+                const searchData = {
+                    query,
+                    filters: {
+                        type: document.getElementById('typeFilter').value,
+                        mode: document.getElementById('modeFilter').value,
+                        skills: document.getElementById('skillsFilter').value,
+                        location: document.getElementById('locationFilter').value
+                    },
+                    results: filteredOpportunities.length
+                };
+                
+                // In real app, would send to analytics API
+                console.log('Search Analytics:', searchData);
+            }
+            
+            applyFilters();
+        }
+
+        // Enhanced opportunity card with more features
+        function createEnhancedOpportunityCard(opp) {
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            };
+
+            const getTypeIcon = (type) => {
+                switch (type) {
+                    case 'hackathon': return '🏆';
+                    case 'internship': return '💼';
+                    case 'workshop': return '🎓';
+                    default: return '📋';
+                }
+            };
+
+            const getModeIcon = (mode) => {
+                switch (mode) {
+                    case 'online': return '💻';
+                    case 'offline': return '🏢';
+                    case 'hybrid': return '🔄';
+                    default: return '📍';
+                }
+            };
+
+            const isDeadlineSoon = () => {
+                const deadline = new Date(opp.timeline.applicationDeadline);
+                const now = new Date();
+                const diffTime = deadline.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 7 && diffDays > 0;
+            };
+
+            const isFavorite = currentUser && currentUser.favorites && currentUser.favorites.includes(opp.id);
+
+            return `
+                <div class="opportunity-card">
+                    <div class="card-header">
+                        <div class="organizer-info">
+                            <span class="organizer-logo">${opp.organizer.logo}</span>
+                            <div>
+                                <h3 class="opportunity-title">${opp.title}</h3>
+                                <p class="organizer-name">${opp.organizer.name}</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button onclick="toggleFavorite('${opp.id}')" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">
+                                ${isFavorite ? '❤️' : '🤍'}
+                            </button>
+                            <div class="opportunity-type">
+                                <span>${getTypeIcon(opp.type)}</span>
+                                <span>${opp.type}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="opportunity-description">${opp.description}</p>
+
+                    <div class="opportunity-details">
+                        <div class="detail-item">
+                            <span>${getModeIcon(opp.details.mode)}</span>
+                            <span>${opp.details.mode}</span>
+                            ${opp.details.location ? `<span> • ${opp.details.location}</span>` : ''}
+                        </div>
+                        
+                        ${opp.details.duration ? `
+                            <div class="detail-item">
+                                <span>⏱️</span>
+                                <span>${opp.details.duration}</span>
+                            </div>
+                        ` : ''}
+
+                        ${opp.details.stipend ? `
+                            <div class="detail-item">
+                                <span>💰</span>
+                                <span>${opp.details.stipend}</span>
+                            </div>
+                        ` : ''}
+
+                        ${opp.details.prizes && opp.details.prizes.length > 0 ? `
+                            <div class="detail-item">
+                                <span>🏆</span>
+                                <span>Prizes: ${opp.details.prizes.join(', ')}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="skills-section">
+                        <h4>Required Skills:</h4>
+                        <div class="skills-list">
+                            ${opp.requirements.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="deadline ${isDeadlineSoon() ? 'deadline-urgent' : ''}">
+                        <span>📅</span>
+                        <span>
+                            Deadline: ${formatDate(opp.timeline.applicationDeadline)}
+                            ${isDeadlineSoon() ? '<span style="font-weight: 600; color: #e74c3c;"> (Soon!)</span>' : ''}
+                        </span>
+                    </div>
+
+                    <div class="platform-tag">
+                        📱 ${opp.platform}
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="guide-button" onclick="showRoadmap('${opp.id}')">
+                            <span>🤖</span>
+                            Guide Me
+                        </button>
+                        <a href="${opp.externalUrl}" target="_blank" class="apply-button" onclick="trackClick('${opp.id}')">
+                            <span>🔗</span>
+                            View on Platform
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Favorite functionality
+        function toggleFavorite(opportunityId) {
+            if (!currentUser) {
+                showNotification('Please login to save favorites', 'error');
+                return;
+            }
+            
+            if (!currentUser.favorites) {
+                currentUser.favorites = [];
+            }
+            
+            const index = currentUser.favorites.indexOf(opportunityId);
+            if (index > -1) {
+                currentUser.favorites.splice(index, 1);
+                showNotification('Removed from favorites', 'info');
+            } else {
+                currentUser.favorites.push(opportunityId);
+                showNotification('Added to favorites', 'success');
+            }
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            displayOpportunities(filteredOpportunities); // Refresh display
+        }
+
+        // Click tracking
+        function trackClick(opportunityId) {
+            console.log('Tracking click for opportunity:', opportunityId);
+            // In real app, would send to analytics API
+        }
+
+        // Update the display function to use enhanced cards
+        function displayOpportunities(opportunities) {
+            const grid = document.getElementById('opportunitiesGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `${opportunities.length} ${opportunities.length === 1 ? 'opportunity' : 'opportunities'} found`;
+            
+            if (opportunities.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: white;">
+                        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.6;">🔍</div>
+                        <h3>No opportunities found</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = opportunities.map(opp => createEnhancedOpportunityCard(opp)).join('');
+        }
+
+        // Override the original performSearch to use analytics
+        function performSearch() {
+            performSearchWithAnalytics();
+        }
+
+        // Debounce function for search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Search function
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredOpportunities = mockOpportunities.filter(opp => {
+                return opp.title.toLowerCase().includes(query) ||
+                       opp.description.toLowerCase().includes(query) ||
+                       opp.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                       opp.requirements.skills.some(skill => skill.toLowerCase().includes(query));
+            });
+            
+            applyFilters();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const modeFilter = document.getElementById('modeFilter').value;
+            const skillsFilter = document.getElementById('skillsFilter').value.toLowerCase();
+            const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+            
+            let filtered = [...filteredOpportunities];
+            
+            // Apply type filter
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(opp => opp.type === typeFilter);
+            }
+            
+            // Apply mode filter
+            if (modeFilter !== 'any') {
+                filtered = filtered.filter(opp => opp.details.mode === modeFilter);
+            }
+            
+            // Apply skills filter
+            if (skillsFilter) {
+                const skillsArray = skillsFilter.split(',').map(s => s.trim());
+                filtered = filtered.filter(opp =>
+                    skillsArray.some(skill =>
+                        opp.requirements.skills.some(oppSkill => oppSkill.toLowerCase().includes(skill))
+                    )
+                );
+            }
+            
+            // Apply location filter
+            if (locationFilter) {
+                filtered = filtered.filter(opp =>
+                    opp.details.location && opp.details.location.toLowerCase().includes(locationFilter)
+                );
+            }
+            
+            displayOpportunities(filtered);
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('typeFilter').value = 'all';
+            document.getElementById('modeFilter').value = 'any';
+            document.getElementById('skillsFilter').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            
+            filteredOpportunities = [...mockOpportunities];
+            displayOpportunities(mockOpportunities);
+        }
+
+        // Display opportunities
+        function displayOpportunities(opportunities) {
+            const grid = document.getElementById('opportunitiesGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `${opportunities.length} ${opportunities.length === 1 ? 'opportunity' : 'opportunities'} found`;
+            
+            if (opportunities.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: white;">
+                        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.6;">🔍</div>
+                        <h3>No opportunities found</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = opportunities.map(opp => createOpportunityCard(opp)).join('');
+        }
+
+        // Create opportunity card HTML
+        function createOpportunityCard(opp) {
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            };
+
+            const getTypeIcon = (type) => {
+                switch (type) {
+                    case 'hackathon': return '🏆';
+                    case 'internship': return '💼';
+                    case 'workshop': return '🎓';
+                    default: return '📋';
+                }
+            };
+
+            const getModeIcon = (mode) => {
+                switch (mode) {
+                    case 'online': return '💻';
+                    case 'offline': return '🏢';
+                    case 'hybrid': return '🔄';
+                    default: return '📍';
+                }
+            };
+
+            return `
+                <div class="opportunity-card">
+                    <div class="card-header">
+                        <div class="organizer-info">
+                            <span class="organizer-logo">${opp.organizer.logo}</span>
+                            <div>
+                                <h3 class="opportunity-title">${opp.title}</h3>
+                                <p class="organizer-name">${opp.organizer.name}</p>
+                            </div>
+                        </div>
+                        <div class="opportunity-type">
+                            <span>${getTypeIcon(opp.type)}</span>
+                            <span>${opp.type}</span>
+                        </div>
+                    </div>
+
+                    <p class="opportunity-description">${opp.description}</p>
+
+                    <div class="opportunity-details">
+                        <div class="detail-item">
+                            <span>${getModeIcon(opp.details.mode)}</span>
+                            <span>${opp.details.mode}</span>
+                            ${opp.details.location ? `<span> • ${opp.details.location}</span>` : ''}
+                        </div>
+                        
+                        ${opp.details.duration ? `
+                            <div class="detail-item">
+                                <span>⏱️</span>
+                                <span>${opp.details.duration}</span>
+                            </div>
+                        ` : ''}
+
+                        ${opp.details.stipend ? `
+                            <div class="detail-item">
+                                <span>💰</span>
+                                <span>${opp.details.stipend}</span>
+                            </div>
+                        ` : ''}
+
+                        ${opp.details.prizes && opp.details.prizes.length > 0 ? `
+                            <div class="detail-item">
+                                <span>🏆</span>
+                                <span>Prizes: ${opp.details.prizes.join(', ')}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="skills-section">
+                        <h4>Required Skills:</h4>
+                        <div class="skills-list">
+                            ${opp.requirements.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="deadline">
+                        <span>📅</span>
+                        <span>Deadline: ${formatDate(opp.timeline.applicationDeadline)}</span>
+                    </div>
+
+                    <div class="platform-tag">
+                        📱 ${opp.platform}
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="guide-button" onclick="showRoadmap('${opp.id}')">
+                            <span>🤖</span>
+                            Guide Me
+                        </button>
+                        <a href="${opp.externalUrl}" target="_blank" class="apply-button">
+                            <span>🔗</span>
+                            View on Platform
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show roadmap modal
+        function showRoadmap(opportunityId) {
+            const opportunity = mockOpportunities.find(opp => opp.id === opportunityId);
+            if (!opportunity) return;
+
+            const modal = document.getElementById('roadmapModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            // Show loading state
+            modalContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your personalized roadmap...</p>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                const roadmap = generateMockRoadmap(opportunity);
+                modalContent.innerHTML = createRoadmapHTML(roadmap);
+            }, 1500);
+        }
+
+        // Generate mock roadmap
+        function generateMockRoadmap(opportunity) {
+            const basePhases = {
+                hackathon: [
+                    {
+                        title: 'Preparation Phase',
+                        duration: '1 week',
+                        tasks: [
+                            'Review problem statement and requirements',
+                            'Form a team or prepare for solo participation',
+                            'Set up development environment',
+                            'Research similar solutions and approaches'
+                        ]
+                    },
+                    {
+                        title: 'Skill Building',
+                        duration: '1-2 weeks',
+                        tasks: [
+                            `Learn ${opportunity.requirements.skills.slice(0, 2).join(' and ')}`,
+                            'Practice with small projects',
+                            'Study relevant documentation and tutorials',
+                            'Join online communities for support'
+                        ]
+                    },
+                    {
+                        title: 'Implementation',
+                        duration: 'During hackathon',
+                        tasks: [
+                            'Plan your solution architecture',
+                            'Implement core features first',
+                            'Test and debug your solution',
+                            'Prepare presentation and demo'
+                        ]
+                    }
+                ],
+                internship: [
+                    {
+                        title: 'Application Preparation',
+                        duration: '1 week',
+                        tasks: [
+                            'Update your resume with relevant projects',
+                            'Create a portfolio showcasing your work',
+                            'Write a compelling cover letter',
+                            'Prepare for technical interviews'
+                        ]
+                    },
+                    {
+                        title: 'Skill Enhancement',
+                        duration: '2-3 weeks',
+                        tasks: [
+                            `Master ${opportunity.requirements.skills.slice(0, 2).join(' and ')}`,
+                            'Build projects using required technologies',
+                            'Contribute to open source projects',
+                            'Practice coding problems and algorithms'
+                        ]
+                    },
+                    {
+                        title: 'Interview Preparation',
+                        duration: '1 week',
+                        tasks: [
+                            'Practice common interview questions',
+                            'Prepare technical explanations of your projects',
+                            'Research the company and role',
+                            'Mock interviews with peers or mentors'
+                        ]
+                    }
+                ],
+                workshop: [
+                    {
+                        title: 'Pre-workshop Preparation',
+                        duration: '3-5 days',
+                        tasks: [
+                            'Review workshop agenda and prerequisites',
+                            'Set up required software and tools',
+                            'Brush up on basic concepts',
+                            'Prepare questions to ask during the workshop'
+                        ]
+                    },
+                    {
+                        title: 'Active Participation',
+                        duration: 'During workshop',
+                        tasks: [
+                            'Attend all sessions and take notes',
+                            'Participate in hands-on exercises',
+                            'Network with other participants',
+                            'Ask questions and seek clarifications'
+                        ]
+                    },
+                    {
+                        title: 'Post-workshop Follow-up',
+                        duration: '1 week',
+                        tasks: [
+                            'Review and organize your notes',
+                            'Complete any assigned projects',
+                            'Connect with instructors and peers',
+                            'Apply learned concepts to personal projects'
+                        ]
+                    }
+                ]
+            };
+
+            return {
+                opportunityTitle: opportunity.title,
+                phases: basePhases[opportunity.type] || basePhases.hackathon,
+                estimatedDuration: opportunity.type === 'hackathon' ? '3-4 weeks' : 
+                                  opportunity.type === 'internship' ? '4-5 weeks' : '2 weeks',
+                personalizedTips: [
+                    `Focus on ${opportunity.requirements.skills[0]} as it's highly relevant for this ${opportunity.type}`,
+                    `Since this is a ${opportunity.details.mode} opportunity, prepare accordingly`,
+                    'Build a portfolio project that demonstrates your skills',
+                    'Connect with past participants or organizers on LinkedIn'
+                ]
+            };
+        }
+
+        // Create roadmap HTML
+        function createRoadmapHTML(roadmap) {
+            return `
+                <div class="roadmap-header">
+                    <h3>${roadmap.opportunityTitle}</h3>
+                    <div class="duration-badge">
+                        <span>⏱️</span>
+                        Estimated Duration: ${roadmap.estimatedDuration}
+                    </div>
+                </div>
+
+                <div class="roadmap-phases">
+                    ${roadmap.phases.map((phase, index) => `
+                        <div class="phase-card">
+                            <div class="phase-header">
+                                <div class="phase-number">${index + 1}</div>
+                                <div class="phase-info">
+                                    <h4>${phase.title}</h4>
+                                    <span class="phase-duration">${phase.duration}</span>
+                                </div>
+                            </div>
+                            <ul class="phase-tasks">
+                                ${phase.tasks.map(task => `
+                                    <li class="task-item">
+                                        <span class="task-icon">✓</span>
+                                        ${task}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div style="background: #fff3cd; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #ffc107;">
+                    <h4 style="display: flex; align-items: center; gap: 8px; color: #856404; margin-bottom: 15px; font-size: 1.1rem;">
+                        <span>💡</span>
+                        Personalized Tips
+                    </h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        ${roadmap.personalizedTips.map(tip => `
+                            <li style="color: #856404; margin-bottom: 8px; padding-left: 20px; position: relative; line-height: 1.5;">
+                                ${tip}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: center; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <button class="guide-button" style="flex: none;">
+                        <span>📋</span>
+                        Save Roadmap
+                    </button>
+                    <button class="guide-button" style="flex: none; background: #6c757d;">
+                        <span>📤</span>
+                        Share
+                    </button>
+                    <button class="apply-button" style="flex: none;">
+                        <span>🚀</span>
+                        Apply Now
+                    </button>
+                </div>
+            `;
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('roadmapModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('roadmapModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

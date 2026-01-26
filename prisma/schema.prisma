@@ -1,0 +1,213 @@
+// OpportuneX Prisma Schema
+// This schema defines the database structure for the OpportuneX platform
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum OpportunityType {
+  hackathon
+  internship
+  workshop
+}
+
+enum OrganizerType {
+  corporate
+  startup
+  government
+  academic
+}
+
+enum OpportunityMode {
+  online
+  offline
+  hybrid
+}
+
+enum ProficiencyLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+enum NotificationFrequency {
+  immediate
+  daily
+  weekly
+}
+
+enum NotificationType {
+  new_opportunities
+  deadlines
+  recommendations
+}
+
+// User model
+model User {
+  id                        String                 @id @default(uuid()) @db.Uuid
+  email                     String                 @unique @db.VarChar(255)
+  name                      String                 @db.VarChar(100)
+  phone                     String?                @db.VarChar(15)
+  passwordHash              String                 @map("password_hash") @db.VarChar(255)
+  city                      String?                @db.VarChar(100)
+  state                     String?                @db.VarChar(100)
+  tier                      Int?                   @db.Integer
+  institution               String?                @db.VarChar(200)
+  degree                    String?                @db.VarChar(100)
+  year                      Int?                   @db.Integer
+  cgpa                      Decimal?               @db.Decimal(3, 2)
+  technicalSkills           String[]               @map("technical_skills")
+  domains                   String[]
+  proficiencyLevel          ProficiencyLevel       @default(beginner) @map("proficiency_level")
+  preferredOpportunityTypes OpportunityType[]      @map("preferred_opportunity_types")
+  preferredMode             OpportunityMode?       @default(online) @map("preferred_mode")
+  maxDistance               Int?                   @map("max_distance") @db.Integer
+  emailNotifications        Boolean                @default(true) @map("email_notifications")
+  smsNotifications          Boolean                @default(false) @map("sms_notifications")
+  inAppNotifications        Boolean                @default(true) @map("in_app_notifications")
+  notificationFrequency     NotificationFrequency  @default(daily) @map("notification_frequency")
+  notificationTypes         NotificationType[]     @map("notification_types")
+  createdAt                 DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                 DateTime               @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  searches      UserSearch[]
+  favorites     UserFavorite[]
+  notifications Notification[]
+  roadmaps      Roadmap[]
+
+  @@map("users")
+}
+
+// Opportunity model
+model Opportunity {
+  id                   String          @id @default(uuid()) @db.Uuid
+  title                String          @db.VarChar(500)
+  description          String?
+  type                 OpportunityType
+  organizerName        String          @map("organizer_name") @db.VarChar(200)
+  organizerType        OrganizerType   @map("organizer_type")
+  organizerLogo        String?         @map("organizer_logo") @db.VarChar(500)
+  requiredSkills       String[]        @map("required_skills")
+  experienceRequired   String?         @map("experience_required") @db.VarChar(200)
+  educationRequired    String?         @map("education_required") @db.VarChar(200)
+  eligibilityCriteria  String[]        @map("eligibility_criteria")
+  mode                 OpportunityMode
+  location             String?         @db.VarChar(200)
+  duration             String?         @db.VarChar(100)
+  stipend              String?         @db.VarChar(100)
+  prizes               String[]
+  applicationDeadline  DateTime        @map("application_deadline") @db.Timestamptz
+  startDate            DateTime?       @map("start_date") @db.Timestamptz
+  endDate              DateTime?       @map("end_date") @db.Timestamptz
+  externalUrl          String          @map("external_url") @db.VarChar(1000)
+  sourceId             String          @map("source_id") @db.VarChar(100)
+  tags                 String[]
+  isActive             Boolean         @default(true) @map("is_active")
+  qualityScore         Int             @default(0) @map("quality_score") @db.Integer
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  source        Source         @relation(fields: [sourceId], references: [id])
+  favorites     UserFavorite[]
+  notifications Notification[]
+  roadmaps      Roadmap[]
+
+  @@map("opportunities")
+}
+
+// Source model
+model Source {
+  id                   String    @id @db.VarChar(100)
+  name                 String    @db.VarChar(200)
+  url                  String    @db.VarChar(500)
+  type                 String    @db.VarChar(50)
+  isActive             Boolean   @default(true) @map("is_active")
+  lastScrapedAt        DateTime? @map("last_scraped_at") @db.Timestamptz
+  scrapeFrequencyHours Int       @default(24) @map("scrape_frequency_hours") @db.Integer
+  qualityScore         Int       @default(0) @map("quality_score") @db.Integer
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  opportunities Opportunity[]
+
+  @@map("sources")
+}
+
+// User search model
+model UserSearch {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  query       String
+  filters     Json?
+  resultCount Int      @default(0) @map("result_count") @db.Integer
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_searches")
+}
+
+// User favorites model
+model UserFavorite {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  opportunityId String   @map("opportunity_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, opportunityId])
+  @@map("user_favorites")
+}
+
+// Notification model
+model Notification {
+  id            String           @id @default(uuid()) @db.Uuid
+  userId        String           @map("user_id") @db.Uuid
+  type          NotificationType
+  title         String           @db.VarChar(200)
+  message       String
+  opportunityId String?          @map("opportunity_id") @db.Uuid
+  isRead        Boolean          @default(false) @map("is_read")
+  sentAt        DateTime?        @map("sent_at") @db.Timestamptz
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+// Roadmap model
+model Roadmap {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  opportunityId     String   @map("opportunity_id") @db.Uuid
+  title             String   @db.VarChar(200)
+  description       String?
+  phases            Json
+  estimatedDuration Int?     @map("estimated_duration") @db.Integer
+  targetDate        DateTime? @map("target_date") @db.Timestamptz
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@map("roadmaps")
+}

@@ -1,0 +1,42 @@
+{
+  "name": "OpportuneX - AI-Powered Opportunity Discovery",
+  "short_name": "OpportuneX",
+  "description": "Discover hackathons, internships, and workshops with AI-powered search and personalized guidance",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["education", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search Opportunities",
+      "short_name": "Search",
+      "description": "Search for hackathons, internships, and workshops",
+      "url": "/search"
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile", 
+      "description": "View and edit your profile",
+      "url": "/profile"
+    },
+    {
+      "name": "AI Roadmap",
+      "short_name": "Roadmap",
+      "description": "Get personalized preparation roadmaps", 
+      "url": "/roadmap"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

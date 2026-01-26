@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opportunex-api-deployment
+  namespace: opportunex
+  labels:
+    app: opportunex-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: opportunex-api
+  template:
+    metadata:
+      labels:
+        app: opportunex-api
+    spec:
+      containers:
+      - name: opportunex-api
+        image: opportunex/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: opportunex-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: opportunex-config
+              key: API_GATEWAY_PORT
+        - name: DATABASE_URL
+          value: "postgresql://postgres:$(DATABASE_PASSWORD)@postgres-service:5432/opportunex"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opportunex-secrets
+              key: DATABASE_PASSWORD
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: opportunex-secrets
+              key: JWT_SECRET
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "125m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opportunex-api-service
+  namespace: opportunex
+spec:
+  selector:
+    app: opportunex-api
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: opportunex-api-hpa
+  namespace: opportunex
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: opportunex-api-deployment
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
