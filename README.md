@@ -1,159 +1,194 @@
-# OpportuneX
+# OpportuneX - AI-Powered Opportunity Discovery Platform
+
+[![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-blue)](https://kiro.ai)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3-38B2AC)](https://tailwindcss.com/)
 
 OpportuneX is an AI-powered platform designed to help students, particularly from Tier 2 and Tier 3 cities in India, discover and access hackathons, internships, and workshops through natural language interactions.
 
-## Features
+## 🚀 Features
 
-- 🔍 **Smart Search**: Natural language search for opportunities
-- 🎤 **Voice Search**: Search using voice commands in English and Hindi
-- 🤖 **AI Instructor**: Personalized preparation roadmaps
-- 📱 **Mobile-First**: Responsive design optimized for mobile devices
-- 🔔 **Smart Notifications**: Personalized opportunity alerts
-- 🎯 **Advanced Filtering**: Filter by skills, location, mode, and more
+- **Smart Search**: Natural language search for opportunities with advanced filtering
+- **Voice Search**: Multi-language voice commands (English and Hindi)
+- **AI Instructor**: Personalized preparation roadmaps and guidance
+- **Real-time Data**: Automated fetching from MLH and other platforms
+- **Mobile-First Design**: Responsive interface optimized for mobile devices
+- **Smart Notifications**: Personalized opportunity alerts via email, SMS, and in-app
+- **Progressive Web App**: Offline capabilities and installable experience
+- **Resume Parsing**: Upload resume and auto-populate profile details
+- **Theme Support**: Light, dark, and system theme modes
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Node.js
-- **Database**: PostgreSQL, Redis (caching)
-- **Search**: Elasticsearch
-- **AI/ML**: OpenAI API, Speech-to-Text APIs
-- **Authentication**: JWT
-- **Deployment**: Docker, Kubernetes
+### Frontend
+- **Next.js 15** with App Router
+- **React 19** with TypeScript
+- **Tailwind CSS** for styling
+- **Progressive Web App** capabilities
 
-## Getting Started
+### Backend
+- **Next.js API Routes** for serverless functions
+- **Node.js** runtime with Express.js
+- **Real-time data fetching** from MLH and other sources
+
+### Database & Storage
+- **PostgreSQL 15+** as primary database
+- **Prisma** as ORM with strict type safety
+- **Redis 6+** for caching and session storage
+- **Elasticsearch 8+** for search functionality
+
+### External Services
+- **OpenAI API** for AI features
+- **Speech-to-Text APIs** (Google, Azure)
+- **SendGrid** for email notifications
+- **Twilio** for SMS notifications
+
+## 🏗️ Built with Kiro
+
+This project was built using **Kiro AI assistant** with a spec-driven development methodology. The `.kiro` directory contains:
+
+- **Specifications**: Complete requirements, design, and task breakdown
+- **Steering Rules**: Project structure, technology stack, and product guidelines
+- **Property-Based Tests**: Comprehensive testing with formal correctness properties
+
+### Spec-Driven Development
+
+The project follows a systematic approach:
+1. **Requirements Analysis** → Clear user stories and acceptance criteria
+2. **Design Documentation** → Comprehensive system architecture and API design
+3. **Task Breakdown** → 156 detailed implementation tasks
+4. **Property-Based Testing** → Formal correctness properties and automated testing
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL 14+
 - Redis 6+
-- Elasticsearch 8+
+- Elasticsearch 8+ (optional)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/opportunex.git
+   git clone <your-repo-url>
    cd opportunex
    ```
 
-2. Install dependencies:
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. Set up environment variables:
+3. **Set up environment variables**
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
 
-4. Set up the database:
+4. **Start the development servers**
    ```bash
-   # Start PostgreSQL and create database
-   createdb opportunex_dev
-   
-   # Run migrations (when available)
-   npm run db:migrate
-   ```
-
-5. Start development services:
-   ```bash
-   # Start Redis
-   redis-server
-   
-   # Start Elasticsearch
-   # Follow Elasticsearch installation guide for your OS
-   ```
-
-6. Start the development server:
-   ```bash
+   # Start frontend (Next.js)
    npm run dev
+
+   # Start backend server (in another terminal)
+   cd server && npm start
+
+   # Start automated backend (in another terminal)
+   cd backend && npm start
    ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. **Access the application**
+   - Frontend: http://localhost:3000
+   - Main Server: http://localhost:5001
+   - Backend API: http://localhost:5002
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   └── search/            # Search pages
-├── components/            # Reusable UI components
-│   └── ui/               # Base UI components
-├── lib/                  # Utility functions and configurations
-│   ├── constants.ts      # Application constants
-│   └── utils.ts          # Utility functions
-└── types/                # TypeScript type definitions
-    └── index.ts          # Core type definitions
+├── .kiro/                  # Kiro configuration and specs
+│   ├── specs/             # Feature specifications
+│   └── steering/          # Project guidelines
+├── src/                   # Source code
+│   ├── app/              # Next.js App Router
+│   ├── components/       # React components
+│   ├── lib/              # Business logic and utilities
+│   ├── hooks/            # Custom React hooks
+│   └── test/             # Test suites
+├── backend/              # Automated data fetching backend
+├── server/               # Main application server
+├── prisma/               # Database schema
+└── public/               # Static assets
 ```
 
-## Development
+## 🧪 Testing
 
-### Available Scripts
+The project includes comprehensive testing:
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
+```bash
+# Unit tests
+npm run test
 
-### Code Style
+# Integration tests
+npm run test:integration
 
-This project uses:
-- ESLint for code linting
-- Prettier for code formatting
-- TypeScript strict mode
-- Tailwind CSS for styling
+# Property-based tests
+npm run test:property
 
-### Testing
+# Smoke tests
+npm run test:smoke
 
-Testing will be implemented in subsequent phases:
-- Unit tests with Jest and React Testing Library
-- Property-based tests with fast-check
-- Integration tests for API endpoints
-- End-to-end tests with Playwright
+# All tests with coverage
+npm run test:coverage
+```
 
-## Architecture
+## 🚀 Deployment
 
-The application follows a microservices architecture with the following key components:
+### Development
+```bash
+npm run docker:dev
+```
 
-- **API Gateway**: Request routing and authentication
-- **Search Service**: Natural language and voice search
-- **AI Instructor Service**: Personalized roadmap generation
-- **Data Aggregation Service**: Opportunity data collection
-- **User Management Service**: User profiles and preferences
-- **Notification Service**: Email, SMS, and in-app notifications
+### Production
+```bash
+npm run build
+npm run docker:prod
+```
 
-## Contributing
+### Kubernetes
+```bash
+npm run deploy:k8s
+```
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 📊 Key Metrics
 
-## License
+- **156 Implementation Tasks** completed
+- **8 Property-Based Tests** for correctness validation
+- **Mobile-First Design** with PWA capabilities
+- **Real-time Data** from 6+ MLH hackathons
+- **Multi-language Support** (English/Hindi voice search)
+
+## 🤝 Contributing
+
+This project was built using Kiro's spec-driven development methodology. To contribute:
+
+1. Review the specifications in `.kiro/specs/`
+2. Follow the project structure guidelines in `.kiro/steering/`
+3. Ensure all property-based tests pass
+4. Add new features following the established patterns
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🙏 Acknowledgments
 
-For support, email support@opportunex.com or join our community Discord server.
+- Built with [Kiro AI Assistant](https://kiro.ai) using spec-driven development
+- MLH (Major League Hacking) for hackathon data
+- Open source community for the amazing tools and libraries
 
-## Roadmap
+---
 
-- [ ] Phase 1: Foundation and Core Infrastructure ✅
-- [ ] Phase 2: Backend Services Implementation
-- [ ] Phase 3: Data Aggregation System
-- [ ] Phase 4: AI and Machine Learning Features
-- [ ] Phase 5: Frontend Implementation
-- [ ] Phase 6: Notification and Communication
-- [ ] Phase 7: Testing and Quality Assurance
-- [ ] Phase 8: Performance and Optimization
-- [ ] Phase 9: Security and Compliance
-- [ ] Phase 10: Deployment and Production
+**Built with ❤️ using Kiro AI Assistant and spec-driven development methodology**
