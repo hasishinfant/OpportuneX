@@ -1,9 +1,9 @@
 /**
  * Property-Based Test: Comprehensive Search Relevance
  * **Validates: Requirements 1.1, 2.1, 2.2**
- * 
- * Property 1: For any search query (text or voice) in English or Hindi, 
- * all returned opportunities should be relevant to the query intent and 
+ *
+ * Property 1: For any search query (text or voice) in English or Hindi,
+ * all returned opportunities should be relevant to the query intent and
  * match the specified opportunity types (hackathon, internship, workshop)
  */
 
@@ -69,7 +69,11 @@ describe('Property Test: Comprehensive Search Relevance', () => {
   );
 
   // Generator for opportunity types
-  const opportunityTypes = fc.constantFrom('hackathon', 'internship', 'workshop');
+  const opportunityTypes = fc.constantFrom(
+    'hackathon',
+    'internship',
+    'workshop'
+  );
 
   // Generator for mock opportunities
   const mockOpportunityGenerator = fc.record({
@@ -78,14 +82,28 @@ describe('Property Test: Comprehensive Search Relevance', () => {
     description: fc.string({ minLength: 20, maxLength: 500 }),
     type: opportunityTypes,
     organizerName: fc.string({ minLength: 5, maxLength: 50 }),
-    organizerType: fc.constantFrom('corporate', 'startup', 'government', 'academic'),
-    requiredSkills: fc.array(fc.string({ minLength: 2, maxLength: 20 }), { minLength: 1, maxLength: 10 }),
+    organizerType: fc.constantFrom(
+      'corporate',
+      'startup',
+      'government',
+      'academic'
+    ),
+    requiredSkills: fc.array(fc.string({ minLength: 2, maxLength: 20 }), {
+      minLength: 1,
+      maxLength: 10,
+    }),
     mode: fc.constantFrom('online', 'offline', 'hybrid'),
     location: fc.option(fc.string({ minLength: 3, maxLength: 50 })),
-    applicationDeadline: fc.date({ min: new Date(), max: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) }),
+    applicationDeadline: fc.date({
+      min: new Date(),
+      max: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    }),
     externalUrl: fc.webUrl(),
     sourceId: fc.string({ minLength: 5, maxLength: 15 }),
-    tags: fc.array(fc.string({ minLength: 2, maxLength: 15 }), { minLength: 1, maxLength: 8 }),
+    tags: fc.array(fc.string({ minLength: 2, maxLength: 15 }), {
+      minLength: 1,
+      maxLength: 8,
+    }),
     isActive: fc.constant(true),
     createdAt: fc.date({ max: new Date() }),
     updatedAt: fc.date({ max: new Date() }),
@@ -94,17 +112,25 @@ describe('Property Test: Comprehensive Search Relevance', () => {
   // Generator for search requests
   const searchRequestGenerator = fc.record({
     query: fc.oneof(englishSearchQueries, hindiSearchQueries),
-    filters: fc.option(fc.record({
-      type: fc.option(opportunityTypes),
-      skills: fc.option(fc.array(fc.string({ minLength: 2, maxLength: 20 }), { maxLength: 5 })),
-      organizerType: fc.option(fc.constantFrom('corporate', 'startup', 'government', 'academic')),
-      mode: fc.option(fc.constantFrom('online', 'offline', 'hybrid')),
-      location: fc.option(fc.string({ minLength: 3, maxLength: 30 })),
-    })),
-    pagination: fc.option(fc.record({
-      page: fc.integer({ min: 1, max: 10 }),
-      limit: fc.integer({ min: 5, max: 50 }),
-    })),
+    filters: fc.option(
+      fc.record({
+        type: fc.option(opportunityTypes),
+        skills: fc.option(
+          fc.array(fc.string({ minLength: 2, maxLength: 20 }), { maxLength: 5 })
+        ),
+        organizerType: fc.option(
+          fc.constantFrom('corporate', 'startup', 'government', 'academic')
+        ),
+        mode: fc.option(fc.constantFrom('online', 'offline', 'hybrid')),
+        location: fc.option(fc.string({ minLength: 3, maxLength: 30 })),
+      })
+    ),
+    pagination: fc.option(
+      fc.record({
+        page: fc.integer({ min: 1, max: 10 }),
+        limit: fc.integer({ min: 5, max: 50 }),
+      })
+    ),
     userId: fc.option(fc.uuid()),
   });
 
@@ -157,7 +183,8 @@ describe('Property Test: Comprehensive Search Relevance', () => {
 
           // Property: All results should be relevant
           if (result.success && result.data) {
-            const { opportunities: resultOpportunities, totalCount } = result.data;
+            const { opportunities: resultOpportunities, totalCount } =
+              result.data;
 
             // Basic relevance checks
             expect(resultOpportunities).toBeInstanceOf(Array);
@@ -169,9 +196,13 @@ describe('Property Test: Comprehensive Search Relevance', () => {
                 // Essential fields should be present
                 expect(opportunity.id).toBeDefined();
                 expect(opportunity.title).toBeDefined();
-                expect(opportunity.type).toMatch(/^(hackathon|internship|workshop)$/);
+                expect(opportunity.type).toMatch(
+                  /^(hackathon|internship|workshop)$/
+                );
                 expect(opportunity.organizer.name).toBeDefined();
-                expect(opportunity.timeline.applicationDeadline).toBeInstanceOf(Date);
+                expect(opportunity.timeline.applicationDeadline).toBeInstanceOf(
+                  Date
+                );
 
                 // If type filter is specified, results should match
                 if (searchRequest.filters?.type) {
@@ -180,28 +211,43 @@ describe('Property Test: Comprehensive Search Relevance', () => {
 
                 // If organizer type filter is specified, results should match
                 if (searchRequest.filters?.organizerType) {
-                  expect(opportunity.organizer.type).toBe(searchRequest.filters.organizerType);
+                  expect(opportunity.organizer.type).toBe(
+                    searchRequest.filters.organizerType
+                  );
                 }
 
                 // If mode filter is specified, results should match
                 if (searchRequest.filters?.mode) {
-                  expect(opportunity.details.mode).toBe(searchRequest.filters.mode);
+                  expect(opportunity.details.mode).toBe(
+                    searchRequest.filters.mode
+                  );
                 }
 
                 // If skills filter is specified, opportunity should have at least one matching skill
-                if (searchRequest.filters?.skills && searchRequest.filters.skills.length > 0) {
-                  const hasMatchingSkill = searchRequest.filters.skills.some(filterSkill =>
-                    opportunity.requirements.skills.some(oppSkill =>
-                      oppSkill.toLowerCase().includes(filterSkill.toLowerCase()) ||
-                      filterSkill.toLowerCase().includes(oppSkill.toLowerCase())
-                    )
+                if (
+                  searchRequest.filters?.skills &&
+                  searchRequest.filters.skills.length > 0
+                ) {
+                  const hasMatchingSkill = searchRequest.filters.skills.some(
+                    filterSkill =>
+                      opportunity.requirements.skills.some(
+                        oppSkill =>
+                          oppSkill
+                            .toLowerCase()
+                            .includes(filterSkill.toLowerCase()) ||
+                          filterSkill
+                            .toLowerCase()
+                            .includes(oppSkill.toLowerCase())
+                      )
                   );
                   expect(hasMatchingSkill).toBe(true);
                 }
 
                 // Opportunity should be active and have future deadline
                 expect(opportunity.isActive).toBe(true);
-                expect(opportunity.timeline.applicationDeadline.getTime()).toBeGreaterThan(Date.now() - 24 * 60 * 60 * 1000);
+                expect(
+                  opportunity.timeline.applicationDeadline.getTime()
+                ).toBeGreaterThan(Date.now() - 24 * 60 * 60 * 1000);
               });
             }
 
@@ -267,7 +313,8 @@ describe('Property Test: Comprehensive Search Relevance', () => {
 
           // Text search
           const textSearchRequest: SearchRequest = { query };
-          const textResult = await searchService.searchOpportunities(textSearchRequest);
+          const textResult =
+            await searchService.searchOpportunities(textSearchRequest);
 
           // Voice search (mock voice processing)
           const mockAudioBlob = new Blob(['mock audio'], { type: 'audio/wav' });
@@ -278,12 +325,13 @@ describe('Property Test: Comprehensive Search Relevance', () => {
 
           // Property: Voice processing should succeed and extract similar intent
           if (voiceResult.success && voiceResult.data) {
-            const voiceSearchRequest: SearchRequest = { 
-              query: voiceResult.data.searchQuery 
+            const voiceSearchRequest: SearchRequest = {
+              query: voiceResult.data.searchQuery,
             };
-            
+
             // Mock the same response for voice-derived query
-            const voiceSearchResult = await searchService.searchOpportunities(voiceSearchRequest);
+            const voiceSearchResult =
+              await searchService.searchOpportunities(voiceSearchRequest);
 
             // Both searches should succeed
             expect(textResult.success).toBe(true);
@@ -291,11 +339,18 @@ describe('Property Test: Comprehensive Search Relevance', () => {
 
             if (textResult.data && voiceSearchResult.data) {
               // Results should have similar structure
-              expect(voiceSearchResult.data.opportunities).toBeInstanceOf(Array);
-              expect(voiceSearchResult.data.totalCount).toBeGreaterThanOrEqual(0);
+              expect(voiceSearchResult.data.opportunities).toBeInstanceOf(
+                Array
+              );
+              expect(voiceSearchResult.data.totalCount).toBeGreaterThanOrEqual(
+                0
+              );
 
               // If both have results, they should be of the same type structure
-              if (textResult.data.opportunities.length > 0 && voiceSearchResult.data.opportunities.length > 0) {
+              if (
+                textResult.data.opportunities.length > 0 &&
+                voiceSearchResult.data.opportunities.length > 0
+              ) {
                 const textOpp = textResult.data.opportunities[0];
                 const voiceOpp = voiceSearchResult.data.opportunities[0];
 
@@ -318,11 +373,20 @@ describe('Property Test: Comprehensive Search Relevance', () => {
     await fc.assert(
       fc.asyncProperty(
         fc.oneof(
-          fc.record({ query: englishSearchQueries, language: fc.constant('en' as const) }),
-          fc.record({ query: hindiSearchQueries, language: fc.constant('hi' as const) })
+          fc.record({
+            query: englishSearchQueries,
+            language: fc.constant('en' as const),
+          }),
+          fc.record({
+            query: hindiSearchQueries,
+            language: fc.constant('hi' as const),
+          })
         ),
         fc.array(mockOpportunityGenerator, { minLength: 1, maxLength: 15 }),
-        async (queryData: { query: string; language: 'en' | 'hi' }, mockOpportunities: any[]) => {
+        async (
+          queryData: { query: string; language: 'en' | 'hi' },
+          mockOpportunities: any[]
+        ) => {
           // Transform mock opportunities
           const opportunities: Opportunity[] = mockOpportunities.map(opp => ({
             ...opp,
@@ -359,9 +423,9 @@ describe('Property Test: Comprehensive Search Relevance', () => {
             },
           });
 
-          const searchRequest: SearchRequest = { 
+          const searchRequest: SearchRequest = {
             query: queryData.query,
-            userId: 'test-user'
+            userId: 'test-user',
           };
 
           const result = await searchService.searchOpportunities(searchRequest);
@@ -376,9 +440,13 @@ describe('Property Test: Comprehensive Search Relevance', () => {
             resultOpportunities.forEach(opportunity => {
               expect(opportunity.id).toBeDefined();
               expect(opportunity.title).toBeDefined();
-              expect(opportunity.type).toMatch(/^(hackathon|internship|workshop)$/);
+              expect(opportunity.type).toMatch(
+                /^(hackathon|internship|workshop)$/
+              );
               expect(opportunity.organizer.name).toBeDefined();
-              expect(opportunity.timeline.applicationDeadline).toBeInstanceOf(Date);
+              expect(opportunity.timeline.applicationDeadline).toBeInstanceOf(
+                Date
+              );
               expect(opportunity.isActive).toBe(true);
             });
 

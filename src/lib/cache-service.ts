@@ -160,7 +160,7 @@ class CacheService {
         const cacheKey = this.generateKey(key, options.prefix);
         const serializedValue = this.serialize(value);
         const expiry = ttl || options.ttl || this.defaultTTL;
-        
+
         pipeline.setEx(cacheKey, expiry, serializedValue);
       }
 
@@ -208,18 +208,18 @@ class CacheService {
    */
   async increment(
     key: string,
-    amount: number = 1,
+    amount = 1,
     options: CacheOptions = {}
   ): Promise<number> {
     try {
       const client = await this.getClient();
       const cacheKey = this.generateKey(key, options.prefix);
       const result = await client.incrBy(cacheKey, amount);
-      
+
       // Set TTL if it's a new key
       const ttl = options.ttl || this.defaultTTL;
       await client.expire(cacheKey, ttl);
-      
+
       return result;
     } catch (error) {
       console.error('Cache increment error:', error);
@@ -240,10 +240,10 @@ class CacheService {
       const client = await this.getClient();
       const cacheKey = this.generateKey(key, options.prefix);
       const result = await client.sAdd(cacheKey, members);
-      
+
       const ttl = options.ttl || this.defaultTTL;
       await client.expire(cacheKey, ttl);
-      
+
       return result;
     } catch (error) {
       console.error('Cache sadd error:', error);
@@ -255,10 +255,7 @@ class CacheService {
   /**
    * Get all members of a set
    */
-  async smembers(
-    key: string,
-    options: CacheOptions = {}
-  ): Promise<string[]> {
+  async smembers(key: string, options: CacheOptions = {}): Promise<string[]> {
     try {
       const client = await this.getClient();
       const cacheKey = this.generateKey(key, options.prefix);
@@ -277,7 +274,7 @@ class CacheService {
     try {
       const client = await this.getClient();
       const keys = await client.keys(`${this.keyPrefix}${pattern}`);
-      
+
       if (keys.length === 0) {
         return 0;
       }
@@ -298,7 +295,7 @@ class CacheService {
   getStats(): CacheStats & { hitRate: number } {
     const total = this.stats.hits + this.stats.misses;
     const hitRate = total > 0 ? (this.stats.hits / total) * 100 : 0;
-    
+
     return {
       ...this.stats,
       hitRate: Math.round(hitRate * 100) / 100,
@@ -331,7 +328,7 @@ class CacheService {
       const client = await this.getClient();
       await client.ping();
       const latency = Date.now() - start;
-      
+
       return { healthy: true, latency };
     } catch (error) {
       return {
@@ -427,7 +424,9 @@ export class OpportuneXCache {
     recommendations: any[],
     ttl: number = OpportuneXCache.TTL.RECOMMENDATIONS
   ): Promise<boolean> {
-    return cacheService.set(`recommendations:${userId}`, recommendations, { ttl });
+    return cacheService.set(`recommendations:${userId}`, recommendations, {
+      ttl,
+    });
   }
 
   /**
@@ -514,15 +513,15 @@ export class OpportuneXCache {
    */
   static async warmUpCache(): Promise<void> {
     console.log('🔥 Warming up cache...');
-    
+
     try {
       // This would typically be called during application startup
       // to pre-populate cache with frequently accessed data
-      
+
       // Example: Cache active opportunities
       // const activeOpportunities = await getActiveOpportunities();
       // await OpportuneXCache.cacheOpportunities('active', activeOpportunities);
-      
+
       console.log('✅ Cache warm-up completed');
     } catch (error) {
       console.error('❌ Cache warm-up failed:', error);

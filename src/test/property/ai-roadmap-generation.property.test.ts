@@ -1,14 +1,17 @@
 /**
  * Property-Based Test: AI Roadmap Generation
  * **Validates: Requirements 6.1, 6.3, 6.4**
- * 
- * Property 7: For any opportunity and user profile combination, the AI Instructor 
- * should generate a roadmap containing learning resources, timelines, milestones, 
+ *
+ * Property 7: For any opportunity and user profile combination, the AI Instructor
+ * should generate a roadmap containing learning resources, timelines, milestones,
  * and content appropriate for the opportunity type
  */
 
 import * as fc from 'fast-check';
-import type { RoadmapRequest, UserProfile } from '../../lib/services/ai-instructor.service';
+import type {
+  RoadmapRequest,
+  UserProfile,
+} from '../../lib/services/ai-instructor.service';
 import { AIInstructorService } from '../../lib/services/ai-instructor.service';
 
 // Mock dependencies
@@ -23,7 +26,9 @@ const mockPrisma = {
   },
 };
 
-(require('@prisma/client').PrismaClient as jest.MockedClass<any>).mockImplementation(() => mockPrisma);
+(
+  require('@prisma/client').PrismaClient as jest.MockedClass<any>
+).mockImplementation(() => mockPrisma);
 
 describe('Property Test: AI Roadmap Generation', () => {
   let aiInstructorService: AIInstructorService;
@@ -39,39 +44,79 @@ describe('Property Test: AI Roadmap Generation', () => {
     email: fc.emailAddress(),
     name: fc.string({ minLength: 2, maxLength: 50 }),
     location: fc.record({
-      city: fc.constantFrom('Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Pune', 'Hyderabad'),
-      state: fc.constantFrom('Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana'),
+      city: fc.constantFrom(
+        'Mumbai',
+        'Delhi',
+        'Bangalore',
+        'Chennai',
+        'Pune',
+        'Hyderabad'
+      ),
+      state: fc.constantFrom(
+        'Maharashtra',
+        'Delhi',
+        'Karnataka',
+        'Tamil Nadu',
+        'Telangana'
+      ),
       tier: fc.constantFrom(2, 3),
     }),
     academic: fc.record({
       institution: fc.string({ minLength: 5, maxLength: 100 }),
-      degree: fc.constantFrom('Computer Science', 'Information Technology', 'Electronics', 'Mechanical', 'Civil'),
+      degree: fc.constantFrom(
+        'Computer Science',
+        'Information Technology',
+        'Electronics',
+        'Mechanical',
+        'Civil'
+      ),
       year: fc.integer({ min: 1, max: 4 }),
       cgpa: fc.option(fc.float({ min: 6.0, max: 10.0 })),
     }),
     skills: fc.record({
       technical: fc.array(
         fc.constantFrom(
-          'JavaScript', 'Python', 'Java', 'C++', 'React', 'Node.js', 
-          'Machine Learning', 'Data Science', 'AI', 'Blockchain', 'DevOps'
+          'JavaScript',
+          'Python',
+          'Java',
+          'C++',
+          'React',
+          'Node.js',
+          'Machine Learning',
+          'Data Science',
+          'AI',
+          'Blockchain',
+          'DevOps'
         ),
         { minLength: 1, maxLength: 10 }
       ),
       domains: fc.array(
-        fc.constantFrom('Web Development', 'Mobile Development', 'AI/ML', 'Data Science', 'Cybersecurity'),
+        fc.constantFrom(
+          'Web Development',
+          'Mobile Development',
+          'AI/ML',
+          'Data Science',
+          'Cybersecurity'
+        ),
         { minLength: 1, maxLength: 5 }
       ),
       proficiencyLevel: fc.constantFrom('beginner', 'intermediate', 'advanced'),
     }),
     preferences: fc.record({
-      opportunityTypes: fc.array(fc.constantFrom('hackathon', 'internship', 'workshop'), { minLength: 1, maxLength: 3 }),
+      opportunityTypes: fc.array(
+        fc.constantFrom('hackathon', 'internship', 'workshop'),
+        { minLength: 1, maxLength: 3 }
+      ),
       preferredMode: fc.constantFrom('online', 'offline', 'hybrid', 'any'),
       notifications: fc.record({
         email: fc.boolean(),
         sms: fc.boolean(),
         inApp: fc.boolean(),
         frequency: fc.constantFrom('immediate', 'daily', 'weekly'),
-        types: fc.array(fc.constantFrom('new_opportunities', 'deadlines', 'recommendations'), { minLength: 1, maxLength: 3 }),
+        types: fc.array(
+          fc.constantFrom('new_opportunities', 'deadlines', 'recommendations'),
+          { minLength: 1, maxLength: 3 }
+        ),
       }),
     }),
     searchHistory: fc.constant([]),
@@ -88,12 +133,24 @@ describe('Property Test: AI Roadmap Generation', () => {
     organizerName: fc.string({ minLength: 3, maxLength: 100 }),
     requiredSkills: fc.array(
       fc.constantFrom(
-        'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'Machine Learning',
-        'Data Analysis', 'AI', 'Blockchain', 'Cloud Computing', 'DevOps'
+        'JavaScript',
+        'Python',
+        'Java',
+        'React',
+        'Node.js',
+        'Machine Learning',
+        'Data Analysis',
+        'AI',
+        'Blockchain',
+        'Cloud Computing',
+        'DevOps'
       ),
       { minLength: 1, maxLength: 8 }
     ),
-    applicationDeadline: fc.date({ min: new Date(), max: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }),
+    applicationDeadline: fc.date({
+      min: new Date(),
+      max: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    }),
   });
 
   /**
@@ -115,13 +172,15 @@ describe('Property Test: AI Roadmap Generation', () => {
             targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           };
 
-          const result = await aiInstructorService.generateRoadmap(roadmapRequest);
+          const result =
+            await aiInstructorService.generateRoadmap(roadmapRequest);
 
           // Property: Should always succeed and contain essential components
           expect(result.success).toBe(true);
 
           if (result.data) {
-            const { roadmap, personalizedTips, skillGaps, recommendedActions } = result.data;
+            const { roadmap, personalizedTips, skillGaps, recommendedActions } =
+              result.data;
 
             // Roadmap structure
             expect(roadmap).toBeDefined();
@@ -161,7 +220,12 @@ describe('Property Test: AI Roadmap Generation', () => {
                 expect(typeof task.estimatedHours).toBe('number');
                 expect(task.estimatedHours).toBeGreaterThan(0);
                 expect(['high', 'medium', 'low']).toContain(task.priority);
-                expect(['learning', 'practice', 'project', 'assessment']).toContain(task.type);
+                expect([
+                  'learning',
+                  'practice',
+                  'project',
+                  'assessment',
+                ]).toContain(task.type);
                 expect(typeof task.completed).toBe('boolean');
               });
 
@@ -169,10 +233,18 @@ describe('Property Test: AI Roadmap Generation', () => {
               phase.resources.forEach(resource => {
                 expect(resource.id).toBeDefined();
                 expect(resource.title).toBeDefined();
-                expect(['article', 'video', 'course', 'book', 'practice']).toContain(resource.type);
+                expect([
+                  'article',
+                  'video',
+                  'course',
+                  'book',
+                  'practice',
+                ]).toContain(resource.type);
                 expect(resource.url).toBeDefined();
                 expect(resource.url).toMatch(/^https?:\/\/.+/);
-                expect(['beginner', 'intermediate', 'advanced']).toContain(resource.difficulty);
+                expect(['beginner', 'intermediate', 'advanced']).toContain(
+                  resource.difficulty
+                );
                 expect(typeof resource.free).toBe('boolean');
               });
             });
@@ -236,14 +308,19 @@ describe('Property Test: AI Roadmap Generation', () => {
       fc.asyncProperty(
         userProfileGenerator,
         fc.constantFrom('hackathon', 'internship', 'workshop'),
-        async (userProfile: UserProfile, opportunityType: 'hackathon' | 'internship' | 'workshop') => {
+        async (
+          userProfile: UserProfile,
+          opportunityType: 'hackathon' | 'internship' | 'workshop'
+        ) => {
           const opportunity = {
             id: 'test-opp',
             title: `Test ${opportunityType}`,
             type: opportunityType,
             organizerName: 'Test Org',
             requiredSkills: ['JavaScript', 'Python'],
-            applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            applicationDeadline: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000
+            ),
           };
 
           mockPrisma.opportunity.findUnique.mockResolvedValue(opportunity);
@@ -254,7 +331,8 @@ describe('Property Test: AI Roadmap Generation', () => {
             userProfile,
           };
 
-          const result = await aiInstructorService.generateRoadmap(roadmapRequest);
+          const result =
+            await aiInstructorService.generateRoadmap(roadmapRequest);
 
           expect(result.success).toBe(true);
 
@@ -262,40 +340,54 @@ describe('Property Test: AI Roadmap Generation', () => {
             const { roadmap } = result.data;
 
             // Property: Content should be appropriate for opportunity type
-            const roadmapContent = `${roadmap.title} ${roadmap.description}`.toLowerCase();
+            const roadmapContent =
+              `${roadmap.title} ${roadmap.description}`.toLowerCase();
 
             switch (opportunityType) {
               case 'hackathon':
                 // Should focus on rapid development, teamwork, innovation
                 expect(roadmap.estimatedDuration).toBeLessThanOrEqual(45); // Shorter prep time
-                expect(roadmap.phases.some(phase => 
-                  phase.title.toLowerCase().includes('project') ||
-                  phase.title.toLowerCase().includes('practice')
-                )).toBe(true);
+                expect(
+                  roadmap.phases.some(
+                    phase =>
+                      phase.title.toLowerCase().includes('project') ||
+                      phase.title.toLowerCase().includes('practice')
+                  )
+                ).toBe(true);
                 break;
 
               case 'internship':
                 // Should focus on professional skills, longer preparation
                 expect(roadmap.estimatedDuration).toBeGreaterThanOrEqual(14); // Longer prep time
-                expect(roadmap.phases.some(phase =>
-                  phase.title.toLowerCase().includes('skill') ||
-                  phase.title.toLowerCase().includes('foundation')
-                )).toBe(true);
+                expect(
+                  roadmap.phases.some(
+                    phase =>
+                      phase.title.toLowerCase().includes('skill') ||
+                      phase.title.toLowerCase().includes('foundation')
+                  )
+                ).toBe(true);
                 break;
 
               case 'workshop':
                 // Should focus on specific learning outcomes
-                expect(roadmap.phases.some(phase =>
-                  phase.title.toLowerCase().includes('learn') ||
-                  phase.title.toLowerCase().includes('foundation')
-                )).toBe(true);
+                expect(
+                  roadmap.phases.some(
+                    phase =>
+                      phase.title.toLowerCase().includes('learn') ||
+                      phase.title.toLowerCase().includes('foundation')
+                  )
+                ).toBe(true);
                 break;
             }
 
             // All types should have practical components
-            expect(roadmap.phases.some(phase =>
-              phase.tasks.some(task => task.type === 'practice' || task.type === 'project')
-            )).toBe(true);
+            expect(
+              roadmap.phases.some(phase =>
+                phase.tasks.some(
+                  task => task.type === 'practice' || task.type === 'project'
+                )
+              )
+            ).toBe(true);
           }
         }
       ),
@@ -316,7 +408,11 @@ describe('Property Test: AI Roadmap Generation', () => {
             email: 'test@example.com',
             name: 'Test User',
             location: { city: 'Mumbai', state: 'Maharashtra', tier: 2 },
-            academic: { institution: 'Test Uni', degree: 'Computer Science', year: 2 },
+            academic: {
+              institution: 'Test Uni',
+              degree: 'Computer Science',
+              year: 2,
+            },
             skills: {
               technical: ['JavaScript'],
               domains: ['Web Development'],
@@ -345,7 +441,9 @@ describe('Property Test: AI Roadmap Generation', () => {
             type: 'hackathon',
             organizerName: 'AI Corp',
             requiredSkills: ['Python', 'Machine Learning', 'TensorFlow'],
-            applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            applicationDeadline: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000
+            ),
           };
 
           mockPrisma.opportunity.findUnique.mockResolvedValue(opportunity);
@@ -367,10 +465,13 @@ describe('Property Test: AI Roadmap Generation', () => {
                 // Should have more foundational content and longer duration
                 expect(roadmap.estimatedDuration).toBeGreaterThanOrEqual(21);
                 expect(skillGaps.length).toBeGreaterThan(0); // Should have skill gaps
-                expect(roadmap.phases.some(phase =>
-                  phase.title.toLowerCase().includes('foundation') ||
-                  phase.title.toLowerCase().includes('basic')
-                )).toBe(true);
+                expect(
+                  roadmap.phases.some(
+                    phase =>
+                      phase.title.toLowerCase().includes('foundation') ||
+                      phase.title.toLowerCase().includes('basic')
+                  )
+                ).toBe(true);
                 break;
 
               case 'intermediate':
@@ -382,17 +483,24 @@ describe('Property Test: AI Roadmap Generation', () => {
               case 'advanced':
                 // Should have shorter duration and focus on specific skills
                 expect(roadmap.estimatedDuration).toBeLessThanOrEqual(35);
-                expect(roadmap.phases.some(phase =>
-                  phase.title.toLowerCase().includes('advanced') ||
-                  phase.title.toLowerCase().includes('specific')
-                )).toBe(true);
+                expect(
+                  roadmap.phases.some(
+                    phase =>
+                      phase.title.toLowerCase().includes('advanced') ||
+                      phase.title.toLowerCase().includes('specific')
+                  )
+                ).toBe(true);
                 break;
             }
 
             // All levels should have practical application
-            expect(roadmap.phases.some(phase =>
-              phase.tasks.some(task => task.type === 'project' || task.type === 'practice')
-            )).toBe(true);
+            expect(
+              roadmap.phases.some(phase =>
+                phase.tasks.some(
+                  task => task.type === 'project' || task.type === 'practice'
+                )
+              )
+            ).toBe(true);
           }
         }
       ),
@@ -439,7 +547,12 @@ describe('Property Test: AI Roadmap Generation', () => {
           title: 'Complex AI Challenge',
           type: 'hackathon',
           organizerName: 'AI Corp',
-          requiredSkills: ['Python', 'TensorFlow', 'Deep Learning', 'Computer Vision'],
+          requiredSkills: [
+            'Python',
+            'TensorFlow',
+            'Deep Learning',
+            'Computer Vision',
+          ],
           applicationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Very short deadline
         },
       },
@@ -450,9 +563,22 @@ describe('Property Test: AI Roadmap Generation', () => {
           email: 'edge2@example.com',
           name: 'Edge User 2',
           location: { city: 'Bangalore', state: 'Karnataka', tier: 2 },
-          academic: { institution: 'Test', degree: 'Computer Science', year: 4 },
+          academic: {
+            institution: 'Test',
+            degree: 'Computer Science',
+            year: 4,
+          },
           skills: {
-            technical: ['JavaScript', 'Python', 'Java', 'React', 'Node.js', 'Machine Learning', 'AI', 'Blockchain'],
+            technical: [
+              'JavaScript',
+              'Python',
+              'Java',
+              'React',
+              'Node.js',
+              'Machine Learning',
+              'AI',
+              'Blockchain',
+            ],
             domains: ['Web Development', 'AI/ML', 'Blockchain'],
             proficiencyLevel: 'advanced' as const,
           },

@@ -7,14 +7,11 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { createClient } from 'redis';
+import { env, validateEnv } from '../lib/env';
 import {
-    env,
-    validateEnv
-} from '../lib/env';
-import {
-    getSecretsAudit,
-    secretsManager,
-    validateAllSecrets,
+  getSecretsAudit,
+  secretsManager,
+  validateAllSecrets,
 } from '../lib/secrets';
 
 interface ValidationResult {

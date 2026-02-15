@@ -142,11 +142,13 @@ class Logger {
         level: LogLevel[entry.level],
         message: entry.message,
         context: entry.context,
-        error: entry.error ? {
-          name: entry.error.name,
-          message: entry.error.message,
-          stack: entry.error.stack,
-        } : undefined,
+        error: entry.error
+          ? {
+              name: entry.error.name,
+              message: entry.error.message,
+              stack: entry.error.stack,
+            }
+          : undefined,
         userId: entry.userId,
         sessionId: entry.sessionId,
         requestId: entry.requestId,
@@ -164,7 +166,7 @@ class Logger {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.LOGGING_API_KEY}`,
+            Authorization: `Bearer ${process.env.LOGGING_API_KEY}`,
           },
           body: JSON.stringify(logData),
         });
@@ -253,7 +255,12 @@ class Logger {
     });
   }
 
-  logSearchQuery(query: string, resultCount: number, duration: number, userId?: string) {
+  logSearchQuery(
+    query: string,
+    resultCount: number,
+    duration: number,
+    userId?: string
+  ) {
     this.info('Search Query', {
       query,
       resultCount,
@@ -273,7 +280,12 @@ class Logger {
     });
   }
 
-  logCacheOperation(operation: string, key: string, hit: boolean, duration?: number) {
+  logCacheOperation(
+    operation: string,
+    key: string,
+    hit: boolean,
+    duration?: number
+  ) {
     this.debug('Cache Operation', {
       operation,
       key,
@@ -284,22 +296,18 @@ class Logger {
   }
 
   // Get recent logs
-  getRecentLogs(count: number = 100): LogEntry[] {
+  getRecentLogs(count = 100): LogEntry[] {
     return this.logs.slice(-count);
   }
 
   // Get logs by level
-  getLogsByLevel(level: LogLevel, count: number = 100): LogEntry[] {
-    return this.logs
-      .filter(log => log.level === level)
-      .slice(-count);
+  getLogsByLevel(level: LogLevel, count = 100): LogEntry[] {
+    return this.logs.filter(log => log.level === level).slice(-count);
   }
 
   // Get logs by component
-  getLogsByComponent(component: string, count: number = 100): LogEntry[] {
-    return this.logs
-      .filter(log => log.component === component)
-      .slice(-count);
+  getLogsByComponent(component: string, count = 100): LogEntry[] {
+    return this.logs.filter(log => log.component === component).slice(-count);
   }
 
   // Clear logs
@@ -330,12 +338,17 @@ class PerformanceMonitor {
 
     const name = timerId.split('_')[0];
     this.recordMetric(name, duration, 'ms', tags);
-    
+
     return duration;
   }
 
   // Record a metric
-  recordMetric(name: string, value: number, unit: string, tags?: Record<string, string>) {
+  recordMetric(
+    name: string,
+    value: number,
+    unit: string,
+    tags?: Record<string, string>
+  ) {
     const metric: PerformanceMetric = {
       name,
       value,
@@ -365,7 +378,7 @@ class PerformanceMonitor {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.METRICS_API_KEY}`,
+            Authorization: `Bearer ${process.env.METRICS_API_KEY}`,
           },
           body: JSON.stringify({
             ...metric,
@@ -380,14 +393,12 @@ class PerformanceMonitor {
   }
 
   // Get metrics by name
-  getMetrics(name: string, limit: number = 100): PerformanceMetric[] {
-    return this.metrics
-      .filter(metric => metric.name === name)
-      .slice(-limit);
+  getMetrics(name: string, limit = 100): PerformanceMetric[] {
+    return this.metrics.filter(metric => metric.name === name).slice(-limit);
   }
 
   // Get average value for a metric
-  getAverageMetric(name: string, timeWindowMs: number = 300000): number {
+  getAverageMetric(name: string, timeWindowMs = 300000): number {
     const cutoff = new Date(Date.now() - timeWindowMs);
     const recentMetrics = this.metrics.filter(
       metric => metric.name === name && metric.timestamp >= cutoff
@@ -400,7 +411,11 @@ class PerformanceMonitor {
   }
 
   // Get percentile for a metric
-  getPercentile(name: string, percentile: number, timeWindowMs: number = 300000): number {
+  getPercentile(
+    name: string,
+    percentile: number,
+    timeWindowMs = 300000
+  ): number {
     const cutoff = new Date(Date.now() - timeWindowMs);
     const recentMetrics = this.metrics
       .filter(metric => metric.name === name && metric.timestamp >= cutoff)
@@ -422,7 +437,12 @@ class PerformanceMonitor {
 class ApplicationMonitor {
   private metrics: ApplicationMetrics = {
     requests: { total: 0, successful: 0, failed: 0, averageResponseTime: 0 },
-    database: { connections: 0, queries: 0, slowQueries: 0, averageQueryTime: 0 },
+    database: {
+      connections: 0,
+      queries: 0,
+      slowQueries: 0,
+      averageQueryTime: 0,
+    },
     cache: { hits: 0, misses: 0, hitRate: 0 },
     search: { queries: 0, averageResponseTime: 0, slowQueries: 0 },
     errors: { total: 0, byType: {} },
@@ -447,12 +467,13 @@ class ApplicationMonitor {
       this.responseTimes = this.responseTimes.slice(-1000);
     }
 
-    this.metrics.requests.averageResponseTime = 
-      this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length;
+    this.metrics.requests.averageResponseTime =
+      this.responseTimes.reduce((sum, time) => sum + time, 0) /
+      this.responseTimes.length;
   }
 
   // Record database metrics
-  recordDatabaseQuery(queryTime: number, isSlow: boolean = false) {
+  recordDatabaseQuery(queryTime: number, isSlow = false) {
     this.metrics.database.queries++;
     if (isSlow) {
       this.metrics.database.slowQueries++;
@@ -463,8 +484,9 @@ class ApplicationMonitor {
       this.queryTimes = this.queryTimes.slice(-1000);
     }
 
-    this.metrics.database.averageQueryTime = 
-      this.queryTimes.reduce((sum, time) => sum + time, 0) / this.queryTimes.length;
+    this.metrics.database.averageQueryTime =
+      this.queryTimes.reduce((sum, time) => sum + time, 0) /
+      this.queryTimes.length;
   }
 
   // Record cache metrics
@@ -476,11 +498,12 @@ class ApplicationMonitor {
     }
 
     const total = this.metrics.cache.hits + this.metrics.cache.misses;
-    this.metrics.cache.hitRate = total > 0 ? (this.metrics.cache.hits / total) * 100 : 0;
+    this.metrics.cache.hitRate =
+      total > 0 ? (this.metrics.cache.hits / total) * 100 : 0;
   }
 
   // Record search metrics
-  recordSearchQuery(responseTime: number, isSlow: boolean = false) {
+  recordSearchQuery(responseTime: number, isSlow = false) {
     this.metrics.search.queries++;
     if (isSlow) {
       this.metrics.search.slowQueries++;
@@ -491,14 +514,16 @@ class ApplicationMonitor {
       this.searchTimes = this.searchTimes.slice(-1000);
     }
 
-    this.metrics.search.averageResponseTime = 
-      this.searchTimes.reduce((sum, time) => sum + time, 0) / this.searchTimes.length;
+    this.metrics.search.averageResponseTime =
+      this.searchTimes.reduce((sum, time) => sum + time, 0) /
+      this.searchTimes.length;
   }
 
   // Record error
   recordError(errorType: string) {
     this.metrics.errors.total++;
-    this.metrics.errors.byType[errorType] = (this.metrics.errors.byType[errorType] || 0) + 1;
+    this.metrics.errors.byType[errorType] =
+      (this.metrics.errors.byType[errorType] || 0) + 1;
   }
 
   // Update user metrics
@@ -521,7 +546,12 @@ class ApplicationMonitor {
   resetMetrics() {
     this.metrics = {
       requests: { total: 0, successful: 0, failed: 0, averageResponseTime: 0 },
-      database: { connections: 0, queries: 0, slowQueries: 0, averageQueryTime: 0 },
+      database: {
+        connections: 0,
+        queries: 0,
+        slowQueries: 0,
+        averageQueryTime: 0,
+      },
       cache: { hits: 0, misses: 0, hitRate: 0 },
       search: { queries: 0, averageResponseTime: 0, slowQueries: 0 },
       errors: { total: 0, byType: {} },
@@ -540,7 +570,10 @@ class ApplicationMonitor {
   } {
     const checks = {
       responseTime: this.metrics.requests.averageResponseTime < 1000, // < 1s
-      errorRate: (this.metrics.requests.failed / Math.max(this.metrics.requests.total, 1)) < 0.05, // < 5%
+      errorRate:
+        this.metrics.requests.failed /
+          Math.max(this.metrics.requests.total, 1) <
+        0.05, // < 5%
       databasePerformance: this.metrics.database.averageQueryTime < 500, // < 500ms
       cacheHitRate: this.metrics.cache.hitRate > 70, // > 70%
       searchPerformance: this.metrics.search.averageResponseTime < 2000, // < 2s
@@ -574,7 +607,8 @@ export const applicationMonitor = new ApplicationMonitor();
 // Monitoring middleware for Express
 export function createMonitoringMiddleware() {
   return (req: any, res: any, next: any) => {
-    const requestId = req.headers['x-request-id'] || `req_${Date.now()}_${Math.random()}`;
+    const requestId =
+      req.headers['x-request-id'] || `req_${Date.now()}_${Math.random()}`;
     const startTime = performance.now();
 
     // Add request ID to request object
@@ -585,7 +619,7 @@ export function createMonitoringMiddleware() {
 
     // Override res.end to capture response
     const originalEnd = res.end;
-    res.end = function(...args: any[]) {
+    res.end = function (...args: any[]) {
       const duration = performance.now() - startTime;
       const success = res.statusCode < 400;
 
@@ -610,7 +644,7 @@ export function createMonitoringMiddleware() {
 export function createErrorMonitoringMiddleware() {
   return (error: Error, req: any, res: any, next: any) => {
     const requestId = req.requestId || 'unknown';
-    
+
     // Log error
     logger.error('Unhandled request error', error, {
       requestId,

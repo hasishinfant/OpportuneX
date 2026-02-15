@@ -33,7 +33,8 @@ By using OpportuneX, you consent to the data practices described in this policy.
         },
         {
           title: '2. Information We Collect',
-          content: 'We collect several types of information to provide and improve our services:',
+          content:
+            'We collect several types of information to provide and improve our services:',
           subsections: [
             {
               title: '2.1 Personal Information',
@@ -104,7 +105,8 @@ By using OpportuneX, you consent to the data practices described in this policy.
         },
         {
           title: '4. Legal Basis for Processing (GDPR)',
-          content: 'For users in the European Union, we process your data based on:',
+          content:
+            'For users in the European Union, we process your data based on:',
           subsections: [
             {
               title: '4.1 Consent',
@@ -136,7 +138,8 @@ By using OpportuneX, you consent to the data practices described in this policy.
         },
         {
           title: '5. Information Sharing and Disclosure',
-          content: 'We may share your information in the following circumstances:',
+          content:
+            'We may share your information in the following circumstances:',
           subsections: [
             {
               title: '5.1 Service Providers',
@@ -184,11 +187,13 @@ However, no method of transmission over the internet is 100% secure. We cannot g
         },
         {
           title: '7. Data Retention',
-          content: 'We retain your information for different periods based on data type:',
+          content:
+            'We retain your information for different periods based on data type:',
           subsections: [
             {
               title: '7.1 Account Data',
-              content: 'Retained until you delete your account or request deletion',
+              content:
+                'Retained until you delete your account or request deletion',
             },
             {
               title: '7.2 Search History',
@@ -200,17 +205,20 @@ However, no method of transmission over the internet is 100% secure. We cannot g
             },
             {
               title: '7.4 Analytics Data',
-              content: 'Anonymized data retained for 2 years for service improvement',
+              content:
+                'Anonymized data retained for 2 years for service improvement',
             },
             {
               title: '7.5 Legal Records',
-              content: 'Consent records and audit logs retained for 7 years as required by law',
+              content:
+                'Consent records and audit logs retained for 7 years as required by law',
             },
           ],
         },
         {
           title: '8. Your Rights and Choices',
-          content: 'You have the following rights regarding your personal information:',
+          content:
+            'You have the following rights regarding your personal information:',
           subsections: [
             {
               title: '8.1 Access and Portability',
@@ -274,7 +282,7 @@ We only transfer data to countries with adequate data protection laws or appropr
           `,
         },
         {
-          title: '11. Children\'s Privacy',
+          title: "11. Children's Privacy",
           content: `
 OpportuneX is designed for students who are typically 18 years or older. We do not knowingly collect personal information from children under 13 (or 16 in the EU).
 
@@ -353,7 +361,8 @@ OpportuneX is an AI-powered platform that helps students discover and access hac
         },
         {
           title: '3. User Accounts and Registration',
-          content: 'To use certain features of the Service, you must create an account:',
+          content:
+            'To use certain features of the Service, you must create an account:',
           subsections: [
             {
               title: '3.1 Account Creation',
@@ -377,7 +386,8 @@ OpportuneX is an AI-powered platform that helps students discover and access hac
         },
         {
           title: '4. Acceptable Use Policy',
-          content: 'You agree to use the Service responsibly and in compliance with these Terms:',
+          content:
+            'You agree to use the Service responsibly and in compliance with these Terms:',
           subsections: [
             {
               title: '4.1 Permitted Uses',
@@ -404,7 +414,8 @@ OpportuneX is an AI-powered platform that helps students discover and access hac
         },
         {
           title: '5. Content and Intellectual Property',
-          content: 'Rights and responsibilities regarding content on the Service:',
+          content:
+            'Rights and responsibilities regarding content on the Service:',
           subsections: [
             {
               title: '5.1 Your Content',
@@ -598,25 +609,29 @@ OpportuneX uses cookies and similar technologies to provide and improve our serv
           cookieTypes: [
             {
               name: 'Essential Cookies',
-              purpose: 'Required for basic website functionality, authentication, and security',
+              purpose:
+                'Required for basic website functionality, authentication, and security',
               duration: 'Session or up to 1 year',
               essential: true,
             },
             {
               name: 'Preference Cookies',
-              purpose: 'Remember your settings, language preferences, and customizations',
+              purpose:
+                'Remember your settings, language preferences, and customizations',
               duration: 'Up to 1 year',
               essential: false,
             },
             {
               name: 'Analytics Cookies',
-              purpose: 'Help us understand how you use the website to improve our services',
+              purpose:
+                'Help us understand how you use the website to improve our services',
               duration: 'Up to 2 years',
               essential: false,
             },
             {
               name: 'Marketing Cookies',
-              purpose: 'Used to deliver relevant advertisements and track campaign effectiveness',
+              purpose:
+                'Used to deliver relevant advertisements and track campaign effectiveness',
               duration: 'Up to 1 year',
               essential: false,
             },
@@ -676,54 +691,62 @@ Last updated: ${new Date().toISOString().split('T')[0]}
   } {
     return {
       title: 'Privacy Preferences',
-      description: 'Please review and customize your privacy preferences. You can change these settings at any time.',
+      description:
+        'Please review and customize your privacy preferences. You can change these settings at any time.',
       consentItems: [
         {
           id: 'essential_services',
           title: 'Essential Services',
-          description: 'Required for basic platform functionality, account management, and security.',
+          description:
+            'Required for basic platform functionality, account management, and security.',
           required: true,
           lawfulBasis: 'contractual_necessity',
         },
         {
           id: 'personalized_recommendations',
           title: 'Personalized Recommendations',
-          description: 'Use your profile and search history to provide relevant opportunity recommendations.',
+          description:
+            'Use your profile and search history to provide relevant opportunity recommendations.',
           required: false,
           lawfulBasis: 'consent',
         },
         {
           id: 'ai_roadmap_generation',
           title: 'AI Roadmap Generation',
-          description: 'Generate personalized preparation roadmaps using AI based on your skills and goals.',
+          description:
+            'Generate personalized preparation roadmaps using AI based on your skills and goals.',
           required: false,
           lawfulBasis: 'consent',
         },
         {
           id: 'email_notifications',
           title: 'Email Notifications',
-          description: 'Receive email notifications about new opportunities, deadlines, and platform updates.',
+          description:
+            'Receive email notifications about new opportunities, deadlines, and platform updates.',
           required: false,
           lawfulBasis: 'consent',
         },
         {
           id: 'sms_notifications',
           title: 'SMS Notifications',
-          description: 'Receive SMS notifications for urgent deadlines and important updates.',
+          description:
+            'Receive SMS notifications for urgent deadlines and important updates.',
           required: false,
           lawfulBasis: 'consent',
         },
         {
           id: 'analytics_improvement',
           title: 'Analytics and Improvement',
-          description: 'Help us improve the platform by analyzing usage patterns (anonymized data).',
+          description:
+            'Help us improve the platform by analyzing usage patterns (anonymized data).',
           required: false,
           lawfulBasis: 'legitimate_interests',
         },
         {
           id: 'marketing_communications',
           title: 'Marketing Communications',
-          description: 'Receive promotional content about new features, partnerships, and educational resources.',
+          description:
+            'Receive promotional content about new features, partnerships, and educational resources.',
           required: false,
           lawfulBasis: 'consent',
         },

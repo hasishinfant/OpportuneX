@@ -8,7 +8,7 @@ export interface OpportunityAlert {
   name: string;
   description?: string;
   criteria: AlertCriteria;
-  channels: ('email' | 'sms' | 'in_app' | 'push')[];
+  channels: Array<'email' | 'sms' | 'in_app' | 'push'>;
   frequency: 'immediate' | 'daily' | 'weekly';
   active: boolean;
   lastTriggered?: Date;
@@ -20,9 +20,9 @@ export interface OpportunityAlert {
 export interface AlertCriteria {
   keywords?: string[];
   skills?: string[];
-  opportunityTypes?: ('hackathon' | 'internship' | 'workshop')[];
-  organizerTypes?: ('corporate' | 'startup' | 'government' | 'academic')[];
-  modes?: ('online' | 'offline' | 'hybrid')[];
+  opportunityTypes?: Array<'hackathon' | 'internship' | 'workshop'>;
+  organizerTypes?: Array<'corporate' | 'startup' | 'government' | 'academic'>;
+  modes?: Array<'online' | 'offline' | 'hybrid'>;
   locations?: string[];
   minStipend?: number;
   maxStipend?: number;
@@ -61,16 +61,22 @@ export interface OpportunityMatch {
 const alertCriteriaSchema = z.object({
   keywords: z.array(z.string()).optional(),
   skills: z.array(z.string()).optional(),
-  opportunityTypes: z.array(z.enum(['hackathon', 'internship', 'workshop'])).optional(),
-  organizerTypes: z.array(z.enum(['corporate', 'startup', 'government', 'academic'])).optional(),
+  opportunityTypes: z
+    .array(z.enum(['hackathon', 'internship', 'workshop']))
+    .optional(),
+  organizerTypes: z
+    .array(z.enum(['corporate', 'startup', 'government', 'academic']))
+    .optional(),
   modes: z.array(z.enum(['online', 'offline', 'hybrid'])).optional(),
   locations: z.array(z.string()).optional(),
   minStipend: z.number().min(0).optional(),
   maxStipend: z.number().min(0).optional(),
-  deadlineRange: z.object({
-    min: z.number().min(0),
-    max: z.number().min(0),
-  }).optional(),
+  deadlineRange: z
+    .object({
+      min: z.number().min(0),
+      max: z.number().min(0),
+    })
+    .optional(),
   excludeKeywords: z.array(z.string()).optional(),
 });
 
@@ -99,7 +105,7 @@ export class OpportunityAlertsService {
     name: string;
     description?: string;
     criteria: AlertCriteria;
-    channels: ('email' | 'sms' | 'in_app' | 'push')[];
+    channels: Array<'email' | 'sms' | 'in_app' | 'push'>;
     frequency?: 'immediate' | 'daily' | 'weekly';
   }): Promise<OpportunityAlert> {
     // Validate input
@@ -121,29 +127,40 @@ export class OpportunityAlertsService {
 
     this.alerts.set(alert.id, alert);
     this.matches.set(alert.id, []);
-    
+
     // TODO: Store in database
-    console.log(`Created opportunity alert ${alert.id} for user ${params.userId}`);
-    
+    console.log(
+      `Created opportunity alert ${alert.id} for user ${params.userId}`
+    );
+
     return alert;
   }
 
   // Get user's alerts
-  async getUserAlerts(userId: string, options: {
-    active?: boolean;
-  } = {}): Promise<OpportunityAlert[]> {
-    let userAlerts = Array.from(this.alerts.values())
-      .filter(alert => alert.userId === userId);
+  async getUserAlerts(
+    userId: string,
+    options: {
+      active?: boolean;
+    } = {}
+  ): Promise<OpportunityAlert[]> {
+    let userAlerts = Array.from(this.alerts.values()).filter(
+      alert => alert.userId === userId
+    );
 
     if (options.active !== undefined) {
       userAlerts = userAlerts.filter(alert => alert.active === options.active);
     }
 
-    return userAlerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return userAlerts.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }
 
   // Get alert by ID
-  async getAlert(alertId: string, userId: string): Promise<OpportunityAlert | null> {
+  async getAlert(
+    alertId: string,
+    userId: string
+  ): Promise<OpportunityAlert | null> {
     const alert = this.alerts.get(alertId);
     if (!alert || alert.userId !== userId) {
       return null;
@@ -152,21 +169,26 @@ export class OpportunityAlertsService {
   }
 
   // Update alert
-  async updateAlert(alertId: string, userId: string, updates: {
-    name?: string;
-    description?: string;
-    criteria?: Partial<AlertCriteria>;
-    channels?: ('email' | 'sms' | 'in_app' | 'push')[];
-    frequency?: 'immediate' | 'daily' | 'weekly';
-    active?: boolean;
-  }): Promise<OpportunityAlert | null> {
+  async updateAlert(
+    alertId: string,
+    userId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      criteria?: Partial<AlertCriteria>;
+      channels?: Array<'email' | 'sms' | 'in_app' | 'push'>;
+      frequency?: 'immediate' | 'daily' | 'weekly';
+      active?: boolean;
+    }
+  ): Promise<OpportunityAlert | null> {
     const alert = this.alerts.get(alertId);
     if (!alert || alert.userId !== userId) {
       return null;
     }
 
     if (updates.name) alert.name = updates.name;
-    if (updates.description !== undefined) alert.description = updates.description;
+    if (updates.description !== undefined)
+      alert.description = updates.description;
     if (updates.criteria) {
       alert.criteria = { ...alert.criteria, ...updates.criteria };
     }
@@ -192,15 +214,17 @@ export class OpportunityAlertsService {
 
     this.alerts.delete(alertId);
     this.matches.delete(alertId);
-    
+
     // TODO: Delete from database
     console.log(`Deleted alert ${alertId}`);
-    
+
     return true;
   }
 
   // Check opportunities against alerts
-  async checkOpportunityAgainstAlerts(opportunity: OpportunityMatch['opportunity']): Promise<OpportunityMatch[]> {
+  async checkOpportunityAgainstAlerts(
+    opportunity: OpportunityMatch['opportunity']
+  ): Promise<OpportunityMatch[]> {
     const matches: OpportunityMatch[] = [];
 
     for (const alert of this.alerts.values()) {
@@ -208,8 +232,11 @@ export class OpportunityAlertsService {
 
       const matchScore = this.calculateMatchScore(opportunity, alert.criteria);
       if (matchScore > 0) {
-        const matchedCriteria = this.getMatchedCriteria(opportunity, alert.criteria);
-        
+        const matchedCriteria = this.getMatchedCriteria(
+          opportunity,
+          alert.criteria
+        );
+
         const match: OpportunityMatch = {
           alertId: alert.id,
           opportunityId: opportunity.id,
@@ -220,7 +247,7 @@ export class OpportunityAlertsService {
         };
 
         matches.push(match);
-        
+
         // Store match
         const alertMatches = this.matches.get(alert.id) || [];
         alertMatches.push(match);
@@ -243,16 +270,20 @@ export class OpportunityAlertsService {
   }
 
   // Calculate match score between opportunity and criteria
-  private calculateMatchScore(opportunity: OpportunityMatch['opportunity'], criteria: AlertCriteria): number {
+  private calculateMatchScore(
+    opportunity: OpportunityMatch['opportunity'],
+    criteria: AlertCriteria
+  ): number {
     let score = 0;
     let maxScore = 0;
 
     // Keywords matching
     if (criteria.keywords && criteria.keywords.length > 0) {
       maxScore += 30;
-      const keywordMatches = criteria.keywords.filter(keyword =>
-        opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        opportunity.description.toLowerCase().includes(keyword.toLowerCase())
+      const keywordMatches = criteria.keywords.filter(
+        keyword =>
+          opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          opportunity.description.toLowerCase().includes(keyword.toLowerCase())
       );
       score += (keywordMatches.length / criteria.keywords.length) * 30;
     }
@@ -261,7 +292,7 @@ export class OpportunityAlertsService {
     if (criteria.skills && criteria.skills.length > 0) {
       maxScore += 25;
       const skillMatches = criteria.skills.filter(skill =>
-        opportunity.skills.some(oppSkill => 
+        opportunity.skills.some(oppSkill =>
           oppSkill.toLowerCase().includes(skill.toLowerCase())
         )
       );
@@ -293,7 +324,11 @@ export class OpportunityAlertsService {
     }
 
     // Location matching
-    if (criteria.locations && criteria.locations.length > 0 && opportunity.location) {
+    if (
+      criteria.locations &&
+      criteria.locations.length > 0 &&
+      opportunity.location
+    ) {
       maxScore += 15;
       const locationMatches = criteria.locations.some(location =>
         opportunity.location!.toLowerCase().includes(location.toLowerCase())
@@ -310,18 +345,21 @@ export class OpportunityAlertsService {
       const daysUntilDeadline = Math.ceil(
         (opportunity.deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
       );
-      
-      if (daysUntilDeadline >= criteria.deadlineRange.min && 
-          daysUntilDeadline <= criteria.deadlineRange.max) {
+
+      if (
+        daysUntilDeadline >= criteria.deadlineRange.min &&
+        daysUntilDeadline <= criteria.deadlineRange.max
+      ) {
         score += 10;
       }
     }
 
     // Exclude keywords (negative scoring)
     if (criteria.excludeKeywords && criteria.excludeKeywords.length > 0) {
-      const excludeMatches = criteria.excludeKeywords.filter(keyword =>
-        opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        opportunity.description.toLowerCase().includes(keyword.toLowerCase())
+      const excludeMatches = criteria.excludeKeywords.filter(
+        keyword =>
+          opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          opportunity.description.toLowerCase().includes(keyword.toLowerCase())
       );
       if (excludeMatches.length > 0) {
         return 0; // Exclude this opportunity
@@ -333,13 +371,17 @@ export class OpportunityAlertsService {
   }
 
   // Get matched criteria for an opportunity
-  private getMatchedCriteria(opportunity: OpportunityMatch['opportunity'], criteria: AlertCriteria): string[] {
+  private getMatchedCriteria(
+    opportunity: OpportunityMatch['opportunity'],
+    criteria: AlertCriteria
+  ): string[] {
     const matched: string[] = [];
 
     if (criteria.keywords) {
-      const keywordMatches = criteria.keywords.filter(keyword =>
-        opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        opportunity.description.toLowerCase().includes(keyword.toLowerCase())
+      const keywordMatches = criteria.keywords.filter(
+        keyword =>
+          opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          opportunity.description.toLowerCase().includes(keyword.toLowerCase())
       );
       if (keywordMatches.length > 0) {
         matched.push(`Keywords: ${keywordMatches.join(', ')}`);
@@ -348,7 +390,7 @@ export class OpportunityAlertsService {
 
     if (criteria.skills) {
       const skillMatches = criteria.skills.filter(skill =>
-        opportunity.skills.some(oppSkill => 
+        opportunity.skills.some(oppSkill =>
           oppSkill.toLowerCase().includes(skill.toLowerCase())
         )
       );
@@ -382,12 +424,16 @@ export class OpportunityAlertsService {
   }
 
   // Send alert notification
-  private async sendAlertNotification(alert: OpportunityAlert, matches: OpportunityMatch[]): Promise<void> {
+  private async sendAlertNotification(
+    alert: OpportunityAlert,
+    matches: OpportunityMatch[]
+  ): Promise<void> {
     if (matches.length === 0) return;
 
-    const title = matches.length === 1 
-      ? `New Opportunity Alert: ${matches[0].opportunity.title}`
-      : `${matches.length} New Opportunities Match Your Alert`;
+    const title =
+      matches.length === 1
+        ? `New Opportunity Alert: ${matches[0].opportunity.title}`
+        : `${matches.length} New Opportunities Match Your Alert`;
 
     let message: string;
     if (matches.length === 1) {
@@ -422,15 +468,21 @@ export class OpportunityAlertsService {
       priority: matches.length > 3 ? 'high' : 'normal',
     });
 
-    console.log(`Sent alert notification for ${matches.length} opportunities to user ${alert.userId}`);
+    console.log(
+      `Sent alert notification for ${matches.length} opportunities to user ${alert.userId}`
+    );
   }
 
   // Get alert matches
-  async getAlertMatches(alertId: string, userId: string, options: {
-    limit?: number;
-    offset?: number;
-    minScore?: number;
-  } = {}): Promise<{
+  async getAlertMatches(
+    alertId: string,
+    userId: string,
+    options: {
+      limit?: number;
+      offset?: number;
+      minScore?: number;
+    } = {}
+  ): Promise<{
     matches: OpportunityMatch[];
     total: number;
   }> {
@@ -457,7 +509,7 @@ export class OpportunityAlertsService {
     const total = matches.length;
     const offset = options.offset || 0;
     const limit = options.limit || 20;
-    
+
     const paginatedMatches = matches.slice(offset, offset + limit);
 
     return {
@@ -469,23 +521,27 @@ export class OpportunityAlertsService {
   // Process daily/weekly alerts
   private async processBatchAlerts(): Promise<void> {
     const now = new Date();
-    const dailyAlerts = Array.from(this.alerts.values())
-      .filter(alert => alert.active && alert.frequency === 'daily');
-    
-    const weeklyAlerts = Array.from(this.alerts.values())
-      .filter(alert => alert.active && alert.frequency === 'weekly');
+    const dailyAlerts = Array.from(this.alerts.values()).filter(
+      alert => alert.active && alert.frequency === 'daily'
+    );
+
+    const weeklyAlerts = Array.from(this.alerts.values()).filter(
+      alert => alert.active && alert.frequency === 'weekly'
+    );
 
     // Process daily alerts (send if last triggered > 24 hours ago)
     for (const alert of dailyAlerts) {
-      const shouldSend = !alert.lastTriggered || 
-        (now.getTime() - alert.lastTriggered.getTime()) > (24 * 60 * 60 * 1000);
-      
+      const shouldSend =
+        !alert.lastTriggered ||
+        now.getTime() - alert.lastTriggered.getTime() > 24 * 60 * 60 * 1000;
+
       if (shouldSend) {
         const matches = this.matches.get(alert.id) || [];
-        const recentMatches = matches.filter(match => 
-          (now.getTime() - match.createdAt.getTime()) <= (24 * 60 * 60 * 1000)
+        const recentMatches = matches.filter(
+          match =>
+            now.getTime() - match.createdAt.getTime() <= 24 * 60 * 60 * 1000
         );
-        
+
         if (recentMatches.length > 0) {
           await this.sendAlertNotification(alert, recentMatches);
         }
@@ -494,15 +550,17 @@ export class OpportunityAlertsService {
 
     // Process weekly alerts (send if last triggered > 7 days ago)
     for (const alert of weeklyAlerts) {
-      const shouldSend = !alert.lastTriggered || 
-        (now.getTime() - alert.lastTriggered.getTime()) > (7 * 24 * 60 * 60 * 1000);
-      
+      const shouldSend =
+        !alert.lastTriggered ||
+        now.getTime() - alert.lastTriggered.getTime() > 7 * 24 * 60 * 60 * 1000;
+
       if (shouldSend) {
         const matches = this.matches.get(alert.id) || [];
-        const recentMatches = matches.filter(match => 
-          (now.getTime() - match.createdAt.getTime()) <= (7 * 24 * 60 * 60 * 1000)
+        const recentMatches = matches.filter(
+          match =>
+            now.getTime() - match.createdAt.getTime() <= 7 * 24 * 60 * 60 * 1000
         );
-        
+
         if (recentMatches.length > 0) {
           await this.sendAlertNotification(alert, recentMatches);
         }
@@ -513,11 +571,14 @@ export class OpportunityAlertsService {
   // Start alert processor
   private startAlertProcessor(): void {
     // Process batch alerts every hour
-    this.processingInterval = setInterval(() => {
-      this.processBatchAlerts().catch(error => {
-        console.error('Error processing batch alerts:', error);
-      });
-    }, 60 * 60 * 1000);
+    this.processingInterval = setInterval(
+      () => {
+        this.processBatchAlerts().catch(error => {
+          console.error('Error processing batch alerts:', error);
+        });
+      },
+      60 * 60 * 1000
+    );
 
     console.log('Opportunity alerts processor started');
   }
@@ -542,13 +603,13 @@ export class OpportunityAlertsService {
     topMatchingCriteria: Array<{ criteria: string; count: number }>;
   }> {
     let alerts = Array.from(this.alerts.values());
-    
+
     if (userId) {
       alerts = alerts.filter(alert => alert.userId === userId);
     }
 
     const activeAlerts = alerts.filter(alert => alert.active);
-    
+
     let totalMatches = 0;
     let totalScore = 0;
     const byFrequency: Record<string, number> = {};
@@ -558,7 +619,7 @@ export class OpportunityAlertsService {
     alerts.forEach(alert => {
       const matches = this.matches.get(alert.id) || [];
       totalMatches += matches.length;
-      
+
       matches.forEach(match => {
         totalScore += match.matchScore;
         match.matchedCriteria.forEach(criteria => {
@@ -567,14 +628,14 @@ export class OpportunityAlertsService {
       });
 
       byFrequency[alert.frequency] = (byFrequency[alert.frequency] || 0) + 1;
-      
+
       alert.channels.forEach(channel => {
         byChannel[channel] = (byChannel[channel] || 0) + 1;
       });
     });
 
     const avgMatchScore = totalMatches > 0 ? totalScore / totalMatches : 0;
-    
+
     const topMatchingCriteria = Object.entries(criteriaCount)
       .map(([criteria, count]) => ({ criteria, count }))
       .sort((a, b) => b.count - a.count)
@@ -592,12 +653,15 @@ export class OpportunityAlertsService {
   }
 
   // Create alert from user profile
-  async createAlertFromProfile(userId: string, userProfile: {
-    skills: string[];
-    interests: string[];
-    location?: string;
-    preferredTypes?: ('hackathon' | 'internship' | 'workshop')[];
-  }): Promise<OpportunityAlert> {
+  async createAlertFromProfile(
+    userId: string,
+    userProfile: {
+      skills: string[];
+      interests: string[];
+      location?: string;
+      preferredTypes?: Array<'hackathon' | 'internship' | 'workshop'>;
+    }
+  ): Promise<OpportunityAlert> {
     const criteria: AlertCriteria = {
       skills: userProfile.skills,
       keywords: userProfile.interests,

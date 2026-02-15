@@ -65,7 +65,14 @@ export interface EmailTemplate {
 export interface EmailDeliveryStatus {
   messageId: string;
   email: string;
-  status: 'queued' | 'sent' | 'delivered' | 'bounced' | 'dropped' | 'deferred' | 'blocked';
+  status:
+    | 'queued'
+    | 'sent'
+    | 'delivered'
+    | 'bounced'
+    | 'dropped'
+    | 'deferred'
+    | 'blocked';
   timestamp: Date;
   reason?: string;
   bounceType?: 'hard' | 'soft';
@@ -92,7 +99,9 @@ export class SendGridEmailService implements EmailService {
 
   // Initialize default email templates
   private initializeDefaultTemplates(): void {
-    const defaultTemplates: Omit<EmailTemplate, 'createdAt' | 'updatedAt'>[] = [
+    const defaultTemplates: Array<
+      Omit<EmailTemplate, 'createdAt' | 'updatedAt'>
+    > = [
       {
         id: 'welcome',
         name: 'Welcome Email',
@@ -235,7 +244,14 @@ export class SendGridEmailService implements EmailService {
           Unsubscribe: {{unsubscribeUrl}}
           Manage preferences: {{preferencesUrl}}
         `,
-        variables: ['name', 'count', 'opportunities', 'moreOpportunitiesUrl', 'unsubscribeUrl', 'preferencesUrl'],
+        variables: [
+          'name',
+          'count',
+          'opportunities',
+          'moreOpportunitiesUrl',
+          'unsubscribeUrl',
+          'preferencesUrl',
+        ],
         active: true,
       },
     ];
@@ -303,14 +319,16 @@ export class SendGridEmailService implements EmailService {
       }
 
       const response = await this.makeRequest('/mail/send', 'POST', email);
-      
+
       return {
         messageId: response.headers?.['x-message-id'] || 'unknown',
         status: 'sent',
       };
     } catch (error) {
       console.error('SendGrid email send error:', error);
-      throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -370,13 +388,21 @@ export class SendGridEmailService implements EmailService {
 
       // Send emails in batches to avoid rate limits
       const batchSize = 100;
-      const results: Array<{ messageId: string; status: string; recipient: string }> = [];
+      const results: Array<{
+        messageId: string;
+        status: string;
+        recipient: string;
+      }> = [];
 
       for (let i = 0; i < emails.length; i += batchSize) {
         const batch = emails.slice(i, i + batchSize);
         const batchPromises = batch.map(async (email, index) => {
           try {
-            const response = await this.makeRequest('/mail/send', 'POST', email);
+            const response = await this.makeRequest(
+              '/mail/send',
+              'POST',
+              email
+            );
             return {
               messageId: response.headers?.['x-message-id'] || 'unknown',
               status: 'sent',
@@ -413,7 +439,9 @@ export class SendGridEmailService implements EmailService {
       return results;
     } catch (error) {
       console.error('SendGrid bulk email send error:', error);
-      throw new Error(`Failed to send bulk emails: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to send bulk emails: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -421,7 +449,7 @@ export class SendGridEmailService implements EmailService {
   async processWebhookEvent(event: any): Promise<EmailDeliveryStatus | null> {
     try {
       const eventType = event.event;
-      const email = event.email;
+      const { email } = event;
       const messageId = event.sg_message_id;
       const timestamp = new Date(event.timestamp * 1000);
 
@@ -472,7 +500,9 @@ export class SendGridEmailService implements EmailService {
   }
 
   // Add custom template
-  addTemplate(template: Omit<EmailTemplate, 'createdAt' | 'updatedAt'>): EmailTemplate {
+  addTemplate(
+    template: Omit<EmailTemplate, 'createdAt' | 'updatedAt'>
+  ): EmailTemplate {
     const fullTemplate: EmailTemplate = {
       ...template,
       createdAt: new Date(),
@@ -483,7 +513,10 @@ export class SendGridEmailService implements EmailService {
   }
 
   // Process template with variables
-  processTemplate(template: EmailTemplate, variables: Record<string, any>): {
+  processTemplate(
+    template: EmailTemplate,
+    variables: Record<string, any>
+  ): {
     subject: string;
     html: string;
     text: string;
@@ -495,16 +528,24 @@ export class SendGridEmailService implements EmailService {
       });
 
       // Handle array iteration (basic Handlebars-like syntax)
-      processed = processed.replace(/\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, arrayKey, template) => {
-        const array = variables[arrayKey];
-        if (!Array.isArray(array)) return '';
-        
-        return array.map(item => {
-          return template.replace(/\{\{(\w+)\}\}/g, (itemMatch: string, itemKey: string) => {
-            return item[itemKey] || itemMatch;
-          });
-        }).join('');
-      });
+      processed = processed.replace(
+        /\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g,
+        (match, arrayKey, template) => {
+          const array = variables[arrayKey];
+          if (!Array.isArray(array)) return '';
+
+          return array
+            .map(item => {
+              return template.replace(
+                /\{\{(\w+)\}\}/g,
+                (itemMatch: string, itemKey: string) => {
+                  return item[itemKey] || itemMatch;
+                }
+              );
+            })
+            .join('');
+        }
+      );
 
       return processed;
     };
@@ -517,13 +558,17 @@ export class SendGridEmailService implements EmailService {
   }
 
   // Make HTTP request to SendGrid API
-  private async makeRequest(endpoint: string, method: string, data?: any): Promise<any> {
+  private async makeRequest(
+    endpoint: string,
+    method: string,
+    data?: any
+  ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const response = await fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
+        Authorization: `Bearer ${this.config.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: data ? JSON.stringify(data) : undefined,
@@ -531,7 +576,9 @@ export class SendGridEmailService implements EmailService {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`SendGrid API error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `SendGrid API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
     }
 
     const responseData = response.status === 202 ? {} : await response.json();
@@ -548,7 +595,10 @@ export class SendGridEmailService implements EmailService {
   }
 
   // Get delivery statistics
-  async getDeliveryStats(startDate?: Date, endDate?: Date): Promise<{
+  async getDeliveryStats(
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<{
     sent: number;
     delivered: number;
     bounced: number;

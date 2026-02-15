@@ -17,45 +17,34 @@ export class SecurityHeaders {
           "'self'",
           "'unsafe-inline'", // Required for Next.js in development
           "'unsafe-eval'", // Required for Next.js in development
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com",
-          "https://www.googletagmanager.com",
+          'https://cdn.jsdelivr.net',
+          'https://unpkg.com',
+          'https://www.googletagmanager.com',
         ],
         styleSrc: [
           "'self'",
           "'unsafe-inline'",
-          "https://fonts.googleapis.com",
-          "https://cdn.jsdelivr.net",
+          'https://fonts.googleapis.com',
+          'https://cdn.jsdelivr.net',
         ],
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com",
-          "data:",
-        ],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https:",
-          "blob:",
-        ],
-        mediaSrc: [
-          "'self'",
-          "blob:",
-        ],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        mediaSrc: ["'self'", 'blob:'],
         connectSrc: [
           "'self'",
-          "https://api.openai.com",
-          "https://speech.googleapis.com",
-          "https://api.twilio.com",
-          "wss:",
-          "ws:",
+          'https://api.openai.com',
+          'https://speech.googleapis.com',
+          'https://api.twilio.com',
+          'wss:',
+          'ws:',
         ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
-        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+        upgradeInsecureRequests:
+          process.env.NODE_ENV === 'production' ? [] : null,
       },
     },
 
@@ -63,10 +52,10 @@ export class SecurityHeaders {
     crossOriginEmbedderPolicy: false, // Disabled for compatibility
 
     // Cross-Origin Opener Policy
-    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
 
     // Cross-Origin Resource Policy
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
 
     // DNS Prefetch Control
     dnsPrefetchControl: { allow: false },
@@ -109,7 +98,7 @@ export class SecurityHeaders {
     originAgentCluster: true,
 
     // Referrer Policy
-    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 
     // X-Frame-Options
     frameguard: { action: 'deny' },
@@ -121,24 +110,31 @@ export class SecurityHeaders {
   /**
    * Custom security headers middleware
    */
-  static customSecurityHeaders = (req: Request, res: Response, next: NextFunction) => {
+  static customSecurityHeaders = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Security headers
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
+
     // Remove server information
     res.removeHeader('X-Powered-By');
     res.removeHeader('Server');
-    
+
     // Cache control for sensitive pages
     if (req.path.includes('/profile') || req.path.includes('/admin')) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.setHeader(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, private'
+      );
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
     }
-    
+
     // CORS headers for API endpoints
     if (req.path.startsWith('/api/')) {
       const allowedOrigins = [
@@ -147,18 +143,24 @@ export class SecurityHeaders {
         'http://localhost:3000',
         'http://localhost:3001',
       ].filter(Boolean);
-      
-      const origin = req.headers.origin;
+
+      const { origin } = req.headers;
       if (origin && allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
       }
-      
+
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS'
+      );
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-Requested-With, X-CSRF-Token'
+      );
       res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
     }
-    
+
     next();
   };
 
@@ -172,9 +174,10 @@ export class SecurityHeaders {
     }
 
     // Check if request is already HTTPS
-    const isHTTPS = req.secure || 
-                   req.headers['x-forwarded-proto'] === 'https' ||
-                   req.headers['x-forwarded-ssl'] === 'on';
+    const isHTTPS =
+      req.secure ||
+      req.headers['x-forwarded-proto'] === 'https' ||
+      req.headers['x-forwarded-ssl'] === 'on';
 
     if (!isHTTPS) {
       console.warn('HTTP request redirected to HTTPS:', {
@@ -218,29 +221,21 @@ export class SecurityHeaders {
         scriptSrc: [
           "'self'",
           `'nonce-${nonce}'`,
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com",
+          'https://cdn.jsdelivr.net',
+          'https://unpkg.com',
         ],
         styleSrc: [
           "'self'",
           "'unsafe-inline'", // Required for CSS-in-JS libraries
-          "https://fonts.googleapis.com",
+          'https://fonts.googleapis.com',
         ],
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com",
-        ],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https:",
-          "blob:",
-        ],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
         connectSrc: [
           "'self'",
-          "https://api.openai.com",
-          "https://speech.googleapis.com",
-          "wss:",
+          'https://api.openai.com',
+          'https://speech.googleapis.com',
+          'wss:',
         ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
@@ -254,66 +249,90 @@ export class SecurityHeaders {
   /**
    * API-specific security headers
    */
-  static apiSecurityHeaders = (req: Request, res: Response, next: NextFunction) => {
+  static apiSecurityHeaders = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // JSON-specific headers
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    
+
     // Prevent caching of API responses
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, private'
+    );
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    
+
     // API versioning header
     res.setHeader('API-Version', '1.0');
-    
+
     // Rate limiting headers (will be set by rate limiting middleware)
     res.setHeader('X-RateLimit-Limit', '100');
-    
+
     next();
   };
 
   /**
    * Security headers for file uploads
    */
-  static uploadSecurityHeaders = (req: Request, res: Response, next: NextFunction) => {
+  static uploadSecurityHeaders = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Strict CSP for upload endpoints
-    res.setHeader('Content-Security-Policy', "default-src 'none'; form-action 'self'");
-    
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'none'; form-action 'self'"
+    );
+
     // Prevent file execution
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Disposition', 'attachment');
-    
+
     next();
   };
 
   /**
    * Development-specific security headers
    */
-  static developmentHeaders = (req: Request, res: Response, next: NextFunction) => {
+  static developmentHeaders = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     if (process.env.NODE_ENV === 'development') {
       // More permissive CSP for development
-      res.setHeader('Content-Security-Policy', 
+      res.setHeader(
+        'Content-Security-Policy',
         "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: ws: wss:; " +
-        "connect-src 'self' ws: wss: http: https:;"
+          "connect-src 'self' ws: wss: http: https:;"
       );
-      
+
       // Allow hot reloading
       res.setHeader('Access-Control-Allow-Origin', '*');
     }
-    
+
     next();
   };
 
   /**
    * Security monitoring headers
    */
-  static monitoringHeaders = (req: Request, res: Response, next: NextFunction) => {
+  static monitoringHeaders = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Add request ID for tracking
-    const requestId = req.headers['x-request-id'] || 
-                     `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+    const requestId =
+      req.headers['x-request-id'] ||
+      `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     res.setHeader('X-Request-ID', requestId);
-    
+
     // Add timing information
     const startTime = Date.now();
     res.on('finish', () => {
@@ -328,7 +347,7 @@ export class SecurityHeaders {
         ip: req.ip,
       });
     });
-    
+
     next();
   };
 
@@ -358,30 +377,30 @@ export class SecurityHeaders {
  */
 export const getSecurityConfig = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   return {
     // HTTPS enforcement
     enforceHTTPS: isProduction,
-    
+
     // Strict Transport Security
     hsts: {
       maxAge: isProduction ? 31536000 : 0, // 1 year in production, disabled in dev
       includeSubDomains: isProduction,
       preload: isProduction,
     },
-    
+
     // Content Security Policy
     csp: {
       reportOnly: !isProduction, // Report-only in development
       reportUri: process.env.CSP_REPORT_URI,
     },
-    
+
     // Cookie security
     secureCookies: isProduction,
-    
+
     // CORS
     cors: {
-      origin: isProduction 
+      origin: isProduction
         ? [process.env.FRONTEND_URL, process.env.APP_URL].filter(Boolean)
         : true, // Allow all origins in development
       credentials: true,

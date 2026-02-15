@@ -32,7 +32,9 @@ const mockPrisma = {
   },
 };
 
-(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(() => mockPrisma as any);
+(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(
+  () => mockPrisma as any
+);
 
 describe('SearchService', () => {
   let searchService: SearchService;
@@ -55,7 +57,7 @@ describe('SearchService', () => {
     requirements: {
       skills: ['JavaScript', 'Python', 'Machine Learning'],
       experience: '1-2 years',
-      education: 'Bachelor\'s degree',
+      education: "Bachelor's degree",
       eligibility: ['Students', 'Professionals'],
     },
     details: {
@@ -165,7 +167,7 @@ describe('SearchService', () => {
       await searchService.indexOpportunity(mockOpportunity);
 
       const indexCall = mockElasticsearch.index.mock.calls[0][0];
-      const document = indexCall.document;
+      const { document } = indexCall;
 
       expect(document.applicationDeadline).toBe('2024-03-01T00:00:00.000Z');
       expect(document.startDate).toBe('2024-03-15T00:00:00.000Z');
@@ -176,7 +178,10 @@ describe('SearchService', () => {
   });
 
   describe('bulkIndexOpportunities', () => {
-    const mockOpportunities = [mockOpportunity, { ...mockOpportunity, id: 'opp-456' }];
+    const mockOpportunities = [
+      mockOpportunity,
+      { ...mockOpportunity, id: 'opp-456' },
+    ];
 
     it('should successfully bulk index opportunities', async () => {
       mockEsUtils.bulkIndex.mockResolvedValue({
@@ -185,12 +190,15 @@ describe('SearchService', () => {
         errors: [],
       });
 
-      const result = await searchService.bulkIndexOpportunities(mockOpportunities);
+      const result =
+        await searchService.bulkIndexOpportunities(mockOpportunities);
 
       expect(result.success).toBe(true);
       expect(result.data?.indexed).toBe(2);
       expect(result.data?.errors).toEqual([]);
-      expect(result.message).toBe('Bulk indexing completed: 2 opportunities indexed');
+      expect(result.message).toBe(
+        'Bulk indexing completed: 2 opportunities indexed'
+      );
       expect(mockEsUtils.bulkIndex).toHaveBeenCalledWith(
         'test_opportunities',
         expect.arrayContaining([
@@ -207,7 +215,8 @@ describe('SearchService', () => {
         errors: [{ id: 'opp-456', error: 'Validation failed' }],
       });
 
-      const result = await searchService.bulkIndexOpportunities(mockOpportunities);
+      const result =
+        await searchService.bulkIndexOpportunities(mockOpportunities);
 
       expect(result.success).toBe(false);
       expect(result.data?.indexed).toBe(1);
@@ -218,7 +227,8 @@ describe('SearchService', () => {
       const bulkError = new Error('Bulk operation failed');
       mockEsUtils.bulkIndex.mockRejectedValue(bulkError);
 
-      const result = await searchService.bulkIndexOpportunities(mockOpportunities);
+      const result =
+        await searchService.bulkIndexOpportunities(mockOpportunities);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to bulk index opportunities');
@@ -232,7 +242,9 @@ describe('SearchService', () => {
       const result = await searchService.removeOpportunity('opp-123');
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Opportunity removed from index successfully');
+      expect(result.message).toBe(
+        'Opportunity removed from index successfully'
+      );
       expect(mockElasticsearch.delete).toHaveBeenCalledWith({
         index: 'test_opportunities',
         id: 'opp-123',
@@ -326,14 +338,24 @@ describe('SearchService', () => {
       expect(result.data?.totalCount).toBe(1);
       expect(result.data?.opportunities[0].id).toBe('opp-123');
       expect(result.data?.opportunities[0].title).toBe('AI Hackathon 2024');
-      expect(result.data?.facets?.types).toEqual([{ name: 'hackathon', count: 5 }]);
+      expect(result.data?.facets?.types).toEqual([
+        { name: 'hackathon', count: 5 },
+      ]);
       expect(result.message).toBe('Search completed successfully');
 
       const searchCall = mockElasticsearch.search.mock.calls[0][0];
-      expect(searchCall.query.bool.must[0].multi_match.query).toBe('AI hackathon');
-      expect(searchCall.query.bool.filter).toContainEqual({ term: { type: 'hackathon' } });
-      expect(searchCall.query.bool.filter).toContainEqual({ term: { mode: 'hybrid' } });
-      expect(searchCall.query.bool.filter).toContainEqual({ terms: { requiredSkills: ['JavaScript', 'Python'] } });
+      expect(searchCall.query.bool.must[0].multi_match.query).toBe(
+        'AI hackathon'
+      );
+      expect(searchCall.query.bool.filter).toContainEqual({
+        term: { type: 'hackathon' },
+      });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        term: { mode: 'hybrid' },
+      });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        terms: { requiredSkills: ['JavaScript', 'Python'] },
+      });
     });
 
     it('should handle search without query (match all)', async () => {
@@ -628,13 +650,15 @@ describe('SearchService', () => {
     it('should handle very large search queries', async () => {
       const largeQuery = 'a'.repeat(10000);
       const requestWithLargeQuery = { query: largeQuery };
-      
+
       mockElasticsearch.search.mockResolvedValue({
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {},
       });
 
-      const result = await searchService.searchOpportunities(requestWithLargeQuery);
+      const result = await searchService.searchOpportunities(
+        requestWithLargeQuery
+      );
 
       expect(result.success).toBe(true);
       expect(mockElasticsearch.search).toHaveBeenCalled();
@@ -659,14 +683,23 @@ describe('SearchService', () => {
         aggregations: {},
       });
 
-      const result = await searchService.searchOpportunities(comprehensiveRequest);
+      const result =
+        await searchService.searchOpportunities(comprehensiveRequest);
 
       expect(result.success).toBe(true);
       const searchCall = mockElasticsearch.search.mock.calls[0][0];
-      expect(searchCall.query.bool.filter).toContainEqual({ term: { type: 'hackathon' } });
-      expect(searchCall.query.bool.filter).toContainEqual({ term: { organizerType: 'corporate' } });
-      expect(searchCall.query.bool.filter).toContainEqual({ term: { mode: 'online' } });
-      expect(searchCall.query.bool.filter).toContainEqual({ terms: { requiredSkills: ['React', 'Node.js', 'MongoDB'] } });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        term: { type: 'hackathon' },
+      });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        term: { organizerType: 'corporate' },
+      });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        term: { mode: 'online' },
+      });
+      expect(searchCall.query.bool.filter).toContainEqual({
+        terms: { requiredSkills: ['React', 'Node.js', 'MongoDB'] },
+      });
     });
   });
 });

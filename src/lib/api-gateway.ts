@@ -11,10 +11,15 @@ import { loggingMiddleware } from './middleware/logging';
 import { validateRequest } from './middleware/validation';
 import { adminRouter } from './routes/admin';
 import { aiRouter } from './routes/ai';
+import analyticsRouter from './routes/analytics';
 import { authRouter } from './routes/auth';
+import developerRouter from './routes/developer';
+import gamificationRouter from './routes/gamification';
 import { healthRouter } from './routes/health';
 import { notificationRouter } from './routes/notification';
+import oauthRouter from './routes/oauth';
 import { searchRouter } from './routes/search';
+import socialRouter from './routes/social';
 import { userRouter } from './routes/user';
 import { voiceRouter } from './routes/voice';
 
@@ -127,6 +132,9 @@ export class ApiGateway {
     // Authentication routes (no auth required)
     this.app.use(`${apiPrefix}/auth`, authRouter);
 
+    // OAuth routes (mixed auth requirements)
+    this.app.use(`${apiPrefix}/oauth`, oauthRouter);
+
     // Public routes (optional auth for personalization)
     this.app.use(`${apiPrefix}/search`, optionalAuthMiddleware, searchRouter);
 
@@ -139,9 +147,17 @@ export class ApiGateway {
       authMiddleware,
       notificationRouter
     );
+    this.app.use(`${apiPrefix}/social`, authMiddleware, socialRouter);
+    this.app.use(
+      `${apiPrefix}/gamification`,
+      authMiddleware,
+      gamificationRouter
+    );
+    this.app.use(`${apiPrefix}/developer`, authMiddleware, developerRouter);
 
     // Admin routes (admin role required)
     this.app.use(`${apiPrefix}/admin`, authMiddleware, adminRouter);
+    this.app.use(`${apiPrefix}/analytics`, authMiddleware, analyticsRouter);
 
     // API documentation route
     this.app.get(`${apiPrefix}/docs`, (req: Request, res: Response) => {
@@ -157,9 +173,15 @@ export class ApiGateway {
           voice: `${apiPrefix}/voice`,
           ai: `${apiPrefix}/ai`,
           notifications: `${apiPrefix}/notifications`,
+          social: `${apiPrefix}/social`,
+          gamification: `${apiPrefix}/gamification`,
+          analytics: `${apiPrefix}/analytics`,
           admin: `${apiPrefix}/admin`,
+          developer: `${apiPrefix}/developer`,
+          oauth: `${apiPrefix}/oauth`,
         },
         documentation: 'https://docs.opportunex.com',
+        openapi: `${apiPrefix}/openapi.yaml`,
       });
     });
 

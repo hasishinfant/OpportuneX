@@ -16,20 +16,6 @@ export const prisma =
       process.env.NODE_ENV === 'development'
         ? ['query', 'error', 'warn']
         : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
-    // Connection pooling configuration
-    __internal: {
-      engine: {
-        // Connection pool settings for better performance
-        connection_limit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-        pool_timeout: parseInt(process.env.DB_POOL_TIMEOUT || '10'),
-        schema_cache_size: parseInt(process.env.DB_SCHEMA_CACHE_SIZE || '1000'),
-      },
-    },
   });
 
 // In development, store the instance globally to prevent multiple connections

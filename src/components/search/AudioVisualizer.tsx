@@ -53,7 +53,8 @@ export function AudioVisualizer({
 
     try {
       // Create audio context and analyser
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContext =
+        window.AudioContext || (window as any).webkitAudioContext;
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
       const source = audioContext.createMediaStreamSource(audioStream);
@@ -91,12 +92,18 @@ export function AudioVisualizer({
 
         for (let i = 0; i < barCount; i++) {
           const dataIndex = i * dataStep;
-          const barHeight = (dataArrayRef.current[dataIndex] / 255) * canvas.height * 0.8;
-          
+          const barHeight =
+            (dataArrayRef.current[dataIndex] / 255) * canvas.height * 0.8;
+
           // Create gradient for bars
-          const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+          const gradient = ctx.createLinearGradient(
+            0,
+            canvas.height,
+            0,
+            canvas.height - barHeight
+          );
           gradient.addColorStop(0, barColor);
-          gradient.addColorStop(1, barColor + '80'); // Add transparency
+          gradient.addColorStop(1, `${barColor}80`); // Add transparency
 
           ctx.fillStyle = gradient;
           ctx.fillRect(
@@ -131,7 +138,12 @@ export function AudioVisualizer({
   if (!isSupported) {
     // Fallback visualization using CSS animation
     return (
-      <div className={cn('flex items-center justify-center space-x-1 h-12', className)}>
+      <div
+        className={cn(
+          'flex items-center justify-center space-x-1 h-12',
+          className
+        )}
+      >
         {Array.from({ length: Math.min(barCount, 10) }).map((_, i) => (
           <div
             key={i}

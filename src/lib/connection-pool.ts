@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from 'pg';
+import type { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { prisma } from './database';
 
 /**
@@ -34,7 +35,7 @@ class ConnectionPoolManager {
     }
 
     const url = new URL(connectionString);
-    
+
     return {
       host: url.hostname,
       port: parseInt(url.port) || 5432,
@@ -42,9 +43,11 @@ class ConnectionPoolManager {
       user: url.username,
       password: url.password,
       max: parseInt(process.env.DB_POOL_MAX || '20'), // Maximum connections
-      min: parseInt(process.env.DB_POOL_MIN || '5'),  // Minimum connections
+      min: parseInt(process.env.DB_POOL_MIN || '5'), // Minimum connections
       idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'), // 30 seconds
-      connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '10000'), // 10 seconds
+      connectionTimeoutMillis: parseInt(
+        process.env.DB_CONNECTION_TIMEOUT || '10000'
+      ), // 10 seconds
       maxUses: parseInt(process.env.DB_MAX_USES || '7500'), // Max uses per connection
     };
   }
@@ -70,17 +73,21 @@ class ConnectionPoolManager {
     // Handle pool events
     this.pool.on('connect', (client: PoolClient) => {
       console.log('✅ New database connection established');
-      
+
       // Set session configuration for optimal performance
-      client.query(`
+      client
+        .query(
+          `
         SET search_path TO public;
         SET timezone TO 'UTC';
         SET statement_timeout TO '30s';
         SET lock_timeout TO '10s';
         SET idle_in_transaction_session_timeout TO '60s';
-      `).catch(err => {
-        console.error('❌ Failed to configure database session:', err);
-      });
+      `
+        )
+        .catch(err => {
+          console.error('❌ Failed to configure database session:', err);
+        });
     });
 
     this.pool.on('error', (err: Error) => {
@@ -116,19 +123,22 @@ class ConnectionPoolManager {
   /**
    * Execute a query with automatic connection management
    */
-  public async query<T = any>(text: string, params?: any[]): Promise<T> {
+  public async query<T = any>(text: string, params?: any[]): Promise<T[]> {
     const client = await this.getClient();
     try {
       const start = Date.now();
       const result = await client.query(text, params);
       const duration = Date.now() - start;
-      
+
       // Log slow queries
       if (duration > 1000) {
-        console.warn(`🐌 Slow query detected (${duration}ms):`, text.substring(0, 100));
+        console.warn(
+          `🐌 Slow query detected (${duration}ms):`,
+          text.substring(0, 100)
+        );
       }
-      
-      return result.rows;
+
+      return result.rows as T[];
     } finally {
       client.release();
     }
@@ -137,7 +147,7 @@ class ConnectionPoolManager {
   /**
    * Execute a transaction with automatic rollback on error
    */
-  public async transaction<T>(
+  public async transaction<T = any>(
     callback: (client: PoolClient) => Promise<T>
   ): Promise<T> {
     const client = await this.getClient();
@@ -240,15 +250,17 @@ export const poolQueries = {
   /**
    * Execute a raw SQL query with connection pooling
    */
-  async raw<T = any>(query: string, params?: any[]): Promise<T> {
+  async raw<T = any>(query: string, params?: any[]): Promise<T[]> {
     return connectionPool.query<T>(query, params);
   },
 
   /**
    * Execute multiple queries in a transaction
    */
-  async batch(queries: Array<{ query: string; params?: any[] }>): Promise<any[]> {
-    return connectionPool.transaction(async (client) => {
+  async batch(
+    queries: Array<{ query: string; params?: any[] }>
+  ): Promise<any[]> {
+    return connectionPool.transaction(async client => {
       const results = [];
       for (const { query, params } of queries) {
         const result = await client.query(query, params);
@@ -270,14 +282,15 @@ export const poolQueries = {
     if (values.length === 0) return;
 
     const placeholders = values
-      .map((_, i) => 
-        `(${columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ')})`
+      .map(
+        (_, i) =>
+          `(${columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ')})`
       )
       .join(', ');
 
     const flatValues = values.flat();
     const conflictClause = onConflict ? `ON CONFLICT ${onConflict}` : '';
-    
+
     const query = `
       INSERT INTO ${table} (${columns.join(', ')})
       VALUES ${placeholders}
@@ -290,7 +303,11 @@ export const poolQueries = {
   /**
    * Optimized count query with conditions
    */
-  async count(table: string, conditions?: string, params?: any[]): Promise<number> {
+  async count(
+    table: string,
+    conditions?: string,
+    params?: any[]
+  ): Promise<number> {
     const whereClause = conditions ? `WHERE ${conditions}` : '';
     const query = `SELECT COUNT(*) as count FROM ${table} ${whereClause}`;
     const result = await connectionPool.query<{ count: string }>(query, params);

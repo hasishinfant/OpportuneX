@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "reset": "Restablecer"
+  },
+  "header": {
+    "search": "Buscar",
+    "myRoadmaps": "Mis Hojas de Ruta",
+    "profile": "Perfil",
+    "signIn": "Iniciar Sesión",
+    "getStarted": "Comenzar",
+    "analytics": "Analítica",
+    "social": "Social"
+  },
+  "home": {
+    "title": "Descubre Tu Próxima Oportunidad",
+    "subtitle": "Plataforma impulsada por IA para encontrar hackathons, pasantías y talleres adaptados para ti",
+    "searchPlaceholder": "Buscar oportunidades...",
+    "voiceSearch": "Búsqueda por Voz",
+    "featuredOpportunities": "Oportunidades Destacadas"
+  },
+  "search": {
+    "title": "Buscar Oportunidades",
+    "placeholder": "¿Qué estás buscando?",
+    "voiceSearchButton": "Usar Búsqueda por Voz",
+    "filters": "Filtros",
+    "results": "Resultados",
+    "noResults": "No se encontraron oportunidades",
+    "tryDifferentSearch": "Intenta con un término de búsqueda diferente"
+  },
+  "filters": {
+    "type": "Tipo",
+    "location": "Ubicación",
+    "skillLevel": "Nivel de Habilidad",
+    "remote": "Remoto",
+    "category": "Categoría",
+    "deadline": "Fecha Límite",
+    "clearAll": "Limpiar Todo",
+    "apply": "Aplicar Filtros"
+  },
+  "opportunity": {
+    "hackathon": "Hackathon",
+    "internship": "Pasantía",
+    "workshop": "Taller",
+    "deadline": "Fecha Límite",
+    "location": "Ubicación",
+    "remote": "Remoto",
+    "skillLevel": "Nivel de Habilidad",
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzado",
+    "viewDetails": "Ver Detalles",
+    "apply": "Aplicar Ahora",
+    "save": "Guardar"
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "personalInfo": "Información Personal",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "location": "Ubicación",
+    "skills": "Habilidades",
+    "interests": "Intereses",
+    "education": "Educación",
+    "experience": "Experiencia",
+    "preferences": "Preferencias",
+    "notifications": "Configuración de Notificaciones",
+    "language": "Idioma",
+    "theme": "Tema",
+    "saveChanges": "Guardar Cambios"
+  },
+  "roadmap": {
+    "title": "Mis Hojas de Ruta",
+    "createNew": "Crear Nueva Hoja de Ruta",
+    "inProgress": "En Progreso",
+    "completed": "Completado",
+    "viewRoadmap": "Ver Hoja de Ruta",
+    "progress": "Progreso",
+    "steps": "Pasos",
+    "resources": "Recursos"
+  },
+  "voice": {
+    "listening": "Escuchando...",
+    "processing": "Procesando...",
+    "speak": "Habla ahora",
+    "tryAgain": "Intentar de nuevo",
+    "error": "No se pudo procesar la entrada de voz",
+    "permissionDenied": "Permiso de micrófono denegado",
+    "notSupported": "Búsqueda por voz no compatible con este navegador"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "noNotifications": "Sin notificaciones",
+    "newOpportunity": "Nueva oportunidad coincide con tus intereses",
+    "deadlineReminder": "Fecha límite próxima",
+    "applicationUpdate": "Estado de aplicación actualizado"
+  },
+  "footer": {
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "help": "Centro de Ayuda"
+  }
+}

@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5001';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const response = await fetch(`${BACKEND_URL}/api/roadmap`, {
       method: 'POST',
       headers: {
@@ -16,7 +17,9 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `Backend responded with status: ${response.status}`);
+      throw new Error(
+        errorData.error || `Backend responded with status: ${response.status}`
+      );
     }
 
     const data = await response.json();

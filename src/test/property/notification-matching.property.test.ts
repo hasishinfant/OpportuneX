@@ -1,18 +1,18 @@
 /**
  * Property-Based Test: Notification Matching and Preferences
  * **Validates: Requirements 8.1, 8.4, 8.5**
- * 
- * Property 11: For any new opportunity that matches a user's profile, a notification 
- * should be generated only if it respects the user's notification preferences for 
+ *
+ * Property 11: For any new opportunity that matches a user's profile, a notification
+ * should be generated only if it respects the user's notification preferences for
  * frequency, timing, and channels
  */
 
 import * as fc from 'fast-check';
 import type {
-    EmailService,
-    NotificationRequest,
-    PushService,
-    SMSService
+  EmailService,
+  NotificationRequest,
+  PushService,
+  SMSService,
 } from '../../lib/services/notification.service';
 import { NotificationService } from '../../lib/services/notification.service';
 
@@ -56,7 +56,12 @@ describe('Property Test: Notification Matching and Preferences', () => {
     push: fc.boolean(),
     frequency: fc.constantFrom('immediate', 'daily', 'weekly'),
     types: fc.array(
-      fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation', 'system'),
+      fc.constantFrom(
+        'new_opportunity',
+        'deadline_reminder',
+        'recommendation',
+        'system'
+      ),
       { minLength: 1, maxLength: 4 }
     ),
     quietHours: fc.record({
@@ -70,23 +75,39 @@ describe('Property Test: Notification Matching and Preferences', () => {
   // Generator for notification requests
   const notificationRequestGenerator = fc.record({
     userId: fc.uuid(),
-    type: fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation', 'system'),
-    channels: fc.array(
-      fc.constantFrom('email', 'sms', 'in_app', 'push'),
-      { minLength: 1, maxLength: 4 }
+    type: fc.constantFrom(
+      'new_opportunity',
+      'deadline_reminder',
+      'recommendation',
+      'system'
     ),
+    channels: fc.array(fc.constantFrom('email', 'sms', 'in_app', 'push'), {
+      minLength: 1,
+      maxLength: 4,
+    }),
     content: fc.record({
       title: fc.string({ minLength: 5, maxLength: 100 }),
       message: fc.string({ minLength: 10, maxLength: 500 }),
       html: fc.option(fc.string({ minLength: 20, maxLength: 1000 })),
-      data: fc.option(fc.record({
-        opportunityId: fc.string(),
-        opportunityType: fc.constantFrom('hackathon', 'internship', 'workshop'),
-        organizerName: fc.string({ minLength: 3, maxLength: 50 }),
-      })),
+      data: fc.option(
+        fc.record({
+          opportunityId: fc.string(),
+          opportunityType: fc.constantFrom(
+            'hackathon',
+            'internship',
+            'workshop'
+          ),
+          organizerName: fc.string({ minLength: 3, maxLength: 50 }),
+        })
+      ),
     }),
     priority: fc.constantFrom('low', 'normal', 'high', 'urgent'),
-    scheduledFor: fc.option(fc.date({ min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) })),
+    scheduledFor: fc.option(
+      fc.date({
+        min: new Date(),
+        max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      })
+    ),
   });
 
   /**
@@ -99,15 +120,28 @@ describe('Property Test: Notification Matching and Preferences', () => {
         notificationRequestGenerator,
         async (preferences: any, notificationRequest: NotificationRequest) => {
           // Set up mock responses
-          mockEmailService.sendEmail.mockResolvedValue({ messageId: 'email-123', status: 'sent' });
-          mockSMSService.sendSMS.mockResolvedValue({ messageId: 'sms-123', status: 'sent' });
-          mockPushService.sendPushNotification.mockResolvedValue({ messageId: 'push-123', status: 'sent' });
+          mockEmailService.sendEmail.mockResolvedValue({
+            messageId: 'email-123',
+            status: 'sent',
+          });
+          mockSMSService.sendSMS.mockResolvedValue({
+            messageId: 'sms-123',
+            status: 'sent',
+          });
+          mockPushService.sendPushNotification.mockResolvedValue({
+            messageId: 'push-123',
+            status: 'sent',
+          });
 
           // Update user preferences
-          await notificationService.updateUserPreferences(notificationRequest.userId, preferences);
+          await notificationService.updateUserPreferences(
+            notificationRequest.userId,
+            preferences
+          );
 
           // Send notification
-          const result = await notificationService.sendNotification(notificationRequest);
+          const result =
+            await notificationService.sendNotification(notificationRequest);
 
           expect(result.success).toBe(true);
 
@@ -117,38 +151,53 @@ describe('Property Test: Notification Matching and Preferences', () => {
 
             notificationRequest.channels.forEach(requestedChannel => {
               const channelEnabled = preferences[requestedChannel] !== false;
-              const typeEnabled = preferences.types.includes(notificationRequest.type);
+              const typeEnabled = preferences.types.includes(
+                notificationRequest.type
+              );
 
               if (channelEnabled && typeEnabled) {
                 // Should have attempted delivery
                 expect(deliveredChannels).toContain(requestedChannel);
               } else {
                 // Should have been skipped
-                const channelDelivery = result.deliveries.find(d => d.channel === requestedChannel);
+                const channelDelivery = result.deliveries.find(
+                  d => d.channel === requestedChannel
+                );
                 expect(channelDelivery).toBeUndefined();
               }
             });
 
             // Verify actual service calls
-            if (preferences.email && preferences.types.includes(notificationRequest.type) && 
-                notificationRequest.channels.includes('email')) {
+            if (
+              preferences.email &&
+              preferences.types.includes(notificationRequest.type) &&
+              notificationRequest.channels.includes('email')
+            ) {
               expect(mockEmailService.sendEmail).toHaveBeenCalled();
             } else {
               expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
             }
 
-            if (preferences.sms && preferences.types.includes(notificationRequest.type) && 
-                notificationRequest.channels.includes('sms')) {
+            if (
+              preferences.sms &&
+              preferences.types.includes(notificationRequest.type) &&
+              notificationRequest.channels.includes('sms')
+            ) {
               expect(mockSMSService.sendSMS).toHaveBeenCalled();
             } else {
               expect(mockSMSService.sendSMS).not.toHaveBeenCalled();
             }
 
-            if (preferences.push && preferences.types.includes(notificationRequest.type) && 
-                notificationRequest.channels.includes('push')) {
+            if (
+              preferences.push &&
+              preferences.types.includes(notificationRequest.type) &&
+              notificationRequest.channels.includes('push')
+            ) {
               expect(mockPushService.sendPushNotification).toHaveBeenCalled();
             } else {
-              expect(mockPushService.sendPushNotification).not.toHaveBeenCalled();
+              expect(
+                mockPushService.sendPushNotification
+              ).not.toHaveBeenCalled();
             }
           }
         }
@@ -166,15 +215,29 @@ describe('Property Test: Notification Matching and Preferences', () => {
         fc.record({
           userId: fc.uuid(),
           enabledTypes: fc.array(
-            fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation', 'system'),
+            fc.constantFrom(
+              'new_opportunity',
+              'deadline_reminder',
+              'recommendation',
+              'system'
+            ),
             { minLength: 1, maxLength: 3 }
           ),
           disabledTypes: fc.array(
-            fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation', 'system'),
+            fc.constantFrom(
+              'new_opportunity',
+              'deadline_reminder',
+              'recommendation',
+              'system'
+            ),
             { minLength: 1, maxLength: 2 }
           ),
         }),
-        async (testCase: { userId: string; enabledTypes: string[]; disabledTypes: string[] }) => {
+        async (testCase: {
+          userId: string;
+          enabledTypes: string[];
+          disabledTypes: string[];
+        }) => {
           // Ensure no overlap between enabled and disabled
           const actualDisabledTypes = testCase.disabledTypes.filter(
             type => !testCase.enabledTypes.includes(type)
@@ -182,7 +245,10 @@ describe('Property Test: Notification Matching and Preferences', () => {
 
           if (actualDisabledTypes.length === 0) return; // Skip if no actual disabled types
 
-          mockEmailService.sendEmail.mockResolvedValue({ messageId: 'email-123', status: 'sent' });
+          mockEmailService.sendEmail.mockResolvedValue({
+            messageId: 'email-123',
+            status: 'sent',
+          });
 
           // Set preferences with specific enabled types
           await notificationService.updateUserPreferences(testCase.userId, {
@@ -202,7 +268,8 @@ describe('Property Test: Notification Matching and Preferences', () => {
             priority: 'normal',
           };
 
-          const enabledResult = await notificationService.sendNotification(enabledTypeRequest);
+          const enabledResult =
+            await notificationService.sendNotification(enabledTypeRequest);
           expect(enabledResult.success).toBe(true);
           expect(enabledResult.deliveries.length).toBeGreaterThan(0);
 
@@ -219,8 +286,9 @@ describe('Property Test: Notification Matching and Preferences', () => {
           };
 
           mockEmailService.sendEmail.mockClear();
-          const disabledResult = await notificationService.sendNotification(disabledTypeRequest);
-          
+          const disabledResult =
+            await notificationService.sendNotification(disabledTypeRequest);
+
           // Property: Disabled types should not result in deliveries
           expect(disabledResult.success).toBe(true);
           expect(disabledResult.deliveries.length).toBe(0);
@@ -251,11 +319,16 @@ describe('Property Test: Notification Matching and Preferences', () => {
           quietStart: number;
           quietEnd: number;
         }) => {
-          mockEmailService.sendEmail.mockResolvedValue({ messageId: 'email-123', status: 'sent' });
+          mockEmailService.sendEmail.mockResolvedValue({
+            messageId: 'email-123',
+            status: 'sent',
+          });
 
           // Mock current time
           const mockTime = `${testCase.currentHour.toString().padStart(2, '0')}:00`;
-          jest.spyOn(Date.prototype, 'toLocaleTimeString').mockReturnValue(mockTime);
+          jest
+            .spyOn(Date.prototype, 'toLocaleTimeString')
+            .mockReturnValue(mockTime);
 
           // Set preferences with quiet hours
           await notificationService.updateUserPreferences(testCase.userId, {
@@ -280,15 +353,18 @@ describe('Property Test: Notification Matching and Preferences', () => {
             priority: 'normal',
           };
 
-          const result = await notificationService.sendNotification(notificationRequest);
+          const result =
+            await notificationService.sendNotification(notificationRequest);
 
           // Property: Quiet hours should be respected
-          const isInQuietHours = testCase.quietHoursEnabled && (
-            (testCase.quietStart > testCase.quietEnd && 
-             (testCase.currentHour >= testCase.quietStart || testCase.currentHour <= testCase.quietEnd)) ||
-            (testCase.quietStart <= testCase.quietEnd && 
-             testCase.currentHour >= testCase.quietStart && testCase.currentHour <= testCase.quietEnd)
-          );
+          const isInQuietHours =
+            testCase.quietHoursEnabled &&
+            ((testCase.quietStart > testCase.quietEnd &&
+              (testCase.currentHour >= testCase.quietStart ||
+                testCase.currentHour <= testCase.quietEnd)) ||
+              (testCase.quietStart <= testCase.quietEnd &&
+                testCase.currentHour >= testCase.quietStart &&
+                testCase.currentHour <= testCase.quietEnd));
 
           expect(result.success).toBe(true);
 
@@ -320,8 +396,15 @@ describe('Property Test: Notification Matching and Preferences', () => {
           frequency: fc.constantFrom('immediate', 'daily', 'weekly'),
           priority: fc.constantFrom('low', 'normal', 'high', 'urgent'),
         }),
-        async (testCase: { userId: string; frequency: string; priority: string }) => {
-          mockEmailService.sendEmail.mockResolvedValue({ messageId: 'email-123', status: 'sent' });
+        async (testCase: {
+          userId: string;
+          frequency: string;
+          priority: string;
+        }) => {
+          mockEmailService.sendEmail.mockResolvedValue({
+            messageId: 'email-123',
+            status: 'sent',
+          });
 
           await notificationService.updateUserPreferences(testCase.userId, {
             email: true,
@@ -340,18 +423,22 @@ describe('Property Test: Notification Matching and Preferences', () => {
             priority: testCase.priority as any,
           };
 
-          const result = await notificationService.sendNotification(notificationRequest);
+          const result =
+            await notificationService.sendNotification(notificationRequest);
 
           expect(result.success).toBe(true);
 
           // Property: Frequency preferences should influence delivery
           // Note: In a real implementation, this would involve queuing and batching
           // For immediate frequency or urgent priority, should always send
-          if (testCase.frequency === 'immediate' || testCase.priority === 'urgent') {
+          if (
+            testCase.frequency === 'immediate' ||
+            testCase.priority === 'urgent'
+          ) {
             expect(result.deliveries.length).toBeGreaterThan(0);
             expect(mockEmailService.sendEmail).toHaveBeenCalled();
           } else {
-            // For daily/weekly frequency with non-urgent priority, 
+            // For daily/weekly frequency with non-urgent priority,
             // the system should still send but could be queued
             expect(result.success).toBe(true);
           }
@@ -368,9 +455,16 @@ describe('Property Test: Notification Matching and Preferences', () => {
     await fc.assert(
       fc.asyncProperty(
         fc.uuid(),
-        fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation'),
+        fc.constantFrom(
+          'new_opportunity',
+          'deadline_reminder',
+          'recommendation'
+        ),
         async (userId: string, notificationType: string) => {
-          mockEmailService.sendEmail.mockResolvedValue({ messageId: 'email-123', status: 'sent' });
+          mockEmailService.sendEmail.mockResolvedValue({
+            messageId: 'email-123',
+            status: 'sent',
+          });
 
           // Don't set any preferences - should use defaults
           const notificationRequest: NotificationRequest = {
@@ -384,7 +478,8 @@ describe('Property Test: Notification Matching and Preferences', () => {
             priority: 'normal',
           };
 
-          const result = await notificationService.sendNotification(notificationRequest);
+          const result =
+            await notificationService.sendNotification(notificationRequest);
 
           // Property: Should work with default preferences
           expect(result.success).toBe(true);
@@ -407,12 +502,23 @@ describe('Property Test: Notification Matching and Preferences', () => {
         fc.record({
           userId: fc.oneof(fc.uuid(), fc.string({ maxLength: 10 })), // Some invalid UUIDs
           type: fc.oneof(
-            fc.constantFrom('new_opportunity', 'deadline_reminder', 'recommendation', 'system'),
+            fc.constantFrom(
+              'new_opportunity',
+              'deadline_reminder',
+              'recommendation',
+              'system'
+            ),
             fc.string({ maxLength: 20 }) // Some invalid types
           ),
           channels: fc.oneof(
-            fc.array(fc.constantFrom('email', 'sms', 'in_app', 'push'), { minLength: 1, maxLength: 4 }),
-            fc.array(fc.string({ maxLength: 10 }), { minLength: 1, maxLength: 3 }), // Some invalid channels
+            fc.array(fc.constantFrom('email', 'sms', 'in_app', 'push'), {
+              minLength: 1,
+              maxLength: 4,
+            }),
+            fc.array(fc.string({ maxLength: 10 }), {
+              minLength: 1,
+              maxLength: 3,
+            }), // Some invalid channels
             fc.constant([]) // Empty channels
           ),
           title: fc.oneof(
@@ -440,17 +546,39 @@ describe('Property Test: Notification Matching and Preferences', () => {
 
           // Property: Validation should catch invalid requests
           try {
-            const validatedRequest = notificationService.validateNotificationRequest(notificationRequest);
-            
+            const validatedRequest =
+              notificationService.validateNotificationRequest(
+                notificationRequest
+              );
+
             // If validation passes, the request should be valid
-            expect(validatedRequest.userId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-            expect(['new_opportunity', 'deadline_reminder', 'recommendation', 'system']).toContain(validatedRequest.type);
+            expect(validatedRequest.userId).toMatch(
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+            );
+            expect([
+              'new_opportunity',
+              'deadline_reminder',
+              'recommendation',
+              'system',
+            ]).toContain(validatedRequest.type);
             expect(validatedRequest.channels.length).toBeGreaterThan(0);
-            expect(validatedRequest.channels.every(c => ['email', 'sms', 'in_app', 'push'].includes(c))).toBe(true);
-            expect(validatedRequest.content.title.length).toBeGreaterThanOrEqual(1);
-            expect(validatedRequest.content.title.length).toBeLessThanOrEqual(200);
-            expect(validatedRequest.content.message.length).toBeGreaterThanOrEqual(1);
-            expect(validatedRequest.content.message.length).toBeLessThanOrEqual(1000);
+            expect(
+              validatedRequest.channels.every(c =>
+                ['email', 'sms', 'in_app', 'push'].includes(c)
+              )
+            ).toBe(true);
+            expect(
+              validatedRequest.content.title.length
+            ).toBeGreaterThanOrEqual(1);
+            expect(validatedRequest.content.title.length).toBeLessThanOrEqual(
+              200
+            );
+            expect(
+              validatedRequest.content.message.length
+            ).toBeGreaterThanOrEqual(1);
+            expect(validatedRequest.content.message.length).toBeLessThanOrEqual(
+              1000
+            );
           } catch (error) {
             // If validation fails, the request should be invalid
             expect(error).toBeDefined();

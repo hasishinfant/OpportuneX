@@ -43,40 +43,49 @@ export function useOnboarding(): UseOnboardingReturn {
   }, []);
 
   // Save onboarding state to localStorage
-  const saveOnboardingState = useCallback((state: OnboardingState, data?: any) => {
-    if (typeof window === 'undefined') return;
+  const saveOnboardingState = useCallback(
+    (state: OnboardingState, data?: any) => {
+      if (typeof window === 'undefined') return;
 
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        state,
-        data: data || onboardingData,
-      }));
-    } catch (error) {
-      console.error('Failed to save onboarding state:', error);
-    }
-  }, [onboardingData]);
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            state,
+            data: data || onboardingData,
+          })
+        );
+      } catch (error) {
+        console.error('Failed to save onboarding state:', error);
+      }
+    },
+    [onboardingData]
+  );
 
-  const completeOnboarding = useCallback((data?: any) => {
-    const newState: OnboardingState = {
-      ...onboardingState,
-      isCompleted: true,
-      completedAt: new Date(),
-    };
+  const completeOnboarding = useCallback(
+    (data?: any) => {
+      const newState: OnboardingState = {
+        ...onboardingState,
+        isCompleted: true,
+        completedAt: new Date(),
+      };
 
-    setOnboardingState(newState);
-    if (data) {
-      setOnboardingData(data);
-    }
-    saveOnboardingState(newState, data);
+      setOnboardingState(newState);
+      if (data) {
+        setOnboardingData(data);
+      }
+      saveOnboardingState(newState, data);
 
-    // Track completion event
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'onboarding_completed', {
-        event_category: 'engagement',
-        event_label: 'user_onboarding',
-      });
-    }
-  }, [onboardingState, saveOnboardingState]);
+      // Track completion event
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'onboarding_completed', {
+          event_category: 'engagement',
+          event_label: 'user_onboarding',
+        });
+      }
+    },
+    [onboardingState, saveOnboardingState]
+  );
 
   const skipOnboarding = useCallback(() => {
     const newState: OnboardingState = {

@@ -1,8 +1,8 @@
 /**
  * Property-Based Test: Voice Processing Pipeline
  * **Validates: Requirements 3.1, 3.2, 3.3**
- * 
- * Property 3: For any clear voice input in English or Hindi, the voice-to-search 
+ *
+ * Property 3: For any clear voice input in English or Hindi, the voice-to-search
  * pipeline should produce equivalent results to the same query entered as text
  */
 
@@ -60,7 +60,7 @@ describe('Property Test: Voice Processing Pipeline', () => {
   });
 
   // Helper to create mock audio blob
-  const createMockAudioBlob = (size: number = 5000): Blob => {
+  const createMockAudioBlob = (size = 5000): Blob => {
     const buffer = new ArrayBuffer(size);
     return new Blob([buffer], { type: 'audio/wav' });
   };
@@ -72,9 +72,13 @@ describe('Property Test: Voice Processing Pipeline', () => {
     await fc.assert(
       fc.asyncProperty(
         clearVoiceQueries,
-        async (voiceQuery: { text: string; language: 'en' | 'hi'; confidence: number }) => {
+        async (voiceQuery: {
+          text: string;
+          language: 'en' | 'hi';
+          confidence: number;
+        }) => {
           const mockAudioBlob = createMockAudioBlob();
-          
+
           const voiceRequest: VoiceRequest = {
             audioData: mockAudioBlob,
             language: voiceQuery.language,
@@ -102,7 +106,9 @@ describe('Property Test: Voice Processing Pipeline', () => {
             expect(result.data.followUpQuestions).toBeInstanceOf(Array);
 
             // Search query should be processed (cleaned up)
-            expect(result.data.searchQuery.trim()).toBe(result.data.searchQuery);
+            expect(result.data.searchQuery.trim()).toBe(
+              result.data.searchQuery
+            );
             expect(result.data.searchQuery).not.toMatch(/^\s*$/);
           }
         }
@@ -134,7 +140,9 @@ describe('Property Test: Voice Processing Pipeline', () => {
               organizerType: 'corporate',
               requiredSkills: ['JavaScript', 'Python'],
               mode: 'online',
-              applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              applicationDeadline: new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000
+              ),
               externalUrl: 'https://example.com',
               sourceId: 'test-source',
               tags: ['tech'],
@@ -160,7 +168,8 @@ describe('Property Test: Voice Processing Pipeline', () => {
 
           // Text search
           const textSearchRequest: SearchRequest = { query: baseQuery };
-          const textResult = await searchService.searchOpportunities(textSearchRequest);
+          const textResult =
+            await searchService.searchOpportunities(textSearchRequest);
 
           // Voice search
           const mockAudioBlob = createMockAudioBlob();
@@ -173,23 +182,29 @@ describe('Property Test: Voice Processing Pipeline', () => {
           expect(voiceResult.success).toBe(true);
 
           if (voiceResult.data) {
-            const voiceSearchRequest: SearchRequest = { 
-              query: voiceResult.data.searchQuery 
+            const voiceSearchRequest: SearchRequest = {
+              query: voiceResult.data.searchQuery,
             };
-            const voiceSearchResult = await searchService.searchOpportunities(voiceSearchRequest);
+            const voiceSearchResult =
+              await searchService.searchOpportunities(voiceSearchRequest);
 
             expect(voiceSearchResult.success).toBe(true);
 
             // Property: Both should return similar structured results
             if (textResult.data && voiceSearchResult.data) {
               expect(textResult.data.opportunities).toBeInstanceOf(Array);
-              expect(voiceSearchResult.data.opportunities).toBeInstanceOf(Array);
-              
+              expect(voiceSearchResult.data.opportunities).toBeInstanceOf(
+                Array
+              );
+
               expect(typeof textResult.data.totalCount).toBe('number');
               expect(typeof voiceSearchResult.data.totalCount).toBe('number');
 
               // Results should have same structure
-              if (textResult.data.opportunities.length > 0 && voiceSearchResult.data.opportunities.length > 0) {
+              if (
+                textResult.data.opportunities.length > 0 &&
+                voiceSearchResult.data.opportunities.length > 0
+              ) {
                 const textOpp = textResult.data.opportunities[0];
                 const voiceOpp = voiceSearchResult.data.opportunities[0];
 
@@ -222,9 +237,13 @@ describe('Property Test: Voice Processing Pipeline', () => {
           confidence: fc.float({ min: 0.3, max: 1.0 }),
           language: fc.constantFrom('en' as const, 'hi' as const),
         }),
-        async (audioProps: { size: number; confidence: number; language: 'en' | 'hi' }) => {
+        async (audioProps: {
+          size: number;
+          confidence: number;
+          language: 'en' | 'hi';
+        }) => {
           const mockAudioBlob = createMockAudioBlob(audioProps.size);
-          
+
           const voiceRequest: VoiceRequest = {
             audioData: mockAudioBlob,
             language: audioProps.language,
@@ -236,7 +255,7 @@ describe('Property Test: Voice Processing Pipeline', () => {
           if (audioProps.confidence > 0.7) {
             // High confidence should succeed
             expect(result.success).toBe(true);
-            
+
             if (result.data) {
               expect(result.data.confidence).toBeGreaterThan(0.7);
               expect(result.data.transcription).toBeDefined();
@@ -271,7 +290,7 @@ describe('Property Test: Voice Processing Pipeline', () => {
         }),
         async (context: { queryType: string; language: 'en' | 'hi' }) => {
           const mockAudioBlob = createMockAudioBlob();
-          
+
           const voiceRequest: VoiceRequest = {
             audioData: mockAudioBlob,
             language: context.language,
@@ -298,7 +317,9 @@ describe('Property Test: Voice Processing Pipeline', () => {
             // Language-specific checks
             if (context.language === 'hi') {
               // Hindi questions should contain Devanagari characters
-              const hasHindiText = followUpQuestions.some(q => /[\u0900-\u097F]/.test(q));
+              const hasHindiText = followUpQuestions.some(q =>
+                /[\u0900-\u097F]/.test(q)
+              );
               expect(hasHindiText).toBe(true);
             } else {
               // English questions should be in English
@@ -322,15 +343,22 @@ describe('Property Test: Voice Processing Pipeline', () => {
         fc.record({
           size: fc.integer({ min: 0, max: 15 * 1024 * 1024 }), // 0 to 15MB
           type: fc.constantFrom(
-            'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/m4a', 
-            'audio/webm', 'audio/ogg', 'video/mp4', 'text/plain'
+            'audio/wav',
+            'audio/mp3',
+            'audio/mpeg',
+            'audio/m4a',
+            'audio/webm',
+            'audio/ogg',
+            'video/mp4',
+            'text/plain'
           ),
         }),
         async (audioSpec: { size: number; type: string }) => {
           const buffer = new ArrayBuffer(audioSpec.size);
           const audioBlob = new Blob([buffer], { type: audioSpec.type });
 
-          const validationResult = await voiceService.validateAudioFile(audioBlob);
+          const validationResult =
+            await voiceService.validateAudioFile(audioBlob);
 
           // Property: Validation should follow the rules
           if (audioSpec.size > 10 * 1024 * 1024) {
@@ -341,14 +369,27 @@ describe('Property Test: Voice Processing Pipeline', () => {
             // Too small
             expect(validationResult.success).toBe(false);
             expect(validationResult.error).toContain('too small');
-          } else if (!['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/m4a', 'audio/webm', 'audio/ogg'].includes(audioSpec.type)) {
+          } else if (
+            ![
+              'audio/wav',
+              'audio/mp3',
+              'audio/mpeg',
+              'audio/m4a',
+              'audio/webm',
+              'audio/ogg',
+            ].includes(audioSpec.type)
+          ) {
             // Unsupported format
             expect(validationResult.success).toBe(false);
-            expect(validationResult.error).toContain('Unsupported audio format');
+            expect(validationResult.error).toContain(
+              'Unsupported audio format'
+            );
           } else {
             // Should be valid
             expect(validationResult.success).toBe(true);
-            expect(validationResult.message).toBe('Audio file validation passed');
+            expect(validationResult.message).toBe(
+              'Audio file validation passed'
+            );
           }
         }
       ),

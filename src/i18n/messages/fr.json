@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser"
+  },
+  "header": {
+    "search": "Rechercher",
+    "myRoadmaps": "Mes Feuilles de Route",
+    "profile": "Profil",
+    "signIn": "Se Connecter",
+    "getStarted": "Commencer",
+    "analytics": "Analytique",
+    "social": "Social"
+  },
+  "home": {
+    "title": "Découvrez Votre Prochaine Opportunité",
+    "subtitle": "Plateforme alimentée par l'IA pour trouver des hackathons, stages et ateliers adaptés pour vous",
+    "searchPlaceholder": "Rechercher des opportunités...",
+    "voiceSearch": "Recherche Vocale",
+    "featuredOpportunities": "Opportunités en Vedette"
+  },
+  "search": {
+    "title": "Rechercher des Opportunités",
+    "placeholder": "Que recherchez-vous?",
+    "voiceSearchButton": "Utiliser la Recherche Vocale",
+    "filters": "Filtres",
+    "results": "Résultats",
+    "noResults": "Aucune opportunité trouvée",
+    "tryDifferentSearch": "Essayez un terme de recherche différent"
+  },
+  "filters": {
+    "type": "Type",
+    "location": "Emplacement",
+    "skillLevel": "Niveau de Compétence",
+    "remote": "À Distance",
+    "category": "Catégorie",
+    "deadline": "Date Limite",
+    "clearAll": "Tout Effacer",
+    "apply": "Appliquer les Filtres"
+  },
+  "opportunity": {
+    "hackathon": "Hackathon",
+    "internship": "Stage",
+    "workshop": "Atelier",
+    "deadline": "Date Limite",
+    "location": "Emplacement",
+    "remote": "À Distance",
+    "skillLevel": "Niveau de Compétence",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "viewDetails": "Voir les Détails",
+    "apply": "Postuler Maintenant",
+    "save": "Enregistrer"
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "personalInfo": "Informations Personnelles",
+    "name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "location": "Emplacement",
+    "skills": "Compétences",
+    "interests": "Intérêts",
+    "education": "Éducation",
+    "experience": "Expérience",
+    "preferences": "Préférences",
+    "notifications": "Paramètres de Notification",
+    "language": "Langue",
+    "theme": "Thème",
+    "saveChanges": "Enregistrer les Modifications"
+  },
+  "roadmap": {
+    "title": "Mes Feuilles de Route",
+    "createNew": "Créer une Nouvelle Feuille de Route",
+    "inProgress": "En Cours",
+    "completed": "Terminé",
+    "viewRoadmap": "Voir la Feuille de Route",
+    "progress": "Progrès",
+    "steps": "Étapes",
+    "resources": "Ressources"
+  },
+  "voice": {
+    "listening": "Écoute...",
+    "processing": "Traitement...",
+    "speak": "Parlez maintenant",
+    "tryAgain": "Réessayer",
+    "error": "Impossible de traiter l'entrée vocale",
+    "permissionDenied": "Permission du microphone refusée",
+    "notSupported": "Recherche vocale non prise en charge dans ce navigateur"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification",
+    "newOpportunity": "Nouvelle opportunité correspond à vos intérêts",
+    "deadlineReminder": "Date limite approche",
+    "applicationUpdate": "Statut de candidature mis à jour"
+  },
+  "footer": {
+    "about": "À Propos",
+    "contact": "Contact",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation",
+    "help": "Centre d'Aide"
+  }
+}

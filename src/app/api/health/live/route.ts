@@ -1,5 +1,6 @@
 import { healthCheckService } from '@/lib/health-checks';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * GET /api/health/live
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const liveness = await healthCheckService.getLivenessStatus();
     const statusCode = liveness.alive ? 200 : 503;
-    
+
     return NextResponse.json(liveness, { status: statusCode });
   } catch (error) {
     return NextResponse.json(

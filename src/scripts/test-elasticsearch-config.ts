@@ -286,4 +286,3 @@ Examples:
 }
 
 export { displayTestResults, runConfigurationTests };
-

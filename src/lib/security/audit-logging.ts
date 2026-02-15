@@ -17,26 +17,26 @@ export class AuditLogger {
     LOGOUT: 'logout',
     PASSWORD_CHANGE: 'password_change',
     PASSWORD_RESET: 'password_reset',
-    
+
     // Data access events
     DATA_READ: 'data_read',
     DATA_CREATE: 'data_create',
     DATA_UPDATE: 'data_update',
     DATA_DELETE: 'data_delete',
     DATA_EXPORT: 'data_export',
-    
+
     // Privacy events
     CONSENT_GIVEN: 'consent_given',
     CONSENT_WITHDRAWN: 'consent_withdrawn',
     DATA_DELETION_REQUEST: 'data_deletion_request',
     DATA_ANONYMIZATION: 'data_anonymization',
-    
+
     // Security events
     UNAUTHORIZED_ACCESS: 'unauthorized_access',
     RATE_LIMIT_EXCEEDED: 'rate_limit_exceeded',
     SUSPICIOUS_ACTIVITY: 'suspicious_activity',
     SECURITY_VIOLATION: 'security_violation',
-    
+
     // System events
     SYSTEM_ERROR: 'system_error',
     CONFIGURATION_CHANGE: 'configuration_change',
@@ -103,8 +103,10 @@ export class AuditLogger {
       }
 
       // Alert on high-risk events
-      if (eventData.riskLevel === this.RISK_LEVELS.HIGH || 
-          eventData.riskLevel === this.RISK_LEVELS.CRITICAL) {
+      if (
+        eventData.riskLevel === this.RISK_LEVELS.HIGH ||
+        eventData.riskLevel === this.RISK_LEVELS.CRITICAL
+      ) {
         await this.alertSecurityTeam(eventData);
       }
     } catch (error) {
@@ -132,7 +134,8 @@ export class AuditLogger {
       resource,
       action,
       details,
-      riskLevel: action === 'delete' ? this.RISK_LEVELS.HIGH : this.RISK_LEVELS.LOW,
+      riskLevel:
+        action === 'delete' ? this.RISK_LEVELS.HIGH : this.RISK_LEVELS.LOW,
       success: true,
     });
   }
@@ -143,7 +146,7 @@ export class AuditLogger {
   static async logAuthentication(
     eventType: string,
     userId?: string,
-    success: boolean = true,
+    success = true,
     errorMessage?: string,
     req?: Request
   ): Promise<void> {
@@ -252,13 +255,7 @@ export class AuditLogger {
       endDate?: Date;
     } = {}
   ): Promise<any[]> {
-    const {
-      limit = 100,
-      offset = 0,
-      eventTypes,
-      startDate,
-      endDate,
-    } = options;
+    const { limit = 100, offset = 0, eventTypes, startDate, endDate } = options;
 
     try {
       const whereClause: any = { userId };
@@ -308,13 +305,7 @@ export class AuditLogger {
       endDate?: Date;
     } = {}
   ): Promise<any[]> {
-    const {
-      limit = 100,
-      offset = 0,
-      riskLevel,
-      startDate,
-      endDate,
-    } = options;
+    const { limit = 100, offset = 0, riskLevel, startDate, endDate } = options;
 
     try {
       const whereClause: any = {
@@ -442,7 +433,10 @@ export class AuditLogger {
           endDate: endDate.toISOString(),
         },
         summary: {
-          totalEvents: eventCounts.reduce((sum, item) => sum + item._count.id, 0),
+          totalEvents: eventCounts.reduce(
+            (sum, item) => sum + item._count.id,
+            0
+          ),
           failedEvents,
           securityViolations,
         },
@@ -469,7 +463,8 @@ export class AuditLogger {
       console.error('Error generating audit report:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Report generation failed',
+        error:
+          error instanceof Error ? error.message : 'Report generation failed',
       };
     }
   }
@@ -477,7 +472,8 @@ export class AuditLogger {
   /**
    * Clean up old audit logs based on retention policy
    */
-  static async cleanupOldLogs(retentionDays: number = 2555): Promise<{ // 7 years default
+  static async cleanupOldLogs(retentionDays = 2555): Promise<{
+    // 7 years default
     success: boolean;
     deletedCount?: number;
     error?: string;
@@ -543,15 +539,15 @@ export class AuditLogger {
    */
   static auditMiddleware = (req: any, res: any, next: any) => {
     const startTime = Date.now();
-    
+
     // Log request
     const originalEnd = res.end;
-    res.end = function(chunk: any, encoding: any) {
+    res.end = function (chunk: any, encoding: any) {
       const duration = Date.now() - startTime;
-      const statusCode = res.statusCode;
-      
+      const { statusCode } = res;
+
       // Determine if this should be logged
-      const shouldLog = 
+      const shouldLog =
         req.method !== 'GET' || // Log all non-GET requests
         statusCode >= 400 || // Log all errors
         req.path.includes('/admin') || // Log admin access
@@ -574,9 +570,12 @@ export class AuditLogger {
             // Don't log sensitive body data
             bodySize: req.body ? JSON.stringify(req.body).length : 0,
           },
-          riskLevel: statusCode >= 500 ? AuditLogger.RISK_LEVELS.HIGH :
-                    statusCode >= 400 ? AuditLogger.RISK_LEVELS.MEDIUM :
-                    AuditLogger.RISK_LEVELS.LOW,
+          riskLevel:
+            statusCode >= 500
+              ? AuditLogger.RISK_LEVELS.HIGH
+              : statusCode >= 400
+                ? AuditLogger.RISK_LEVELS.MEDIUM
+                : AuditLogger.RISK_LEVELS.LOW,
           success: statusCode < 400,
           errorMessage: statusCode >= 400 ? `HTTP ${statusCode}` : undefined,
         });

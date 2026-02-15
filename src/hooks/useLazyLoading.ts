@@ -31,12 +31,12 @@ export function useLazyLoading(options: UseLazyLoadingOptions = {}) {
     }
 
     observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             setIsInView(true);
             setHasTriggered(true);
-            
+
             if (triggerOnce) {
               observerRef.current?.disconnect();
             }
@@ -117,7 +117,7 @@ export function useLazyList<T>(options: UseLazyListOptions<T>) {
 
     try {
       const newItems = await loadMore(currentPage);
-      
+
       if (newItems.length === 0 || newItems.length < pageSize) {
         setHasMore(false);
       }
@@ -125,7 +125,9 @@ export function useLazyList<T>(options: UseLazyListOptions<T>) {
       setItems(prev => [...prev, ...newItems]);
       setCurrentPage(prev => prev + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load more items');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load more items'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -175,11 +177,11 @@ interface UseLazyImageOptions {
 
 export function useLazyImage(options: UseLazyImageOptions) {
   const { src, preloadSrc, threshold = 0.1, rootMargin = '50px' } = options;
-  
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState<string | null>(null);
-  
+
   const { elementRef, isInView } = useLazyLoading({
     threshold,
     rootMargin,
@@ -191,12 +193,12 @@ export function useLazyImage(options: UseLazyImageOptions) {
     if (!isInView) return;
 
     const img = new Image();
-    
+
     img.onload = () => {
       setCurrentSrc(src);
       setIsLoaded(true);
     };
-    
+
     img.onerror = () => {
       setHasError(true);
       if (preloadSrc) {
@@ -209,7 +211,7 @@ export function useLazyImage(options: UseLazyImageOptions) {
         fallbackImg.src = preloadSrc;
       }
     };
-    
+
     img.src = src;
   }, [isInView, src, preloadSrc]);
 
@@ -233,11 +235,13 @@ interface UseLazyComponentOptions {
 
 export function useLazyComponent(options: UseLazyComponentOptions) {
   const { importFn, threshold = 0.1, rootMargin = '50px' } = options;
-  
-  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+
+  const [Component, setComponent] = useState<React.ComponentType<any> | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { elementRef, isInView } = useLazyLoading({
     threshold,
     rootMargin,
@@ -251,11 +255,13 @@ export function useLazyComponent(options: UseLazyComponentOptions) {
     setError(null);
 
     importFn()
-      .then((module) => {
+      .then(module => {
         setComponent(() => module.default);
       })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load component');
+      .catch(err => {
+        setError(
+          err instanceof Error ? err.message : 'Failed to load component'
+        );
       })
       .finally(() => {
         setIsLoading(false);
@@ -314,13 +320,16 @@ export function useLazyLoadWithRetry(options: UseLazyLoadWithRetryOptions) {
       setRetryCount(0);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Load failed';
-      
+
       if (retryCount < maxRetries) {
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          setIsLoading(false);
-          load();
-        }, retryDelay * Math.pow(2, retryCount)); // Exponential backoff
+        setTimeout(
+          () => {
+            setRetryCount(prev => prev + 1);
+            setIsLoading(false);
+            load();
+          },
+          retryDelay * Math.pow(2, retryCount)
+        ); // Exponential backoff
       } else {
         setError(errorMessage);
       }

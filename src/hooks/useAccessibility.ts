@@ -25,7 +25,7 @@ export function useAccessibility({
     liveRegion.setAttribute('aria-atomic', 'true');
     liveRegion.className = 'sr-only';
     liveRegion.id = 'accessibility-announcements';
-    
+
     document.body.appendChild(liveRegion);
     announcementRef.current = liveRegion;
 
@@ -37,19 +37,22 @@ export function useAccessibility({
   }, [announceChanges]);
 
   // Announce message to screen readers
-  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    if (!announcementRef.current) return;
+  const announce = useCallback(
+    (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+      if (!announcementRef.current) return;
 
-    announcementRef.current.setAttribute('aria-live', priority);
-    announcementRef.current.textContent = message;
+      announcementRef.current.setAttribute('aria-live', priority);
+      announcementRef.current.textContent = message;
 
-    // Clear after announcement
-    setTimeout(() => {
-      if (announcementRef.current) {
-        announcementRef.current.textContent = '';
-      }
-    }, 1000);
-  }, []);
+      // Clear after announcement
+      setTimeout(() => {
+        if (announcementRef.current) {
+          announcementRef.current.textContent = '';
+        }
+      }, 1000);
+    },
+    []
+  );
 
   // Focus management
   const saveFocus = useCallback(() => {
@@ -83,7 +86,7 @@ export function useAccessibility({
     if (!trapFocus || !containerRef?.current) return;
 
     const container = containerRef.current;
-    
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Tab') return;
 
@@ -110,30 +113,34 @@ export function useAccessibility({
     };
 
     container.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       container.removeEventListener('keydown', handleKeyDown);
     };
   }, [trapFocus, containerRef]);
 
   // Skip link functionality
-  const createSkipLink = useCallback((targetId: string, label: string = 'Skip to main content') => {
-    const skipLink = document.createElement('a');
-    skipLink.href = `#${targetId}`;
-    skipLink.textContent = label;
-    skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-md';
-    
-    skipLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      const target = document.getElementById(targetId);
-      if (target) {
-        target.focus();
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
+  const createSkipLink = useCallback(
+    (targetId: string, label = 'Skip to main content') => {
+      const skipLink = document.createElement('a');
+      skipLink.href = `#${targetId}`;
+      skipLink.textContent = label;
+      skipLink.className =
+        'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-md';
 
-    return skipLink;
-  }, []);
+      skipLink.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.focus();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+
+      return skipLink;
+    },
+    []
+  );
 
   // Reduced motion detection
   const prefersReducedMotion = useCallback(() => {
@@ -146,7 +153,7 @@ export function useAccessibility({
   }, []);
 
   // Generate unique IDs for ARIA relationships
-  const generateId = useCallback((prefix: string = 'a11y') => {
+  const generateId = useCallback((prefix = 'a11y') => {
     return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
   }, []);
 

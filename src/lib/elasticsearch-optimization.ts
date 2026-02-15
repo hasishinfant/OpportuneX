@@ -1,4 +1,4 @@
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { elasticsearch, INDICES } from './elasticsearch';
 
 /**
@@ -18,7 +18,12 @@ class ElasticsearchPerformanceMonitor {
   private metrics: SearchMetrics[] = [];
   private readonly maxMetrics = 1000;
 
-  logSearch(query: string, duration: number, resultCount: number, indexName: string) {
+  logSearch(
+    query: string,
+    duration: number,
+    resultCount: number,
+    indexName: string
+  ) {
     this.metrics.push({
       query,
       duration,
@@ -32,7 +37,7 @@ class ElasticsearchPerformanceMonitor {
     }
   }
 
-  getSlowQueries(thresholdMs: number = 1000): SearchMetrics[] {
+  getSlowQueries(thresholdMs = 1000): SearchMetrics[] {
     return this.metrics.filter(m => m.duration > thresholdMs);
   }
 
@@ -51,9 +56,11 @@ class ElasticsearchPerformanceMonitor {
     const totalSearches = this.metrics.length;
     const averageTime = this.getAverageSearchTime();
     const slowQueries = this.getSlowQueries().length;
-    const averageResults = totalSearches > 0 
-      ? this.metrics.reduce((sum, m) => sum + m.resultCount, 0) / totalSearches 
-      : 0;
+    const averageResults =
+      totalSearches > 0
+        ? this.metrics.reduce((sum, m) => sum + m.resultCount, 0) /
+          totalSearches
+        : 0;
 
     return {
       totalSearches,
@@ -307,7 +314,9 @@ export class OptimizedElasticsearchQueries {
         searchQuery.bool.filter.push({ term: { type: filters.type } });
       }
       if (filters.organizerType) {
-        searchQuery.bool.filter.push({ term: { organizerType: filters.organizerType } });
+        searchQuery.bool.filter.push({
+          term: { organizerType: filters.organizerType },
+        });
       }
       if (filters.mode) {
         searchQuery.bool.filter.push({ term: { mode: filters.mode } });
@@ -385,7 +394,7 @@ export class OptimizedElasticsearchQueries {
       }
 
       // Execute search
-      const searchBody = {
+      const searchBody: any = {
         query: searchQuery,
         sort: [
           { _score: { order: 'desc' } },
@@ -424,13 +433,18 @@ export class OptimizedElasticsearchQueries {
       const response = await this.client.search({
         index: INDICES.OPPORTUNITIES,
         body: searchBody,
-      });
+      } as any);
 
       const duration = Date.now() - startTime;
+      const totalHits =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value || 0;
+
       searchMonitor.logSearch(
         query || 'filter_only',
         duration,
-        response.hits.total?.value || 0,
+        totalHits,
         INDICES.OPPORTUNITIES
       );
 
@@ -441,7 +455,7 @@ export class OptimizedElasticsearchQueries {
           action: 'search',
           query,
           filters,
-          resultCount: response.hits.total?.value || 0,
+          resultCount: totalHits,
         });
       }
 
@@ -451,10 +465,10 @@ export class OptimizedElasticsearchQueries {
           _score: hit._score,
           highlight: hit.highlight,
         })),
-        total: response.hits.total?.value || 0,
+        total: totalHits,
         page,
         size,
-        totalPages: Math.ceil((response.hits.total?.value || 0) / size),
+        totalPages: Math.ceil(totalHits / size),
         aggregations: response.aggregations,
         searchTime: duration,
       };
@@ -474,7 +488,7 @@ export class OptimizedElasticsearchQueries {
   /**
    * Get search suggestions with autocomplete
    */
-  async getSearchSuggestions(query: string, size: number = 10) {
+  async getSearchSuggestions(query: string, size = 10) {
     const startTime = Date.now();
 
     try {
@@ -504,15 +518,20 @@ export class OptimizedElasticsearchQueries {
       });
 
       const duration = Date.now() - startTime;
+      const totalSuggestions =
+        response.suggest?.title_suggest?.[0]?.options?.length || 0;
+
       searchMonitor.logSearch(
         `suggestions:${query}`,
         duration,
-        response.suggest?.title_suggest?.[0]?.options?.length || 0,
+        totalSuggestions,
         INDICES.OPPORTUNITIES
       );
 
-      const titleSuggestions = response.suggest?.title_suggest?.[0]?.options || [];
-      const skillSuggestions = response.suggest?.skill_suggest?.[0]?.options || [];
+      const titleSuggestions =
+        response.suggest?.title_suggest?.[0]?.options || [];
+      const skillSuggestions =
+        response.suggest?.skill_suggest?.[0]?.options || [];
 
       return {
         suggestions: [
@@ -538,7 +557,7 @@ export class OptimizedElasticsearchQueries {
   /**
    * Get similar opportunities using More Like This query
    */
-  async getSimilarOpportunities(opportunityId: string, size: number = 5) {
+  async getSimilarOpportunities(opportunityId: string, size = 5) {
     const startTime = Date.now();
 
     try {
@@ -567,9 +586,7 @@ export class OptimizedElasticsearchQueries {
                 { term: { isActive: true } },
                 { range: { applicationDeadline: { gte: 'now' } } },
               ],
-              must_not: [
-                { term: { id: opportunityId } },
-              ],
+              must_not: [{ term: { id: opportunityId } }],
             },
           },
           size,
@@ -578,7 +595,7 @@ export class OptimizedElasticsearchQueries {
             { qualityScore: { order: 'desc' } },
           ],
         },
-      });
+      } as any);
 
       const duration = Date.now() - startTime;
       searchMonitor.logSearch(
@@ -646,7 +663,9 @@ export class OptimizedElasticsearchQueries {
           opp.organizerName,
           ...(opp.requiredSkills || []),
           ...(opp.tags || []),
-        ].filter(Boolean).join(' '),
+        ]
+          .filter(Boolean)
+          .join(' '),
         popularityScore: this.calculatePopularityScore(opp),
         relevanceBoost: this.calculateRelevanceBoost(opp),
       }));
@@ -664,8 +683,10 @@ export class OptimizedElasticsearchQueries {
       const duration = Date.now() - startTime;
       const errors = response.items.filter((item: any) => item.index?.error);
 
-      console.log(`✅ Bulk indexed ${opportunities.length} opportunities in ${duration}ms`);
-      
+      console.log(
+        `✅ Bulk indexed ${opportunities.length} opportunities in ${duration}ms`
+      );
+
       if (errors.length > 0) {
         console.error(`❌ ${errors.length} indexing errors:`, errors);
       }
@@ -693,7 +714,8 @@ export class OptimizedElasticsearchQueries {
 
     // Boost for recent opportunities
     const daysSinceCreated = Math.floor(
-      (Date.now() - new Date(opportunity.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - new Date(opportunity.createdAt).getTime()) /
+        (1000 * 60 * 60 * 24)
     );
     if (daysSinceCreated <= 7) score += 10;
     else if (daysSinceCreated <= 30) score += 5;
@@ -722,10 +744,12 @@ export class OptimizedElasticsearchQueries {
     else if (opportunity.qualityScore > 40) boost += 0.1;
 
     // Boost opportunities with detailed descriptions
-    if (opportunity.description && opportunity.description.length > 200) boost += 0.1;
+    if (opportunity.description && opportunity.description.length > 200)
+      boost += 0.1;
 
     // Boost opportunities with multiple skills
-    if (opportunity.requiredSkills && opportunity.requiredSkills.length > 3) boost += 0.1;
+    if (opportunity.requiredSkills && opportunity.requiredSkills.length > 3)
+      boost += 0.1;
 
     return boost;
   }
@@ -822,7 +846,7 @@ export class IndexLifecycleManager {
             },
           },
         },
-      });
+      } as any);
 
       console.log('✅ User behavior lifecycle policy created');
     } catch (error) {
@@ -845,7 +869,7 @@ export class IndexLifecycleManager {
             mappings: OptimizedMappings.opportunities,
           },
         },
-      });
+      } as any);
 
       // User behavior index template
       await this.client.indices.putIndexTemplate({
@@ -857,7 +881,7 @@ export class IndexLifecycleManager {
             mappings: OptimizedMappings.userBehavior,
           },
         },
-      });
+      } as any);
 
       console.log('✅ Index templates created successfully');
     } catch (error) {

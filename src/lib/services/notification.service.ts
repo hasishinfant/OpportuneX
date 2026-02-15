@@ -1,9 +1,18 @@
 import { z } from 'zod';
 
 // Notification types
-export type NotificationType = 'new_opportunity' | 'deadline_reminder' | 'recommendation' | 'system';
+export type NotificationType =
+  | 'new_opportunity'
+  | 'deadline_reminder'
+  | 'recommendation'
+  | 'system';
 export type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
-export type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
+export type NotificationStatus =
+  | 'pending'
+  | 'sent'
+  | 'delivered'
+  | 'failed'
+  | 'bounced';
 
 // Notification interfaces
 export interface NotificationTemplate {
@@ -93,7 +102,12 @@ export interface Notification {
 // Validation schemas
 const notificationRequestSchema = z.object({
   userId: z.string().uuid(),
-  type: z.enum(['new_opportunity', 'deadline_reminder', 'recommendation', 'system']),
+  type: z.enum([
+    'new_opportunity',
+    'deadline_reminder',
+    'recommendation',
+    'system',
+  ]),
   channels: z.array(z.enum(['email', 'sms', 'in_app', 'push'])).min(1),
   templateId: z.string().optional(),
   subject: z.string().optional(),
@@ -115,7 +129,9 @@ const notificationPreferencesSchema = z.object({
   inApp: z.boolean().default(true),
   push: z.boolean().default(true),
   frequency: z.enum(['immediate', 'daily', 'weekly']).default('immediate'),
-  types: z.array(z.enum(['new_opportunity', 'deadline_reminder', 'recommendation', 'system'])),
+  types: z.array(
+    z.enum(['new_opportunity', 'deadline_reminder', 'recommendation', 'system'])
+  ),
   quietHours: z.object({
     enabled: z.boolean().default(false),
     start: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/),
@@ -134,7 +150,7 @@ export interface EmailService {
     templateId?: string;
     templateData?: Record<string, any>;
   }): Promise<{ messageId: string; status: string }>;
-  
+
   sendBulkEmail(params: {
     recipients: Array<{
       to: string;
@@ -155,7 +171,7 @@ export interface SMSService {
     templateId?: string;
     templateData?: Record<string, any>;
   }): Promise<{ messageId: string; status: string }>;
-  
+
   sendBulkSMS(params: {
     recipients: Array<{
       to: string;
@@ -199,7 +215,9 @@ export class NotificationService {
 
   // Initialize default notification templates
   private initializeDefaultTemplates(): void {
-    const defaultTemplates: Omit<NotificationTemplate, 'createdAt' | 'updatedAt'>[] = [
+    const defaultTemplates: Array<
+      Omit<NotificationTemplate, 'createdAt' | 'updatedAt'>
+    > = [
       {
         id: 'new-opportunity',
         name: 'New Opportunity Alert',
@@ -225,7 +243,15 @@ export class NotificationService {
           
           View opportunity: {{url}}
         `,
-        variables: ['opportunityType', 'title', 'organizer', 'deadline', 'location', 'description', 'url'],
+        variables: [
+          'opportunityType',
+          'title',
+          'organizer',
+          'deadline',
+          'location',
+          'description',
+          'url',
+        ],
       },
       {
         id: 'deadline-reminder',
@@ -303,12 +329,16 @@ export class NotificationService {
   }
 
   // Validate notification preferences
-  validateNotificationPreferences(preferences: any): Omit<NotificationPreferences, 'createdAt' | 'updatedAt'> {
+  validateNotificationPreferences(
+    preferences: any
+  ): Omit<NotificationPreferences, 'createdAt' | 'updatedAt'> {
     return notificationPreferencesSchema.parse(preferences);
   }
 
   // Get user notification preferences
-  async getUserPreferences(userId: string): Promise<NotificationPreferences | null> {
+  async getUserPreferences(
+    userId: string
+  ): Promise<NotificationPreferences | null> {
     // TODO: Implement database retrieval
     return this.preferences.get(userId) || null;
   }
@@ -316,7 +346,9 @@ export class NotificationService {
   // Update user notification preferences
   async updateUserPreferences(
     userId: string,
-    preferences: Partial<Omit<NotificationPreferences, 'userId' | 'createdAt' | 'updatedAt'>>
+    preferences: Partial<
+      Omit<NotificationPreferences, 'userId' | 'createdAt' | 'updatedAt'>
+    >
   ): Promise<NotificationPreferences> {
     const existing = await this.getUserPreferences(userId);
     const updated: NotificationPreferences = {
@@ -326,14 +358,21 @@ export class NotificationService {
       inApp: preferences.inApp ?? existing?.inApp ?? true,
       push: preferences.push ?? existing?.push ?? true,
       frequency: preferences.frequency ?? existing?.frequency ?? 'immediate',
-      types: preferences.types ?? existing?.types ?? ['new_opportunity', 'deadline_reminder', 'recommendation'],
-      quietHours: preferences.quietHours ?? existing?.quietHours ?? {
-        enabled: false,
-        start: '22:00',
-        end: '08:00',
-        timezone: 'Asia/Kolkata',
-      },
-      unsubscribeToken: existing?.unsubscribeToken ?? this.generateUnsubscribeToken(),
+      types: preferences.types ??
+        existing?.types ?? [
+          'new_opportunity',
+          'deadline_reminder',
+          'recommendation',
+        ],
+      quietHours: preferences.quietHours ??
+        existing?.quietHours ?? {
+          enabled: false,
+          start: '22:00',
+          end: '08:00',
+          timezone: 'Asia/Kolkata',
+        },
+      unsubscribeToken:
+        existing?.unsubscribeToken ?? this.generateUnsubscribeToken(),
       createdAt: existing?.createdAt ?? new Date(),
       updatedAt: new Date(),
     };
@@ -374,13 +413,15 @@ export class NotificationService {
     // Check quiet hours
     if (preferences.quietHours.enabled) {
       const now = new Date();
-      const currentTime = now.toLocaleTimeString('en-US', {
-        hour12: false,
-        timeZone: preferences.quietHours.timezone,
-      }).slice(0, 5);
+      const currentTime = now
+        .toLocaleTimeString('en-US', {
+          hour12: false,
+          timeZone: preferences.quietHours.timezone,
+        })
+        .slice(0, 5);
 
       const { start, end } = preferences.quietHours;
-      
+
       // Handle quiet hours that span midnight
       if (start > end) {
         if (currentTime >= start || currentTime <= end) {
@@ -399,7 +440,7 @@ export class NotificationService {
   // Send notification
   async sendNotification(request: NotificationRequest): Promise<Notification> {
     const validatedRequest = this.validateNotificationRequest(request);
-    
+
     // Create notification record
     const notification: Notification = {
       id: this.generateId(),
@@ -421,21 +462,26 @@ export class NotificationService {
     };
 
     // If scheduled for future, queue it
-    if (validatedRequest.scheduledFor && validatedRequest.scheduledFor > new Date()) {
+    if (
+      validatedRequest.scheduledFor &&
+      validatedRequest.scheduledFor > new Date()
+    ) {
       // TODO: Implement scheduling queue
-      console.log(`Notification ${notification.id} scheduled for ${validatedRequest.scheduledFor}`);
+      console.log(
+        `Notification ${notification.id} scheduled for ${validatedRequest.scheduledFor}`
+      );
       return notification;
     }
 
     // Send immediately
     await this.deliverNotification(notification);
-    
+
     return notification;
   }
 
   // Deliver notification through specified channels
   private async deliverNotification(notification: Notification): Promise<void> {
-    const deliveryPromises = notification.channels.map(async (channel) => {
+    const deliveryPromises = notification.channels.map(async channel => {
       // Check if user should receive notification on this channel
       const shouldSend = await this.shouldSendNotification(
         notification.userId,
@@ -444,7 +490,9 @@ export class NotificationService {
       );
 
       if (!shouldSend) {
-        console.log(`Skipping ${channel} notification for user ${notification.userId} due to preferences`);
+        console.log(
+          `Skipping ${channel} notification for user ${notification.userId} due to preferences`
+        );
         return;
       }
 
@@ -465,14 +513,15 @@ export class NotificationService {
         delivery.deliveredAt = new Date();
       } catch (error) {
         delivery.status = 'failed';
-        delivery.failureReason = error instanceof Error ? error.message : 'Unknown error';
+        delivery.failureReason =
+          error instanceof Error ? error.message : 'Unknown error';
         console.error(`Failed to send ${channel} notification:`, error);
       }
 
       delivery.attempts += 1;
       delivery.lastAttemptAt = new Date();
       delivery.updatedAt = new Date();
-      
+
       notification.deliveries.push(delivery);
     });
 
@@ -527,7 +576,9 @@ export class NotificationService {
 
       case 'in_app':
         // In-app notifications are stored in database and retrieved by frontend
-        console.log(`In-app notification stored for user ${notification.userId}`);
+        console.log(
+          `In-app notification stored for user ${notification.userId}`
+        );
         break;
 
       default:
@@ -536,13 +587,16 @@ export class NotificationService {
   }
 
   // Retry failed notifications
-  async retryFailedNotifications(maxRetries: number = 3): Promise<void> {
+  async retryFailedNotifications(maxRetries = 3): Promise<void> {
     // TODO: Implement retry logic for failed notifications
     console.log(`Retrying failed notifications (max retries: ${maxRetries})`);
   }
 
   // Get notification analytics
-  async getNotificationAnalytics(userId?: string, dateRange?: { start: Date; end: Date }) {
+  async getNotificationAnalytics(
+    userId?: string,
+    dateRange?: { start: Date; end: Date }
+  ) {
     // TODO: Implement analytics retrieval from database
     return {
       totalSent: 0,
@@ -580,7 +634,9 @@ export class NotificationService {
   }
 
   // Add custom template
-  addTemplate(template: Omit<NotificationTemplate, 'createdAt' | 'updatedAt'>): NotificationTemplate {
+  addTemplate(
+    template: Omit<NotificationTemplate, 'createdAt' | 'updatedAt'>
+  ): NotificationTemplate {
     const fullTemplate: NotificationTemplate = {
       ...template,
       createdAt: new Date(),
@@ -591,7 +647,10 @@ export class NotificationService {
   }
 
   // Process template with variables
-  processTemplate(template: NotificationTemplate, variables: Record<string, any>): {
+  processTemplate(
+    template: NotificationTemplate,
+    variables: Record<string, any>
+  ): {
     subject: string;
     html: string;
     text: string;

@@ -33,7 +33,7 @@ export function useInfiniteScroll<T>({
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number | undefined>();
-  
+
   const loadingRef = useRef(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -47,13 +47,14 @@ export function useInfiniteScroll<T>({
 
     try {
       const result = await fetchMore(page);
-      
+
       setData(prevData => [...prevData, ...result.data]);
       setHasMore(result.hasMore);
       setTotalCount(result.totalCount);
       setPage(prevPage => prevPage + 1);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load more data';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load more data';
       setError(errorMessage);
       console.error('Error loading more data:', err);
     } finally {
@@ -79,7 +80,7 @@ export function useInfiniteScroll<T>({
     const sentinel = sentinelRef.current;
 
     observerRef.current = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const entry = entries[0];
         if (entry.isIntersecting && hasMore && !loading) {
           loadMore();
@@ -128,5 +129,7 @@ export function useInfiniteScroll<T>({
     totalCount,
     // Expose sentinel ref for manual placement
     sentinelRef: sentinelRef as React.MutableRefObject<HTMLDivElement | null>,
-  } as UseInfiniteScrollReturn<T> & { sentinelRef: React.MutableRefObject<HTMLDivElement | null> };
+  } as UseInfiniteScrollReturn<T> & {
+    sentinelRef: React.MutableRefObject<HTMLDivElement | null>;
+  };
 }

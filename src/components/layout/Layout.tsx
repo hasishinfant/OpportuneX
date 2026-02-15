@@ -3,6 +3,7 @@
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { OfflineIndicator } from '@/components/pwa/OfflineIndicator';
 import { SkipLinks } from '@/components/ui/SkipLink';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 import { Footer } from './Footer';
@@ -27,8 +28,15 @@ export function Layout({
   showInstallPrompt = true,
   showOfflineIndicator = true,
 }: LayoutProps) {
+  const { isClient } = useTheme();
+
+  // Use basic styling during SSR, theme-dependent styling only after hydration
+  const backgroundClass = isClient
+    ? 'bg-background dark:bg-secondary-900'
+    : 'bg-white';
+
   return (
-    <div className='min-h-screen flex flex-col bg-background dark:bg-secondary-900'>
+    <div className={cn('min-h-screen flex flex-col', backgroundClass)}>
       {/* Skip Links for Accessibility */}
       <SkipLinks
         links={[
@@ -37,20 +45,18 @@ export function Layout({
           { href: '#footer', label: 'Skip to footer' },
         ]}
       />
-      
-      {/* Offline Indicator */}
-      {showOfflineIndicator && <OfflineIndicator />}
-      
-      {/* Install Prompt */}
-      {showInstallPrompt && <InstallPrompt variant="banner" />}
-      
+
+      {/* Only show PWA components after hydration */}
+      {isClient && showOfflineIndicator && <OfflineIndicator />}
+      {isClient && showInstallPrompt && <InstallPrompt variant='banner' />}
+
       {showHeader && (
-        <div id="navigation">
+        <div id='navigation'>
           <Header />
         </div>
       )}
 
-      <main id="main-content" className={cn('flex-1', className)} tabIndex={-1}>
+      <main id='main-content' className={cn('flex-1', className)} tabIndex={-1}>
         {containerized ? (
           <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-6'>
             {children}
@@ -61,7 +67,7 @@ export function Layout({
       </main>
 
       {showFooter && (
-        <div id="footer">
+        <div id='footer'>
           <Footer />
         </div>
       )}

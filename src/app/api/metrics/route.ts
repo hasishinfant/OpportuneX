@@ -1,5 +1,6 @@
 import { metricsCollector } from '@/lib/metrics-collector';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * GET /api/metrics
@@ -8,10 +9,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const format = request.nextUrl.searchParams.get('format') || 'prometheus';
-    
+
     if (format === 'prometheus') {
       const prometheusMetrics = metricsCollector.exportPrometheusMetrics();
-      
+
       return new NextResponse(prometheusMetrics, {
         status: 200,
         headers: {
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     } else if (format === 'json') {
       const allMetrics = metricsCollector.getRegistry().getAllMetrics();
       const summary = metricsCollector.getMetricsSummary();
-      
+
       return NextResponse.json({
         summary,
         metrics: allMetrics,

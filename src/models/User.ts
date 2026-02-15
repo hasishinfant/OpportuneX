@@ -1,4 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import type { Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 export interface IUser extends Document {
   name: string;
@@ -24,12 +25,13 @@ const UserSchema = new Schema<IUser>({
   location: {
     city: { type: String },
     state: { type: String },
-    country: { type: String, default: 'India' }
+    country: { type: String, default: 'India' },
   },
   resume_path: { type: String },
   resume_text: { type: String },
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now }
+  updated_at: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export default mongoose.models.User ||
+  mongoose.model<IUser>('User', UserSchema);

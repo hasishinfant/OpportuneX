@@ -52,8 +52,8 @@ class GracefulShutdownManager extends EventEmitter {
     isShuttingDown: false,
     forcedShutdown: false,
   };
-  private shutdownTimeout: number = 30000; // 30 seconds default
-  private forceShutdownTimeout: number = 10000; // 10 seconds for forced shutdown
+  private shutdownTimeout = 30000; // 30 seconds default
+  private forceShutdownTimeout = 10000; // 10 seconds for forced shutdown
   private shutdownTimer: NodeJS.Timeout | null = null;
   private forceShutdownTimer: NodeJS.Timeout | null = null;
 
@@ -70,7 +70,7 @@ class GracefulShutdownManager extends EventEmitter {
     this.hooks.push(hook);
     // Sort by priority (lower numbers first)
     this.hooks.sort((a, b) => a.priority - b.priority);
-    
+
     logger.info('Shutdown hook added', {
       name: hook.name,
       priority: hook.priority,
@@ -111,7 +111,7 @@ class GracefulShutdownManager extends EventEmitter {
   /**
    * Initiate graceful shutdown
    */
-  async shutdown(reason: string = 'Manual shutdown'): Promise<void> {
+  async shutdown(reason = 'Manual shutdown'): Promise<void> {
     if (this.status.isShuttingDown) {
       logger.warn('Shutdown already in progress');
       return;
@@ -133,23 +133,23 @@ class GracefulShutdownManager extends EventEmitter {
     try {
       await this.executeShutdownPhases();
       this.status.phase = ShutdownPhase.COMPLETED;
-      
+
       logger.info('Graceful shutdown completed', {
         duration: Date.now() - this.status.startTime.getTime(),
         completedHooks: this.status.completedHooks.length,
         failedHooks: this.status.failedHooks.length,
       });
-      
+
       this.emit('shutdownCompleted', this.getStatus());
     } catch (error) {
       this.status.phase = ShutdownPhase.FAILED;
-      
-      logger.error('Graceful shutdown failed', error, {
+
+      logger.error('Graceful shutdown failed', error as Error, {
         duration: Date.now() - this.status.startTime.getTime(),
         completedHooks: this.status.completedHooks.length,
         failedHooks: this.status.failedHooks.length,
       });
-      
+
       this.emit('shutdownFailed', { error, status: this.getStatus() });
       throw error;
     } finally {
@@ -164,10 +164,10 @@ class GracefulShutdownManager extends EventEmitter {
    */
   forceShutdown(): void {
     this.status.forcedShutdown = true;
-    
+
     logger.warn('Forcing immediate shutdown');
     this.emit('forceShutdown');
-    
+
     // Give a brief moment for cleanup
     this.forceShutdownTimer = setTimeout(() => {
       process.exit(1);
@@ -303,7 +303,7 @@ class GracefulShutdownManager extends EventEmitter {
     });
 
     // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
       logger.fatal('Uncaught exception, initiating emergency shutdown', error);
       this.shutdown('Uncaught exception').finally(() => {
         process.exit(1);
@@ -312,8 +312,10 @@ class GracefulShutdownManager extends EventEmitter {
 
     // Handle unhandled promise rejections
     process.on('unhandledRejection', (reason, promise) => {
-      logger.fatal('Unhandled promise rejection, initiating emergency shutdown', 
-        reason instanceof Error ? reason : new Error(String(reason)));
+      logger.fatal(
+        'Unhandled promise rejection, initiating emergency shutdown',
+        reason instanceof Error ? reason : new Error(String(reason))
+      );
       this.shutdown('Unhandled promise rejection').finally(() => {
         process.exit(1);
       });
@@ -327,21 +329,24 @@ class GracefulShutdownManager extends EventEmitter {
     for (const hook of this.hooks) {
       try {
         logger.debug('Executing shutdown hook', { name: hook.name });
-        
+
         // Execute hook with timeout
         await this.executeWithTimeout(hook.hook, hook.timeout, hook.name);
-        
+
         this.status.completedHooks.push(hook.name);
         logger.debug('Shutdown hook completed', { name: hook.name });
-        
+
         this.emit('hookCompleted', { name: hook.name });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         this.status.failedHooks.push({ name: hook.name, error: errorMessage });
-        
-        logger.error('Shutdown hook failed', error, { name: hook.name });
+
+        logger.error('Shutdown hook failed', error as Error, {
+          name: hook.name,
+        });
         this.emit('hookFailed', { name: hook.name, error });
-        
+
         // Continue with other hooks even if one fails
       }
     }
@@ -381,7 +386,7 @@ class GracefulShutdownManager extends EventEmitter {
       // Check if there are active connections
       // For now, we'll just wait a bit to simulate draining
       const activeConnections = this.getActiveConnectionCount();
-      
+
       if (activeConnections === 0) {
         break;
       }
@@ -412,7 +417,7 @@ class GracefulShutdownManager extends EventEmitter {
       clearTimeout(this.shutdownTimer);
       this.shutdownTimer = null;
     }
-    
+
     if (this.forceShutdownTimer) {
       clearTimeout(this.forceShutdownTimer);
       this.forceShutdownTimer = null;
@@ -443,7 +448,7 @@ export function createShutdownHealthCheck() {
     name: 'shutdown_status',
     check: async () => {
       const status = gracefulShutdown.getStatus();
-      
+
       return {
         healthy: !status.isShuttingDown,
         details: {
@@ -464,7 +469,8 @@ export function createShutdownMiddleware() {
     if (gracefulShutdown.isShuttingDown()) {
       res.status(503).json({
         error: 'Service is shutting down',
-        message: 'The server is currently shutting down and not accepting new requests',
+        message:
+          'The server is currently shutting down and not accepting new requests',
       });
       return;
     }

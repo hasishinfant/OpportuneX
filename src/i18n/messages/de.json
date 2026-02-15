@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "submit": "Absenden",
+    "reset": "Zurücksetzen"
+  },
+  "header": {
+    "search": "Suchen",
+    "myRoadmaps": "Meine Roadmaps",
+    "profile": "Profil",
+    "signIn": "Anmelden",
+    "getStarted": "Loslegen",
+    "analytics": "Analytik",
+    "social": "Sozial"
+  },
+  "home": {
+    "title": "Entdecke Deine Nächste Chance",
+    "subtitle": "KI-gestützte Plattform zum Finden von Hackathons, Praktika und Workshops für dich",
+    "searchPlaceholder": "Nach Möglichkeiten suchen...",
+    "voiceSearch": "Sprachsuche",
+    "featuredOpportunities": "Empfohlene Möglichkeiten"
+  },
+  "search": {
+    "title": "Möglichkeiten Suchen",
+    "placeholder": "Wonach suchst du?",
+    "voiceSearchButton": "Sprachsuche Verwenden",
+    "filters": "Filter",
+    "results": "Ergebnisse",
+    "noResults": "Keine Möglichkeiten gefunden",
+    "tryDifferentSearch": "Versuche einen anderen Suchbegriff"
+  },
+  "filters": {
+    "type": "Typ",
+    "location": "Standort",
+    "skillLevel": "Fähigkeitsstufe",
+    "remote": "Remote",
+    "category": "Kategorie",
+    "deadline": "Frist",
+    "clearAll": "Alle Löschen",
+    "apply": "Filter Anwenden"
+  },
+  "opportunity": {
+    "hackathon": "Hackathon",
+    "internship": "Praktikum",
+    "workshop": "Workshop",
+    "deadline": "Frist",
+    "location": "Standort",
+    "remote": "Remote",
+    "skillLevel": "Fähigkeitsstufe",
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "advanced": "Experte",
+    "viewDetails": "Details Anzeigen",
+    "apply": "Jetzt Bewerben",
+    "save": "Speichern"
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "personalInfo": "Persönliche Informationen",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "location": "Standort",
+    "skills": "Fähigkeiten",
+    "interests": "Interessen",
+    "education": "Bildung",
+    "experience": "Erfahrung",
+    "preferences": "Einstellungen",
+    "notifications": "Benachrichtigungseinstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "saveChanges": "Änderungen Speichern"
+  },
+  "roadmap": {
+    "title": "Meine Roadmaps",
+    "createNew": "Neue Roadmap Erstellen",
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "viewRoadmap": "Roadmap Anzeigen",
+    "progress": "Fortschritt",
+    "steps": "Schritte",
+    "resources": "Ressourcen"
+  },
+  "voice": {
+    "listening": "Hört zu...",
+    "processing": "Verarbeitung...",
+    "speak": "Jetzt sprechen",
+    "tryAgain": "Erneut versuchen",
+    "error": "Spracheingabe konnte nicht verarbeitet werden",
+    "permissionDenied": "Mikrofonberechtigung verweigert",
+    "notSupported": "Sprachsuche in diesem Browser nicht unterstützt"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Benachrichtigungen",
+    "newOpportunity": "Neue Möglichkeit entspricht deinen Interessen",
+    "deadlineReminder": "Frist nähert sich",
+    "applicationUpdate": "Bewerbungsstatus aktualisiert"
+  },
+  "footer": {
+    "about": "Über",
+    "contact": "Kontakt",
+    "privacy": "Datenschutzrichtlinie",
+    "terms": "Nutzungsbedingungen",
+    "help": "Hilfezentrum"
+  }
+}

@@ -97,9 +97,11 @@ export class WebPushService implements PushService {
   }): Promise<{ messageId: string; status: string }> {
     try {
       const userSubscriptions = await this.getUserSubscriptions(params.userId);
-      
+
       if (userSubscriptions.length === 0) {
-        throw new Error(`No push subscriptions found for user ${params.userId}`);
+        throw new Error(
+          `No push subscriptions found for user ${params.userId}`
+        );
       }
 
       const payload: PushNotificationPayload = {
@@ -121,12 +123,14 @@ export class WebPushService implements PushService {
       };
 
       const results = await Promise.allSettled(
-        userSubscriptions.map(subscription => 
+        userSubscriptions.map(subscription =>
           this.sendToSubscription(subscription, payload)
         )
       );
 
-      const successCount = results.filter(result => result.status === 'fulfilled').length;
+      const successCount = results.filter(
+        result => result.status === 'fulfilled'
+      ).length;
       const messageId = `push-${Date.now()}-${Math.random().toString(36).substring(2)}`;
 
       return {
@@ -135,7 +139,9 @@ export class WebPushService implements PushService {
       };
     } catch (error) {
       console.error('Push notification send error:', error);
-      throw new Error(`Failed to send push notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to send push notification: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -149,7 +155,11 @@ export class WebPushService implements PushService {
     badge?: number;
     segmentationData?: Record<string, any>;
   }): Promise<Array<{ userId: string; messageId: string; status: string }>> {
-    const results: Array<{ userId: string; messageId: string; status: string }> = [];
+    const results: Array<{
+      userId: string;
+      messageId: string;
+      status: string;
+    }> = [];
 
     for (const userId of params.userIds) {
       try {
@@ -186,10 +196,10 @@ export class WebPushService implements PushService {
   ): Promise<PushDeliveryStatus> {
     try {
       const pushPayload = JSON.stringify(payload);
-      
+
       // Simulate web push API call
       const response = await this.makeWebPushRequest(subscription, pushPayload);
-      
+
       return {
         subscriptionId: subscription.id,
         userId: subscription.userId,
@@ -217,7 +227,7 @@ export class WebPushService implements PushService {
     try {
       // In a real implementation, this would use the web-push library
       // to send notifications via FCM, Mozilla's push service, etc.
-      
+
       // For now, we'll simulate the request
       console.log('🔔 Sending push notification:', {
         endpoint: subscription.endpoint,
@@ -264,7 +274,7 @@ export class WebPushService implements PushService {
     deviceType?: 'desktop' | 'mobile' | 'tablet';
   }): Promise<PushSubscription> {
     const subscriptionId = this.generateId();
-    
+
     const pushSubscription: PushSubscription = {
       id: subscriptionId,
       userId: params.userId,
@@ -278,10 +288,10 @@ export class WebPushService implements PushService {
     };
 
     this.subscriptions.set(subscriptionId, pushSubscription);
-    
+
     // TODO: Store in database
     console.log(`User ${params.userId} subscribed to push notifications`);
-    
+
     return pushSubscription;
   }
 
@@ -292,7 +302,7 @@ export class WebPushService implements PushService {
       subscription.active = false;
       subscription.updatedAt = new Date();
       this.subscriptions.set(subscriptionId, subscription);
-      
+
       // TODO: Update in database
       console.log(`Subscription ${subscriptionId} unsubscribed`);
     }
@@ -301,8 +311,9 @@ export class WebPushService implements PushService {
   // Get user's push subscriptions
   async getUserSubscriptions(userId: string): Promise<PushSubscription[]> {
     // TODO: Implement database retrieval
-    return Array.from(this.subscriptions.values())
-      .filter(sub => sub.userId === userId && sub.active);
+    return Array.from(this.subscriptions.values()).filter(
+      sub => sub.userId === userId && sub.active
+    );
   }
 
   // Get all subscriptions (for admin purposes)
@@ -314,11 +325,11 @@ export class WebPushService implements PushService {
   // Clean up expired subscriptions
   async cleanupExpiredSubscriptions(): Promise<number> {
     let cleanedCount = 0;
-    
+
     for (const [id, subscription] of this.subscriptions.entries()) {
       // Check if subscription is older than 30 days and inactive
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      
+
       if (!subscription.active && subscription.updatedAt < thirtyDaysAgo) {
         this.subscriptions.delete(id);
         cleanedCount++;
@@ -327,12 +338,15 @@ export class WebPushService implements PushService {
 
     // TODO: Implement database cleanup
     console.log(`Cleaned up ${cleanedCount} expired push subscriptions`);
-    
+
     return cleanedCount;
   }
 
   // Get push notification statistics
-  async getPushStats(userId?: string, dateRange?: { start: Date; end: Date }): Promise<{
+  async getPushStats(
+    userId?: string,
+    dateRange?: { start: Date; end: Date }
+  ): Promise<{
     totalSubscriptions: number;
     activeSubscriptions: number;
     totalSent: number;
@@ -346,16 +360,19 @@ export class WebPushService implements PushService {
     };
   }> {
     // TODO: Implement actual stats retrieval from database
-    const subscriptions = userId 
+    const subscriptions = userId
       ? await this.getUserSubscriptions(userId)
       : await this.getAllSubscriptions();
 
     const activeSubscriptions = subscriptions.filter(sub => sub.active);
-    
-    const byDeviceType = subscriptions.reduce((acc, sub) => {
-      acc[sub.deviceType] = (acc[sub.deviceType] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+
+    const byDeviceType = subscriptions.reduce(
+      (acc, sub) => {
+        acc[sub.deviceType] = (acc[sub.deviceType] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalSubscriptions: subscriptions.length,
@@ -377,8 +394,8 @@ export class WebPushService implements PushService {
     // In a real implementation, this would use the web-push library
     // to generate actual VAPID keys
     return {
-      publicKey: 'mock-public-key-' + Math.random().toString(36).substring(2),
-      privateKey: 'mock-private-key-' + Math.random().toString(36).substring(2),
+      publicKey: `mock-public-key-${Math.random().toString(36).substring(2)}`,
+      privateKey: `mock-private-key-${Math.random().toString(36).substring(2)}`,
     };
   }
 
@@ -425,7 +442,8 @@ export class MockPushService implements PushService {
     console.log('🔔 Mock Push Service - Sending push notification:', {
       userId: params.userId,
       title: params.title,
-      body: params.body.substring(0, 50) + (params.body.length > 50 ? '...' : ''),
+      body:
+        params.body.substring(0, 50) + (params.body.length > 50 ? '...' : ''),
     });
 
     this.sentNotifications.push({

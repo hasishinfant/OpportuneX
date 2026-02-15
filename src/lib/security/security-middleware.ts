@@ -17,30 +17,30 @@ export class SecurityMiddleware {
   static webSecurityStack = [
     // HTTPS enforcement
     SecurityHeaders.enforceHTTPS,
-    
+
     // Security headers
     SecurityHeaders.helmetConfig,
     SecurityHeaders.customSecurityHeaders,
-    
+
     // Rate limiting
     RateLimiting.generalApiLimit,
-    
+
     // Input sanitization
     sanitizeRequest,
-    
+
     // SQL injection prevention
     SQLInjectionPrevention.preventSQLInjection,
-    
+
     // XSS protection
     XSSProtection.setXSSHeaders,
     XSSProtection.sanitizeRequest,
-    
+
     // CSRF protection
     ...csrfProtectionStack,
-    
+
     // Response sanitization
     sanitizeResponse,
-    
+
     // Audit logging
     AuditLogger.auditMiddleware,
   ];
@@ -51,28 +51,28 @@ export class SecurityMiddleware {
   static apiSecurityStack = [
     // HTTPS enforcement
     SecurityHeaders.enforceHTTPS,
-    
+
     // API security headers
     SecurityHeaders.apiSecurityHeaders,
-    
+
     // Rate limiting (adaptive)
     RateLimiting.adaptiveLimit,
-    
+
     // Input sanitization
     sanitizeRequest,
-    
+
     // SQL injection prevention
     SQLInjectionPrevention.preventSQLInjection,
-    
+
     // XSS protection
     XSSProtection.sanitizeRequest,
-    
+
     // CSRF protection for APIs
     ...apiCSRFProtection,
-    
+
     // Response sanitization
     sanitizeResponse,
-    
+
     // Audit logging
     AuditLogger.auditMiddleware,
   ];
@@ -167,7 +167,11 @@ export class SecurityMiddleware {
   /**
    * Validate voice input
    */
-  static validateVoiceInput = (req: Request, res: Response, next: NextFunction) => {
+  static validateVoiceInput = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { audioData, language } = req.body;
 
@@ -230,12 +234,21 @@ export class SecurityMiddleware {
   /**
    * Validate AI processing input
    */
-  static validateAIInput = (req: Request, res: Response, next: NextFunction) => {
+  static validateAIInput = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { opportunityId, userProfile, targetDate } = req.body;
 
       // Validate opportunity ID
-      if (opportunityId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(opportunityId)) {
+      if (
+        opportunityId &&
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          opportunityId
+        )
+      ) {
         return res.status(400).json({
           success: false,
           error: 'Invalid opportunity ID',
@@ -287,7 +300,11 @@ export class SecurityMiddleware {
   /**
    * Validate file uploads
    */
-  static validateFileUpload = (req: Request, res: Response, next: NextFunction) => {
+  static validateFileUpload = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       if (!req.file && !req.files) {
         return res.status(400).json({
@@ -297,8 +314,9 @@ export class SecurityMiddleware {
         });
       }
 
-      const file = req.file || (Array.isArray(req.files) ? req.files[0] : req.files);
-      
+      const file =
+        req.file || (Array.isArray(req.files) ? req.files[0] : req.files);
+
       if (!file) {
         return res.status(400).json({
           success: false,
@@ -349,7 +367,11 @@ export class SecurityMiddleware {
   /**
    * Require user authentication
    */
-  static requireUserAuth = (req: Request, res: Response, next: NextFunction) => {
+  static requireUserAuth = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     if (!req.user) {
       AuditLogger.logEvent({
         eventType: AuditLogger.EVENT_TYPES.UNAUTHORIZED_ACCESS,
@@ -376,7 +398,11 @@ export class SecurityMiddleware {
   /**
    * Require admin authentication
    */
-  static requireAdminAuth = (req: Request, res: Response, next: NextFunction) => {
+  static requireAdminAuth = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     if (!req.user) {
       AuditLogger.logEvent({
         eventType: AuditLogger.EVENT_TYPES.UNAUTHORIZED_ACCESS,
@@ -424,9 +450,13 @@ export class SecurityMiddleware {
   /**
    * Security monitoring middleware
    */
-  static securityMonitoring = (req: Request, res: Response, next: NextFunction) => {
+  static securityMonitoring = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const startTime = Date.now();
-    
+
     // Monitor for suspicious patterns
     const suspiciousPatterns = [
       /\b(union|select|insert|delete|drop|alter|create|exec|execute)\b/gi,
@@ -443,7 +473,7 @@ export class SecurityMiddleware {
       headers: req.headers,
     });
 
-    const suspiciousActivity = suspiciousPatterns.some(pattern => 
+    const suspiciousActivity = suspiciousPatterns.some(pattern =>
       pattern.test(requestString)
     );
 
@@ -475,8 +505,9 @@ export class SecurityMiddleware {
     // Monitor response time
     res.on('finish', () => {
       const duration = Date.now() - startTime;
-      
-      if (duration > 5000) { // Log slow requests
+
+      if (duration > 5000) {
+        // Log slow requests
         AuditLogger.logEvent({
           eventType: 'slow_request',
           userId: req.user?.id,
@@ -532,7 +563,7 @@ export class SecurityMiddleware {
  */
 export const getSecurityMiddlewareConfig = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   return {
     // Enable all security features in production
     enableCSRF: isProduction,
@@ -542,11 +573,11 @@ export const getSecurityMiddlewareConfig = () => {
     enableInputSanitization: true,
     enableSQLInjectionPrevention: true,
     enableXSSProtection: true,
-    
+
     // Development-specific settings
     logLevel: isProduction ? 'warn' : 'debug',
     enableSecurityMonitoring: true,
-    
+
     // Rate limiting settings
     rateLimits: {
       general: isProduction ? 100 : 1000,

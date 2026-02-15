@@ -19,7 +19,7 @@ export class DataEncryption {
     if (!key) {
       throw new Error('ENCRYPTION_KEY environment variable is required');
     }
-    
+
     // Derive key from the provided key using PBKDF2
     const salt = process.env.ENCRYPTION_SALT || 'opportunex-default-salt';
     return crypto.pbkdf2Sync(key, salt, 100000, this.KEY_LENGTH, 'sha256');
@@ -37,11 +37,11 @@ export class DataEncryption {
 
       let encrypted = cipher.update(plaintext, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       const tag = cipher.getAuthTag();
-      
+
       // Combine IV, tag, and encrypted data
-      const result = iv.toString('hex') + ':' + tag.toString('hex') + ':' + encrypted;
+      const result = `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted}`;
       return result;
     } catch (error) {
       console.error('Encryption error:', error);
@@ -56,7 +56,7 @@ export class DataEncryption {
     try {
       const key = this.getEncryptionKey();
       const parts = encryptedData.split(':');
-      
+
       if (parts.length !== 3) {
         throw new Error('Invalid encrypted data format');
       }
@@ -71,7 +71,7 @@ export class DataEncryption {
 
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
       console.error('Decryption error:', error);
@@ -94,7 +94,10 @@ export class DataEncryption {
   /**
    * Verify password against hash
    */
-  static async verifyPassword(password: string, hash: string): Promise<boolean> {
+  static async verifyPassword(
+    password: string,
+    hash: string
+  ): Promise<boolean> {
     try {
       return await bcrypt.compare(password, hash);
     } catch (error) {
@@ -106,7 +109,7 @@ export class DataEncryption {
   /**
    * Generate secure random token
    */
-  static generateSecureToken(length: number = 32): string {
+  static generateSecureToken(length = 32): string {
     return crypto.randomBytes(length).toString('hex');
   }
 
@@ -115,7 +118,10 @@ export class DataEncryption {
    */
   static hashForIndex(data: string, salt?: string): string {
     const actualSalt = salt || process.env.INDEX_SALT || 'default-index-salt';
-    return crypto.createHash('sha256').update(data + actualSalt).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(data + actualSalt)
+      .digest('hex');
   }
 
   /**
@@ -191,7 +197,7 @@ export class DataEncryption {
 
     try {
       const decrypted = this.decrypt(encryptedValue);
-      
+
       // Try to parse as JSON if it looks like JSON
       if (decrypted.startsWith('{') || decrypted.startsWith('[')) {
         try {
@@ -200,7 +206,7 @@ export class DataEncryption {
           return decrypted;
         }
       }
-      
+
       return decrypted;
     } catch (error) {
       console.error('Field decryption error:', error);
@@ -240,17 +246,22 @@ export class DataEncryption {
   /**
    * Key rotation utilities
    */
-  static async rotateEncryptionKey(oldKey: string, newKey: string): Promise<void> {
+  static async rotateEncryptionKey(
+    oldKey: string,
+    newKey: string
+  ): Promise<void> {
     // This would be used in a migration script to re-encrypt data with new key
     console.warn('Key rotation should be performed during maintenance window');
-    
+
     // Implementation would:
     // 1. Decrypt all encrypted fields with old key
     // 2. Re-encrypt with new key
     // 3. Update environment variable
     // 4. Verify all data can be decrypted with new key
-    
-    throw new Error('Key rotation must be implemented as a separate migration process');
+
+    throw new Error(
+      'Key rotation must be implemented as a separate migration process'
+    );
   }
 
   /**
@@ -290,11 +301,11 @@ export class DataEncryption {
       if (key.length < 32) {
         errors.push('Encryption key must be at least 32 characters');
       }
-      
+
       if (!/^[a-fA-F0-9]+$/.test(key)) {
         errors.push('Encryption key must be hexadecimal');
       }
-      
+
       if (key === 'default-key' || key === '00000000000000000000000000000000') {
         errors.push('Encryption key must not be a default or weak key');
       }
@@ -320,14 +331,14 @@ export class DataEncryption {
     const key = this.getEncryptionKey();
     const iv = crypto.randomBytes(this.IV_LENGTH);
     const cipher = crypto.createCipher(this.ALGORITHM, key);
-    
+
     const encrypted = Buffer.concat([
       cipher.update(fileBuffer),
       cipher.final(),
     ]);
-    
+
     const tag = cipher.getAuthTag();
-    
+
     return {
       encryptedData: encrypted,
       metadata: {
@@ -341,22 +352,22 @@ export class DataEncryption {
   /**
    * Decrypt file contents
    */
-  static decryptFile(encryptedData: Buffer, metadata: {
-    algorithm: string;
-    iv: string;
-    tag: string;
-  }): Buffer {
+  static decryptFile(
+    encryptedData: Buffer,
+    metadata: {
+      algorithm: string;
+      iv: string;
+      tag: string;
+    }
+  ): Buffer {
     const key = this.getEncryptionKey();
     const iv = Buffer.from(metadata.iv, 'hex');
     const tag = Buffer.from(metadata.tag, 'hex');
-    
+
     const decipher = crypto.createDecipher(metadata.algorithm, key);
     decipher.setAuthTag(tag);
-    
-    return Buffer.concat([
-      decipher.update(encryptedData),
-      decipher.final(),
-    ]);
+
+    return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
   }
 }
 
@@ -386,8 +397,8 @@ export const encryptionMiddleware = {
   decryptResponse: (sensitiveFields: string[]) => {
     return (req: any, res: any, next: any) => {
       const originalJson = res.json;
-      
-      res.json = function(data: any) {
+
+      res.json = function (data: any) {
         if (data && typeof data === 'object') {
           for (const field of sensitiveFields) {
             if (data[field]) {
@@ -395,10 +406,10 @@ export const encryptionMiddleware = {
             }
           }
         }
-        
+
         return originalJson.call(this, data);
       };
-      
+
       next();
     };
   },

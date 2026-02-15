@@ -3,7 +3,7 @@
 import { Layout } from '@/components/layout/Layout';
 import { RoadmapDashboard } from '@/components/roadmap/RoadmapDashboard';
 import type { RoadmapResponse } from '@/types';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Mock roadmap data for demonstration
 const MOCK_ROADMAPS: RoadmapResponse[] = [
@@ -394,6 +394,12 @@ const MOCK_ROADMAPS: RoadmapResponse[] = [
 export default function RoadmapPage() {
   const [roadmaps, setRoadmaps] = useState<RoadmapResponse[]>(MOCK_ROADMAPS);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Mark as client-side after hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleGenerateRoadmap = useCallback(async (opportunityId: string) => {
     setLoading(true);
@@ -457,6 +463,35 @@ export default function RoadmapPage() {
     },
     []
   );
+
+  // Prevent hydration mismatch - show loading until client-side
+  if (!mounted) {
+    return (
+      <Layout>
+        <div className='min-h-screen bg-gray-50'>
+          <div className='bg-gradient-to-br from-blue-600 to-blue-800 text-white'>
+            <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+              <div className='max-w-4xl mx-auto text-center'>
+                <h1 className='text-3xl md:text-5xl font-bold mb-4'>
+                  AI Learning Roadmaps
+                </h1>
+                <p className='text-xl md:text-2xl text-blue-100 mb-6'>
+                  Personalized preparation paths powered by artificial
+                  intelligence
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+            <div className='flex items-center justify-center py-12'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+              <span className='ml-3 text-gray-600'>Loading...</span>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

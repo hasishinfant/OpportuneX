@@ -38,10 +38,12 @@ class CDNService {
     this.config = {
       enabled: process.env.CDN_ENABLED === 'true',
       baseUrl: process.env.CDN_BASE_URL || '',
-      regions: (process.env.CDN_REGIONS || 'us-east-1,eu-west-1,ap-south-1').split(','),
+      regions: (
+        process.env.CDN_REGIONS || 'us-east-1,eu-west-1,ap-south-1'
+      ).split(','),
       cacheHeaders: {
         'Cache-Control': 'public, max-age=31536000, immutable', // 1 year for static assets
-        'Vary': 'Accept-Encoding',
+        Vary: 'Accept-Encoding',
         'X-Content-Type-Options': 'nosniff',
       },
     };
@@ -53,7 +55,11 @@ class CDNService {
         sizes: [320, 640, 768, 1024, 1280, 1920],
       },
       fonts: {
-        preload: ['Inter-Regular.woff2', 'Inter-Medium.woff2', 'Inter-SemiBold.woff2'],
+        preload: [
+          'Inter-Regular.woff2',
+          'Inter-Medium.woff2',
+          'Inter-SemiBold.woff2',
+        ],
         display: 'swap',
       },
       scripts: {
@@ -70,19 +76,22 @@ class CDNService {
   /**
    * Get optimized asset URL
    */
-  getAssetUrl(path: string, options: {
-    width?: number;
-    height?: number;
-    quality?: number;
-    format?: string;
-    version?: string;
-  } = {}): string {
+  getAssetUrl(
+    path: string,
+    options: {
+      width?: number;
+      height?: number;
+      quality?: number;
+      format?: string;
+      version?: string;
+    } = {}
+  ): string {
     if (!this.config.enabled || !this.config.baseUrl) {
       return path;
     }
 
     const url = new URL(path, this.config.baseUrl);
-    
+
     // Add optimization parameters
     if (options.width) url.searchParams.set('w', options.width.toString());
     if (options.height) url.searchParams.set('h', options.height.toString());
@@ -96,16 +105,27 @@ class CDNService {
   /**
    * Generate responsive image srcset
    */
-  generateSrcSet(imagePath: string, options: {
-    format?: string;
-    quality?: number;
-    sizes?: number[];
-  } = {}): string {
-    const { format = 'webp', quality = 75, sizes = this.optimization.images.sizes } = options;
+  generateSrcSet(
+    imagePath: string,
+    options: {
+      format?: string;
+      quality?: number;
+      sizes?: number[];
+    } = {}
+  ): string {
+    const {
+      format = 'webp',
+      quality = 75,
+      sizes = this.optimization.images.sizes,
+    } = options;
 
     return sizes
       .map(size => {
-        const url = this.getAssetUrl(imagePath, { width: size, format, quality });
+        const url = this.getAssetUrl(imagePath, {
+          width: size,
+          format,
+          quality,
+        });
         return `${url} ${size}w`;
       })
       .join(', ');
@@ -114,17 +134,29 @@ class CDNService {
   /**
    * Generate picture element with multiple formats
    */
-  generatePictureElement(imagePath: string, alt: string, options: {
-    sizes?: string;
-    className?: string;
-    loading?: 'lazy' | 'eager';
-    priority?: boolean;
-  } = {}): string {
-    const { sizes = '100vw', className = '', loading = 'lazy', priority = false } = options;
+  generatePictureElement(
+    imagePath: string,
+    alt: string,
+    options: {
+      sizes?: string;
+      className?: string;
+      loading?: 'lazy' | 'eager';
+      priority?: boolean;
+    } = {}
+  ): string {
+    const {
+      sizes = '100vw',
+      className = '',
+      loading = 'lazy',
+      priority = false,
+    } = options;
 
     const webpSrcSet = this.generateSrcSet(imagePath, { format: 'webp' });
     const avifSrcSet = this.generateSrcSet(imagePath, { format: 'avif' });
-    const fallbackSrc = this.getAssetUrl(imagePath, { format: 'jpeg', quality: 85 });
+    const fallbackSrc = this.getAssetUrl(imagePath, {
+      format: 'jpeg',
+      quality: 85,
+    });
 
     return `
       <picture>
@@ -145,7 +177,9 @@ class CDNService {
   /**
    * Get cache headers for different asset types
    */
-  getCacheHeaders(assetType: 'image' | 'font' | 'script' | 'style' | 'document'): Record<string, string> {
+  getCacheHeaders(
+    assetType: 'image' | 'font' | 'script' | 'style' | 'document'
+  ): Record<string, string> {
     const baseHeaders = { ...this.config.cacheHeaders };
 
     switch (assetType) {
@@ -169,7 +203,7 @@ class CDNService {
       case 'document':
         return {
           'Cache-Control': 'public, max-age=3600, must-revalidate',
-          'Vary': 'Accept-Encoding',
+          Vary: 'Accept-Encoding',
         };
       default:
         return baseHeaders;
@@ -209,7 +243,9 @@ class CDNService {
       // DNS prefetch for CDN domain
       const cdnDomain = new URL(this.config.baseUrl).hostname;
       hints.push(`<link rel="dns-prefetch" href="//${cdnDomain}">`);
-      hints.push(`<link rel="preconnect" href="${this.config.baseUrl}" crossorigin>`);
+      hints.push(
+        `<link rel="preconnect" href="${this.config.baseUrl}" crossorigin>`
+      );
     }
 
     // Prefetch for external services
@@ -222,11 +258,14 @@ class CDNService {
   /**
    * Optimize image for different devices and formats
    */
-  async optimizeImage(imagePath: string, options: {
-    targetSizes?: number[];
-    formats?: string[];
-    quality?: number;
-  } = {}): Promise<{
+  async optimizeImage(
+    imagePath: string,
+    options: {
+      targetSizes?: number[];
+      formats?: string[];
+      quality?: number;
+    } = {}
+  ): Promise<{
     optimized: Array<{
       url: string;
       width: number;
@@ -290,7 +329,7 @@ class CDNService {
           },
         },
         {
-          pattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/,
+          pattern: '/images/',
           strategy: 'CacheFirst',
           options: {
             cacheName: 'images-cache',
@@ -301,7 +340,7 @@ class CDNService {
           },
         },
         {
-          pattern: /\.(?:woff|woff2|eot|ttf|otf)$/,
+          pattern: '/fonts/',
           strategy: 'CacheFirst',
           options: {
             cacheName: 'fonts-cache',
@@ -312,7 +351,7 @@ class CDNService {
           },
         },
         {
-          pattern: /\.(?:js|css)$/,
+          pattern: '/static/',
           strategy: 'StaleWhileRevalidate',
           options: {
             cacheName: 'static-resources',
@@ -347,17 +386,19 @@ class CDNService {
         this.config.regions.map(async region => {
           const start = Date.now();
           const testUrl = `${this.config.baseUrl}/health?region=${region}`;
-          
+
           try {
-            const response = await fetch(testUrl, { 
+            const response = await fetch(testUrl, {
               method: 'HEAD',
               signal: AbortSignal.timeout(5000),
             });
             const latency = Date.now() - start;
-            
+
             return {
               region,
-              status: response.ok ? 'healthy' as const : 'degraded' as const,
+              status: response.ok
+                ? ('healthy' as const)
+                : ('degraded' as const),
               latency,
             };
           } catch {
@@ -369,11 +410,13 @@ class CDNService {
         })
       );
 
-      const regions = regionChecks.map(result => 
-        result.status === 'fulfilled' ? result.value : {
-          region: 'unknown',
-          status: 'down' as const,
-        }
+      const regions = regionChecks.map(result =>
+        result.status === 'fulfilled'
+          ? result.value
+          : {
+              region: 'unknown',
+              status: 'down' as const,
+            }
       );
 
       const healthy = regions.some(r => r.status === 'healthy');
@@ -410,7 +453,9 @@ class CDNService {
         console.log(`Purging CDN cache for: ${path}`);
         purged.push(path);
       } catch (error) {
-        errors.push(`Failed to purge ${path}: ${error.message}`);
+        errors.push(
+          `Failed to purge ${path}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
 
@@ -435,15 +480,19 @@ export class ImageOptimizer {
   /**
    * Generate Next.js Image component props
    */
-  generateImageProps(src: string, alt: string, options: {
-    width?: number;
-    height?: number;
-    priority?: boolean;
-    quality?: number;
-    sizes?: string;
-    placeholder?: 'blur' | 'empty';
-    blurDataURL?: string;
-  } = {}) {
+  generateImageProps(
+    src: string,
+    alt: string,
+    options: {
+      width?: number;
+      height?: number;
+      priority?: boolean;
+      quality?: number;
+      sizes?: string;
+      placeholder?: 'blur' | 'empty';
+      blurDataURL?: string;
+    } = {}
+  ) {
     const {
       width = 800,
       height = 600,
@@ -483,14 +532,21 @@ export class ImageOptimizer {
   /**
    * Generate image metadata for SEO
    */
-  generateImageMetadata(imagePath: string, options: {
-    title?: string;
-    description?: string;
-    width?: number;
-    height?: number;
-  } = {}) {
+  generateImageMetadata(
+    imagePath: string,
+    options: {
+      title?: string;
+      description?: string;
+      width?: number;
+      height?: number;
+    } = {}
+  ) {
     const { title, description, width = 1200, height = 630 } = options;
-    const imageUrl = this.cdnService.getAssetUrl(imagePath, { width, height, quality: 85 });
+    const imageUrl = this.cdnService.getAssetUrl(imagePath, {
+      width,
+      height,
+      quality: 85,
+    });
 
     return {
       openGraph: {
@@ -526,7 +582,12 @@ export class CDNPerformanceMonitor {
   /**
    * Record asset load metrics
    */
-  recordAssetLoad(url: string, loadTime: number, size: number, cacheHit: boolean) {
+  recordAssetLoad(
+    url: string,
+    loadTime: number,
+    size: number,
+    cacheHit: boolean
+  ) {
     this.metrics.push({
       url,
       loadTime,
@@ -569,7 +630,7 @@ export class CDNPerformanceMonitor {
   /**
    * Get slow loading assets
    */
-  getSlowAssets(thresholdMs: number = 1000) {
+  getSlowAssets(thresholdMs = 1000) {
     return this.metrics
       .filter(m => m.loadTime > thresholdMs)
       .sort((a, b) => b.loadTime - a.loadTime)

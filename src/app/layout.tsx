@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   userScalable: false,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1f2937' }
+    { media: '(prefers-color-scheme: dark)', color: '#1f2937' },
   ],
 };
 
@@ -38,12 +38,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang='en' className='scroll-smooth' suppressHydrationWarning>
       <body className={inter.className}>
         {/* ✅ Wrap entire app with ThemeProvider */}
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

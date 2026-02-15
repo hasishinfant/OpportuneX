@@ -190,9 +190,21 @@ export function RoadmapDashboard({
           {/* View Mode Selector */}
           <div className='flex space-x-1 bg-secondary-100 p-1 rounded-lg w-fit'>
             {[
-              { key: 'overview', label: 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
-              { key: 'phases', label: 'Phases', icon: <ClipboardList className="h-4 w-4" /> },
-              { key: 'progress', label: 'Progress', icon: <TrendingUp className="h-4 w-4" /> },
+              {
+                key: 'overview',
+                label: 'Overview',
+                icon: <BarChart3 className='h-4 w-4' />,
+              },
+              {
+                key: 'phases',
+                label: 'Phases',
+                icon: <ClipboardList className='h-4 w-4' />,
+              },
+              {
+                key: 'progress',
+                label: 'Progress',
+                icon: <TrendingUp className='h-4 w-4' />,
+              },
             ].map(({ key, label, icon }) => (
               <button
                 key={key}

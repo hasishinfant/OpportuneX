@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import type { NotificationChannel, NotificationDelivery, NotificationStatus } from './notification.service';
+import type {
+  NotificationChannel,
+  NotificationDelivery,
+  NotificationStatus,
+} from './notification.service';
 
 // Delivery tracking interfaces
 export interface DeliveryAttempt {
@@ -68,7 +72,8 @@ export class NotificationDeliveryService {
   private deliveries: Map<string, NotificationDelivery> = new Map();
   private attempts: Map<string, DeliveryAttempt[]> = new Map();
   private rules: Map<NotificationChannel, DeliveryRule> = new Map();
-  private circuitBreakers: Map<NotificationChannel, CircuitBreakerState> = new Map();
+  private circuitBreakers: Map<NotificationChannel, CircuitBreakerState> =
+    new Map();
   private retryQueue: Map<string, NodeJS.Timeout> = new Map();
   private statsCache: Map<string, DeliveryStats> = new Map();
 
@@ -80,7 +85,9 @@ export class NotificationDeliveryService {
 
   // Initialize default delivery rules
   private initializeDefaultRules(): void {
-    const defaultRules: Omit<DeliveryRule, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    const defaultRules: Array<
+      Omit<DeliveryRule, 'id' | 'createdAt' | 'updatedAt'>
+    > = [
       {
         name: 'Email Delivery Rule',
         channel: 'email',
@@ -137,7 +144,7 @@ export class NotificationDeliveryService {
   // Initialize circuit breakers
   private initializeCircuitBreakers(): void {
     const channels: NotificationChannel[] = ['email', 'sms', 'push', 'in_app'];
-    
+
     channels.forEach(channel => {
       this.circuitBreakers.set(channel, {
         channel,
@@ -150,7 +157,7 @@ export class NotificationDeliveryService {
   // Track delivery attempt
   async trackDelivery(delivery: NotificationDelivery): Promise<void> {
     this.deliveries.set(delivery.id, delivery);
-    
+
     const attempt: DeliveryAttempt = {
       id: this.generateId(),
       deliveryId: delivery.id,
@@ -176,14 +183,19 @@ export class NotificationDeliveryService {
     }
 
     // TODO: Store in database
-    console.log(`Tracked delivery attempt for ${delivery.channel}: ${delivery.status}`);
+    console.log(
+      `Tracked delivery attempt for ${delivery.channel}: ${delivery.status}`
+    );
   }
 
   // Update circuit breaker state
-  private async updateCircuitBreaker(channel: NotificationChannel, status: NotificationStatus): Promise<void> {
+  private async updateCircuitBreaker(
+    channel: NotificationChannel,
+    status: NotificationStatus
+  ): Promise<void> {
     const circuitBreaker = this.circuitBreakers.get(channel);
     const rule = this.rules.get(channel);
-    
+
     if (!circuitBreaker || !rule) return;
 
     const now = new Date();
@@ -195,16 +207,23 @@ export class NotificationDeliveryService {
       // Check if we should open the circuit breaker
       if (circuitBreaker.state === 'closed') {
         const recentStats = await this.getChannelStats(channel, 'hour');
-        const failureRate = recentStats.totalSent > 0 
-          ? ((recentStats.totalFailed + recentStats.totalBounced) / recentStats.totalSent) * 100
-          : 0;
+        const failureRate =
+          recentStats.totalSent > 0
+            ? ((recentStats.totalFailed + recentStats.totalBounced) /
+                recentStats.totalSent) *
+              100
+            : 0;
 
         if (failureRate >= rule.failureThreshold) {
           circuitBreaker.state = 'open';
           circuitBreaker.openedAt = now;
-          circuitBreaker.nextRetryTime = new Date(now.getTime() + rule.circuitBreakerDuration * 60 * 1000);
-          
-          console.log(`Circuit breaker OPENED for ${channel} (failure rate: ${failureRate.toFixed(1)}%)`);
+          circuitBreaker.nextRetryTime = new Date(
+            now.getTime() + rule.circuitBreakerDuration * 60 * 1000
+          );
+
+          console.log(
+            `Circuit breaker OPENED for ${channel} (failure rate: ${failureRate.toFixed(1)}%)`
+          );
         }
       }
     } else if (status === 'delivered') {
@@ -214,13 +233,17 @@ export class NotificationDeliveryService {
         circuitBreaker.failureCount = 0;
         circuitBreaker.openedAt = undefined;
         circuitBreaker.nextRetryTime = undefined;
-        
+
         console.log(`Circuit breaker CLOSED for ${channel}`);
       }
     }
 
     // Check if we should move from open to half-open
-    if (circuitBreaker.state === 'open' && circuitBreaker.nextRetryTime && now >= circuitBreaker.nextRetryTime) {
+    if (
+      circuitBreaker.state === 'open' &&
+      circuitBreaker.nextRetryTime &&
+      now >= circuitBreaker.nextRetryTime
+    ) {
       circuitBreaker.state = 'half-open';
       console.log(`Circuit breaker moved to HALF-OPEN for ${channel}`);
     }
@@ -250,7 +273,9 @@ export class NotificationDeliveryService {
     // Check circuit breaker
     const shouldAttempt = await this.shouldAttemptDelivery(delivery.channel);
     if (!shouldAttempt) {
-      console.log(`Circuit breaker open, skipping retry for delivery ${delivery.id}`);
+      console.log(
+        `Circuit breaker open, skipping retry for delivery ${delivery.id}`
+      );
       return;
     }
 
@@ -278,24 +303,32 @@ export class NotificationDeliveryService {
       nextRetryAt: retryTime.toISOString(),
     };
 
-    console.log(`Scheduled retry for delivery ${delivery.id} in ${retryDelay}ms`);
+    console.log(
+      `Scheduled retry for delivery ${delivery.id} in ${retryDelay}ms`
+    );
   }
 
   // Calculate retry delay based on backoff strategy
-  private calculateRetryDelay(delivery: NotificationDelivery, rule: DeliveryRule): number {
-    const attemptIndex = Math.min(delivery.attempts - 1, rule.retryIntervals.length - 1);
+  private calculateRetryDelay(
+    delivery: NotificationDelivery,
+    rule: DeliveryRule
+  ): number {
+    const attemptIndex = Math.min(
+      delivery.attempts - 1,
+      rule.retryIntervals.length - 1
+    );
     const baseDelay = rule.retryIntervals[attemptIndex] * 60 * 1000; // Convert to milliseconds
 
     switch (rule.backoffStrategy) {
       case 'fixed':
         return baseDelay;
-      
+
       case 'exponential':
         return baseDelay * Math.pow(2, delivery.attempts - 1);
-      
+
       case 'linear':
         return baseDelay * delivery.attempts;
-      
+
       default:
         return baseDelay;
     }
@@ -310,7 +343,9 @@ export class NotificationDeliveryService {
       // Check circuit breaker again
       const shouldAttempt = await this.shouldAttemptDelivery(delivery.channel);
       if (!shouldAttempt) {
-        console.log(`Circuit breaker open, aborting retry for delivery ${deliveryId}`);
+        console.log(
+          `Circuit breaker open, aborting retry for delivery ${deliveryId}`
+        );
         return;
       }
 
@@ -322,11 +357,13 @@ export class NotificationDeliveryService {
 
       // TODO: Implement actual retry logic by calling the appropriate service
       // For now, simulate retry
-      console.log(`Retrying delivery ${deliveryId} (attempt ${delivery.attempts})`);
-      
+      console.log(
+        `Retrying delivery ${deliveryId} (attempt ${delivery.attempts})`
+      );
+
       // Simulate retry result
       const success = Math.random() > 0.3; // 70% success rate for retries
-      
+
       if (success) {
         delivery.status = 'delivered';
         delivery.deliveredAt = new Date();
@@ -335,18 +372,18 @@ export class NotificationDeliveryService {
         delivery.status = 'failed';
         delivery.failureReason = 'Retry failed';
         console.log(`Retry failed for delivery ${deliveryId}`);
-        
+
         // Schedule another retry if within limits
         await this.scheduleRetry(delivery);
       }
 
       this.deliveries.set(deliveryId, delivery);
       await this.trackDelivery(delivery);
-
     } catch (error) {
       console.error(`Error retrying delivery ${deliveryId}:`, error);
       delivery.status = 'failed';
-      delivery.failureReason = error instanceof Error ? error.message : 'Retry error';
+      delivery.failureReason =
+        error instanceof Error ? error.message : 'Retry error';
       this.deliveries.set(deliveryId, delivery);
     }
   }
@@ -361,24 +398,29 @@ export class NotificationDeliveryService {
 
     return {
       delivery: delivery || null,
-      attempts: attempts.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
+      attempts: attempts.sort(
+        (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+      ),
     };
   }
 
   // Get delivery statistics for a channel
-  async getChannelStats(channel: NotificationChannel, period: 'hour' | 'day' | 'week' | 'month'): Promise<DeliveryStats> {
+  async getChannelStats(
+    channel: NotificationChannel,
+    period: 'hour' | 'day' | 'week' | 'month'
+  ): Promise<DeliveryStats> {
     const cacheKey = `${channel}-${period}`;
     const cached = this.statsCache.get(cacheKey);
-    
+
     // Return cached stats if less than 5 minutes old
-    if (cached && (Date.now() - cached.lastUpdated.getTime()) < 5 * 60 * 1000) {
+    if (cached && Date.now() - cached.lastUpdated.getTime() < 5 * 60 * 1000) {
       return cached;
     }
 
     // Calculate period start time
     const now = new Date();
     const periodStart = new Date();
-    
+
     switch (period) {
       case 'hour':
         periodStart.setHours(now.getHours(), 0, 0, 0);
@@ -397,35 +439,46 @@ export class NotificationDeliveryService {
     }
 
     // Filter deliveries for the period and channel
-    const periodDeliveries = Array.from(this.deliveries.values())
-      .filter(delivery => 
-        delivery.channel === channel && 
-        delivery.createdAt >= periodStart
-      );
+    const periodDeliveries = Array.from(this.deliveries.values()).filter(
+      delivery =>
+        delivery.channel === channel && delivery.createdAt >= periodStart
+    );
 
     // Calculate statistics
     const totalSent = periodDeliveries.length;
-    const totalDelivered = periodDeliveries.filter(d => d.status === 'delivered').length;
-    const totalFailed = periodDeliveries.filter(d => d.status === 'failed').length;
-    const totalBounced = periodDeliveries.filter(d => d.status === 'bounced').length;
-    
+    const totalDelivered = periodDeliveries.filter(
+      d => d.status === 'delivered'
+    ).length;
+    const totalFailed = periodDeliveries.filter(
+      d => d.status === 'failed'
+    ).length;
+    const totalBounced = periodDeliveries.filter(
+      d => d.status === 'bounced'
+    ).length;
+
     const deliveryRate = totalSent > 0 ? (totalDelivered / totalSent) * 100 : 0;
-    
+
     // Calculate average delivery time
-    const deliveredDeliveries = periodDeliveries.filter(d => d.status === 'delivered' && d.deliveredAt);
-    const avgDeliveryTime = deliveredDeliveries.length > 0
-      ? deliveredDeliveries.reduce((sum, d) => {
-          return sum + (d.deliveredAt!.getTime() - d.createdAt.getTime());
-        }, 0) / deliveredDeliveries.length
-      : 0;
+    const deliveredDeliveries = periodDeliveries.filter(
+      d => d.status === 'delivered' && d.deliveredAt
+    );
+    const avgDeliveryTime =
+      deliveredDeliveries.length > 0
+        ? deliveredDeliveries.reduce((sum, d) => {
+            return sum + (d.deliveredAt!.getTime() - d.createdAt.getTime());
+          }, 0) / deliveredDeliveries.length
+        : 0;
 
     // Calculate retry rate
-    const retriedDeliveries = periodDeliveries.filter(d => d.attempts > 1).length;
+    const retriedDeliveries = periodDeliveries.filter(
+      d => d.attempts > 1
+    ).length;
     const retryRate = totalSent > 0 ? (retriedDeliveries / totalSent) * 100 : 0;
 
     // Check circuit breaker state
     const circuitBreaker = this.circuitBreakers.get(channel);
-    const circuitBreakerTriggered = circuitBreaker?.state === 'open' || circuitBreaker?.state === 'half-open';
+    const circuitBreakerTriggered =
+      circuitBreaker?.state === 'open' || circuitBreaker?.state === 'half-open';
 
     const stats: DeliveryStats = {
       channel,
@@ -474,7 +527,7 @@ export class NotificationDeliveryService {
       totalSent += stats.totalSent;
       totalDelivered += stats.totalDelivered;
       totalFailed += stats.totalFailed;
-      
+
       if (stats.totalDelivered > 0) {
         totalDeliveryTime += stats.avgDeliveryTime * stats.totalDelivered;
         deliveredCount += stats.totalDelivered;
@@ -485,8 +538,12 @@ export class NotificationDeliveryService {
       totalSent,
       totalDelivered,
       totalFailed,
-      deliveryRate: totalSent > 0 ? Math.round((totalDelivered / totalSent) * 10000) / 100 : 0,
-      avgDeliveryTime: deliveredCount > 0 ? Math.round(totalDeliveryTime / deliveredCount) : 0,
+      deliveryRate:
+        totalSent > 0
+          ? Math.round((totalDelivered / totalSent) * 10000) / 100
+          : 0,
+      avgDeliveryTime:
+        deliveredCount > 0 ? Math.round(totalDeliveryTime / deliveredCount) : 0,
     };
 
     return { byChannel, overall };
@@ -509,13 +566,18 @@ export class NotificationDeliveryService {
     circuitBreaker.openedAt = undefined;
 
     this.circuitBreakers.set(channel, circuitBreaker);
-    
+
     console.log(`Circuit breaker manually reset for ${channel}`);
     return true;
   }
 
   // Update delivery rule
-  async updateDeliveryRule(channel: NotificationChannel, updates: Partial<Omit<DeliveryRule, 'id' | 'channel' | 'createdAt' | 'updatedAt'>>): Promise<DeliveryRule | null> {
+  async updateDeliveryRule(
+    channel: NotificationChannel,
+    updates: Partial<
+      Omit<DeliveryRule, 'id' | 'channel' | 'createdAt' | 'updatedAt'>
+    >
+  ): Promise<DeliveryRule | null> {
     const rule = this.rules.get(channel);
     if (!rule) return null;
 
@@ -540,15 +602,18 @@ export class NotificationDeliveryService {
   // Start statistics processor
   private startStatsProcessor(): void {
     // Clear stats cache every 5 minutes
-    setInterval(() => {
-      this.statsCache.clear();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.statsCache.clear();
+      },
+      5 * 60 * 1000
+    );
 
     console.log('Delivery statistics processor started');
   }
 
   // Clean up old delivery records
-  async cleanupOldDeliveries(olderThanDays: number = 30): Promise<number> {
+  async cleanupOldDeliveries(olderThanDays = 30): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 

@@ -4,10 +4,10 @@
  */
 
 import type {
-    EmailService,
-    NotificationRequest,
-    PushService,
-    SMSService
+  EmailService,
+  NotificationRequest,
+  PushService,
+  SMSService,
 } from '../lib/services/notification.service';
 import { NotificationService } from '../lib/services/notification.service';
 
@@ -49,7 +49,8 @@ describe('NotificationService', () => {
     channels: ['email', 'in_app'],
     content: {
       title: 'New AI Hackathon Available',
-      message: 'A new AI hackathon has been posted that matches your interests.',
+      message:
+        'A new AI hackathon has been posted that matches your interests.',
       html: '<p>A new AI hackathon has been posted that matches your interests.</p>',
       data: {
         opportunityId: 'opp-123',
@@ -64,7 +65,9 @@ describe('NotificationService', () => {
 
   describe('Notification Request Validation', () => {
     it('should validate valid notification request', () => {
-      const result = notificationService.validateNotificationRequest(mockNotificationRequest);
+      const result = notificationService.validateNotificationRequest(
+        mockNotificationRequest
+      );
 
       expect(result).toEqual(mockNotificationRequest);
     });
@@ -175,7 +178,9 @@ describe('NotificationService', () => {
       };
       delete (requestWithoutPriority as any).priority;
 
-      const result = notificationService.validateNotificationRequest(requestWithoutPriority);
+      const result = notificationService.validateNotificationRequest(
+        requestWithoutPriority
+      );
       expect(result.priority).toBe('normal');
     });
   });
@@ -198,7 +203,8 @@ describe('NotificationService', () => {
     };
 
     it('should validate valid notification preferences', () => {
-      const result = notificationService.validateNotificationPreferences(mockPreferences);
+      const result =
+        notificationService.validateNotificationPreferences(mockPreferences);
 
       expect(result).toEqual(mockPreferences);
     });
@@ -247,7 +253,10 @@ describe('NotificationService', () => {
         frequency: 'weekly' as const,
       };
 
-      const result = await notificationService.updateUserPreferences(userId, updates);
+      const result = await notificationService.updateUserPreferences(
+        userId,
+        updates
+      );
 
       expect(result.userId).toBe(userId);
       expect(result.email).toBe(false);
@@ -300,7 +309,8 @@ describe('NotificationService', () => {
     });
 
     it('should return null for non-existent user preferences', async () => {
-      const result = await notificationService.getUserPreferences('non-existent-user');
+      const result =
+        await notificationService.getUserPreferences('non-existent-user');
       expect(result).toBeNull();
     });
   });
@@ -333,11 +343,12 @@ describe('NotificationService', () => {
       expect(shouldSendSMS).toBe(false);
 
       // Should not send for disabled type
-      const shouldSendRecommendation = await notificationService.shouldSendNotification(
-        userId,
-        'recommendation',
-        'email'
-      );
+      const shouldSendRecommendation =
+        await notificationService.shouldSendNotification(
+          userId,
+          'recommendation',
+          'email'
+        );
       expect(shouldSendRecommendation).toBe(false);
     });
 
@@ -552,7 +563,12 @@ describe('NotificationService', () => {
       const result = await notificationService.sendNotification(request);
 
       expect(result.deliveries).toHaveLength(4);
-      expect(result.deliveries.map(d => d.channel)).toEqual(['email', 'sms', 'push', 'in_app']);
+      expect(result.deliveries.map(d => d.channel)).toEqual([
+        'email',
+        'sms',
+        'push',
+        'in_app',
+      ]);
       expect(result.deliveries.every(d => d.status === 'sent')).toBe(true);
 
       expect(mockEmailService.sendEmail).toHaveBeenCalled();
@@ -561,7 +577,9 @@ describe('NotificationService', () => {
     });
 
     it('should handle channel delivery failures gracefully', async () => {
-      mockEmailService.sendEmail.mockRejectedValue(new Error('Email service unavailable'));
+      mockEmailService.sendEmail.mockRejectedValue(
+        new Error('Email service unavailable')
+      );
 
       const request = {
         ...mockNotificationRequest,
@@ -571,7 +589,7 @@ describe('NotificationService', () => {
       const result = await notificationService.sendNotification(request);
 
       expect(result.deliveries).toHaveLength(2);
-      
+
       const emailDelivery = result.deliveries.find(d => d.channel === 'email');
       const inAppDelivery = result.deliveries.find(d => d.channel === 'in_app');
 
@@ -582,7 +600,11 @@ describe('NotificationService', () => {
 
     it('should handle missing service configuration', async () => {
       // Create service without email service
-      const serviceWithoutEmail = new NotificationService(undefined, mockSMSService, mockPushService);
+      const serviceWithoutEmail = new NotificationService(
+        undefined,
+        mockSMSService,
+        mockPushService
+      );
 
       const request = {
         ...mockNotificationRequest,
@@ -593,7 +615,9 @@ describe('NotificationService', () => {
 
       expect(result.deliveries).toHaveLength(1);
       expect(result.deliveries[0].status).toBe('failed');
-      expect(result.deliveries[0].failureReason).toBe('Email service not configured');
+      expect(result.deliveries[0].failureReason).toBe(
+        'Email service not configured'
+      );
     });
 
     it('should schedule future notifications', async () => {
@@ -612,7 +636,9 @@ describe('NotificationService', () => {
       expect(result.deliveries).toHaveLength(0);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Notification ${result.id} scheduled for ${futureDate}`)
+        expect.stringContaining(
+          `Notification ${result.id} scheduled for ${futureDate}`
+        )
       );
 
       consoleSpy.mockRestore();
@@ -654,9 +680,12 @@ describe('NotificationService', () => {
 
   describe('Notification Templates', () => {
     it('should have default templates initialized', () => {
-      const newOpportunityTemplate = notificationService.getTemplate('new-opportunity');
-      const deadlineReminderTemplate = notificationService.getTemplate('deadline-reminder');
-      const recommendationTemplate = notificationService.getTemplate('recommendation');
+      const newOpportunityTemplate =
+        notificationService.getTemplate('new-opportunity');
+      const deadlineReminderTemplate =
+        notificationService.getTemplate('deadline-reminder');
+      const recommendationTemplate =
+        notificationService.getTemplate('recommendation');
 
       expect(newOpportunityTemplate).toBeDefined();
       expect(newOpportunityTemplate?.type).toBe('new_opportunity');
@@ -706,9 +735,14 @@ describe('NotificationService', () => {
         url: 'https://example.com/hackathon',
       };
 
-      const processed = notificationService.processTemplate(template!, variables);
+      const processed = notificationService.processTemplate(
+        template!,
+        variables
+      );
 
-      expect(processed.subject).toBe('New hackathon Available: AI Innovation Challenge');
+      expect(processed.subject).toBe(
+        'New hackathon Available: AI Innovation Challenge'
+      );
       expect(processed.html).toContain('AI Innovation Challenge');
       expect(processed.html).toContain('TechCorp');
       expect(processed.html).toContain('2024-03-01');
@@ -726,7 +760,10 @@ describe('NotificationService', () => {
         // Missing other variables
       };
 
-      const processed = notificationService.processTemplate(template!, incompleteVariables);
+      const processed = notificationService.processTemplate(
+        template!,
+        incompleteVariables
+      );
 
       expect(processed.subject).toContain('Test Hackathon');
       expect(processed.subject).toContain('Test Org');
@@ -794,8 +831,12 @@ describe('NotificationService', () => {
     });
 
     it('should handle service failures during delivery', async () => {
-      mockEmailService.sendEmail.mockRejectedValue(new Error('Service timeout'));
-      mockSMSService.sendSMS.mockRejectedValue(new Error('Invalid phone number'));
+      mockEmailService.sendEmail.mockRejectedValue(
+        new Error('Service timeout')
+      );
+      mockSMSService.sendSMS.mockRejectedValue(
+        new Error('Invalid phone number')
+      );
 
       const request = {
         ...mockNotificationRequest,
@@ -818,10 +859,10 @@ describe('NotificationService', () => {
       };
 
       const notification = await notificationService.sendNotification(request);
-      
+
       // Manually modify to test unsupported channel handling
       notification.channels = ['unsupported' as any];
-      
+
       // This would be tested in the private method, but we can't directly test it
       // The error handling is covered by the channel-specific tests above
     });
@@ -837,7 +878,9 @@ describe('NotificationService', () => {
       };
 
       expect(() => {
-        notificationService.validateNotificationPreferences(malformedPreferences);
+        notificationService.validateNotificationPreferences(
+          malformedPreferences
+        );
       }).toThrow();
     });
 
@@ -845,8 +888,12 @@ describe('NotificationService', () => {
       const userId = '123e4567-e89b-12d3-a456-426614174000';
 
       // Simulate concurrent updates
-      const update1 = notificationService.updateUserPreferences(userId, { email: true });
-      const update2 = notificationService.updateUserPreferences(userId, { sms: true });
+      const update1 = notificationService.updateUserPreferences(userId, {
+        email: true,
+      });
+      const update2 = notificationService.updateUserPreferences(userId, {
+        sms: true,
+      });
 
       const [result1, result2] = await Promise.all([update1, update2]);
 
@@ -855,7 +902,8 @@ describe('NotificationService', () => {
       expect(result2.userId).toBe(userId);
 
       // Final state should reflect the last update
-      const finalPreferences = await notificationService.getUserPreferences(userId);
+      const finalPreferences =
+        await notificationService.getUserPreferences(userId);
       expect(finalPreferences?.sms).toBe(true);
     });
 
@@ -868,7 +916,8 @@ describe('NotificationService', () => {
         },
       };
 
-      const result = notificationService.validateNotificationRequest(longRequest);
+      const result =
+        notificationService.validateNotificationRequest(longRequest);
       expect(result.content.title).toHaveLength(200);
       expect(result.content.message).toHaveLength(1000);
     });

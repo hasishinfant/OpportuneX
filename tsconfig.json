@@ -2,32 +2,28 @@
   "compilerOptions": {
     // Language and Environment
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    
+
     // Modules
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    
+
     // Emit
     "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    
+
     // JavaScript Support
     "allowJs": true,
     "checkJs": false,
-    
+
     // Type Checking - Strict Mode Configuration
     "strict": true,
     "noImplicitAny": true,
@@ -46,25 +42,25 @@
     "noUncheckedIndexedAccess": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
-    
+
     // Interop Constraints
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    
+
     // Language and Environment
     "jsx": "preserve",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    
+
     // Projects
     "composite": false,
-    
+
     // Completeness
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    
+
     // Path Mapping
     "baseUrl": ".",
     "paths": {
@@ -77,7 +73,7 @@
       "@/services/*": ["./src/services/*"],
       "@/config/*": ["./src/config/*"]
     },
-    
+
     // Next.js specific
     "plugins": [
       {
@@ -85,12 +81,7 @@
       }
     ]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": [
     "node_modules",
     ".next",
@@ -101,7 +92,13 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "mobile/**/*",
+    "mvp/**/*",
+    "mvp-simple/**/*",
+    "backend/**/*",
+    "server/**/*",
+    "contracts/**/*"
   ],
   "ts-node": {
     "esm": true,

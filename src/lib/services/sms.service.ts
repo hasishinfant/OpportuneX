@@ -69,11 +69,14 @@ export class TwilioSMSService implements SMSService {
 
   // Initialize default SMS templates
   private initializeDefaultTemplates(): void {
-    const defaultTemplates: Omit<SMSTemplate, 'createdAt' | 'updatedAt'>[] = [
+    const defaultTemplates: Array<
+      Omit<SMSTemplate, 'createdAt' | 'updatedAt'>
+    > = [
       {
         id: 'welcome',
         name: 'Welcome SMS',
-        content: 'Welcome to OpportuneX! 🎉 Start discovering opportunities that match your skills. Reply STOP to opt out.',
+        content:
+          'Welcome to OpportuneX! 🎉 Start discovering opportunities that match your skills. Reply STOP to opt out.',
         variables: [],
         maxLength: 160,
         active: true,
@@ -81,7 +84,8 @@ export class TwilioSMSService implements SMSService {
       {
         id: 'otp-verification',
         name: 'OTP Verification',
-        content: 'Your OpportuneX verification code is: {{otp}}. Valid for 10 minutes. Do not share this code.',
+        content:
+          'Your OpportuneX verification code is: {{otp}}. Valid for 10 minutes. Do not share this code.',
         variables: ['otp'],
         maxLength: 160,
         active: true,
@@ -89,7 +93,8 @@ export class TwilioSMSService implements SMSService {
       {
         id: 'deadline-reminder',
         name: 'Deadline Reminder',
-        content: '⏰ Reminder: {{title}} deadline is {{timeLeft}}. Don\'t miss out! Apply now: {{shortUrl}}',
+        content:
+          "⏰ Reminder: {{title}} deadline is {{timeLeft}}. Don't miss out! Apply now: {{shortUrl}}",
         variables: ['title', 'timeLeft', 'shortUrl'],
         maxLength: 160,
         active: true,
@@ -97,7 +102,8 @@ export class TwilioSMSService implements SMSService {
       {
         id: 'new-opportunity',
         name: 'New Opportunity Alert',
-        content: '🚀 New {{type}}: {{title}} by {{organizer}}. Deadline: {{deadline}}. View: {{shortUrl}}',
+        content:
+          '🚀 New {{type}}: {{title}} by {{organizer}}. Deadline: {{deadline}}. View: {{shortUrl}}',
         variables: ['type', 'title', 'organizer', 'deadline', 'shortUrl'],
         maxLength: 160,
         active: true,
@@ -105,7 +111,8 @@ export class TwilioSMSService implements SMSService {
       {
         id: 'password-reset',
         name: 'Password Reset',
-        content: 'Reset your OpportuneX password: {{resetUrl}} This link expires in 1 hour. Reply STOP to opt out.',
+        content:
+          'Reset your OpportuneX password: {{resetUrl}} This link expires in 1 hour. Reply STOP to opt out.',
         variables: ['resetUrl'],
         maxLength: 160,
         active: true,
@@ -132,9 +139,9 @@ export class TwilioSMSService implements SMSService {
     try {
       // Validate phone number format
       const phoneNumber = this.formatPhoneNumber(params.to);
-      
+
       // Process template if provided
-      let message = params.message;
+      let { message } = params;
       if (params.templateId && params.templateData) {
         const template = this.templates.get(params.templateId);
         if (template) {
@@ -143,8 +150,11 @@ export class TwilioSMSService implements SMSService {
       }
 
       // Validate message length
-      if (message.length > 1600) { // Twilio's max length
-        throw new Error('SMS message too long. Maximum 1600 characters allowed.');
+      if (message.length > 1600) {
+        // Twilio's max length
+        throw new Error(
+          'SMS message too long. Maximum 1600 characters allowed.'
+        );
       }
 
       const smsData: TwilioSMSRequest = {
@@ -157,15 +167,21 @@ export class TwilioSMSService implements SMSService {
         smsData.ValidityPeriod = params.validityPeriod;
       }
 
-      const response = await this.makeRequest('/Accounts/{AccountSid}/Messages.json', 'POST', smsData);
-      
+      const response = await this.makeRequest(
+        '/Accounts/{AccountSid}/Messages.json',
+        'POST',
+        smsData
+      );
+
       return {
         messageId: response.sid,
         status: response.status,
       };
     } catch (error) {
       console.error('Twilio SMS send error:', error);
-      throw new Error(`Failed to send SMS: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to send SMS: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -180,23 +196,30 @@ export class TwilioSMSService implements SMSService {
     validityPeriod?: number;
   }): Promise<Array<{ messageId: string; status: string; recipient: string }>> {
     try {
-      const results: Array<{ messageId: string; status: string; recipient: string }> = [];
-      
+      const results: Array<{
+        messageId: string;
+        status: string;
+        recipient: string;
+      }> = [];
+
       // Send SMS messages with rate limiting
       const batchSize = 10; // Twilio rate limit consideration
-      
+
       for (let i = 0; i < params.recipients.length; i += batchSize) {
         const batch = params.recipients.slice(i, i + batchSize);
-        
-        const batchPromises = batch.map(async (recipient) => {
+
+        const batchPromises = batch.map(async recipient => {
           try {
-            let message = params.message;
-            
+            let { message } = params;
+
             // Process template if provided
             if (params.templateId && recipient.templateData) {
               const template = this.templates.get(params.templateId);
               if (template) {
-                message = this.processTemplate(template, recipient.templateData).content;
+                message = this.processTemplate(
+                  template,
+                  recipient.templateData
+                ).content;
               }
             }
 
@@ -222,7 +245,7 @@ export class TwilioSMSService implements SMSService {
         });
 
         const batchResults = await Promise.allSettled(batchPromises);
-        batchResults.forEach((result) => {
+        batchResults.forEach(result => {
           if (result.status === 'fulfilled') {
             results.push(result.value);
           }
@@ -237,7 +260,9 @@ export class TwilioSMSService implements SMSService {
       return results;
     } catch (error) {
       console.error('Twilio bulk SMS send error:', error);
-      throw new Error(`Failed to send bulk SMS: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to send bulk SMS: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -288,27 +313,27 @@ export class TwilioSMSService implements SMSService {
   private formatPhoneNumber(phoneNumber: string): string {
     // Remove all non-digit characters
     const digits = phoneNumber.replace(/\D/g, '');
-    
+
     // Handle Indian phone numbers
     if (digits.length === 10 && !digits.startsWith('91')) {
       return `+91${digits}`;
     }
-    
+
     // Handle numbers with country code
     if (digits.length === 12 && digits.startsWith('91')) {
       return `+${digits}`;
     }
-    
+
     // Handle international format
     if (digits.length > 10 && !phoneNumber.startsWith('+')) {
       return `+${digits}`;
     }
-    
+
     // Return as-is if already in correct format
     if (phoneNumber.startsWith('+')) {
       return phoneNumber;
     }
-    
+
     throw new Error(`Invalid phone number format: ${phoneNumber}`);
   }
 
@@ -318,7 +343,9 @@ export class TwilioSMSService implements SMSService {
   }
 
   // Add custom template
-  addTemplate(template: Omit<SMSTemplate, 'createdAt' | 'updatedAt'>): SMSTemplate {
+  addTemplate(
+    template: Omit<SMSTemplate, 'createdAt' | 'updatedAt'>
+  ): SMSTemplate {
     const fullTemplate: SMSTemplate = {
       ...template,
       createdAt: new Date(),
@@ -329,7 +356,10 @@ export class TwilioSMSService implements SMSService {
   }
 
   // Process template with variables
-  processTemplate(template: SMSTemplate, variables: Record<string, any>): {
+  processTemplate(
+    template: SMSTemplate,
+    variables: Record<string, any>
+  ): {
     content: string;
     length: number;
     segments: number;
@@ -341,7 +371,7 @@ export class TwilioSMSService implements SMSService {
     };
 
     const content = processString(template.content);
-    const length = content.length;
+    const { length } = content;
     const segments = Math.ceil(length / 160); // SMS segment calculation
 
     return {
@@ -352,14 +382,20 @@ export class TwilioSMSService implements SMSService {
   }
 
   // Make HTTP request to Twilio API
-  private async makeRequest(endpoint: string, method: string, data?: any): Promise<any> {
+  private async makeRequest(
+    endpoint: string,
+    method: string,
+    data?: any
+  ): Promise<any> {
     const url = `${this.baseUrl}${endpoint.replace('{AccountSid}', this.config.apiKey)}`;
-    
+
     // Create basic auth header
-    const auth = Buffer.from(`${this.config.apiKey}:${this.config.apiSecret}`).toString('base64');
-    
+    const auth = Buffer.from(
+      `${this.config.apiKey}:${this.config.apiSecret}`
+    ).toString('base64');
+
     const headers: Record<string, string> = {
-      'Authorization': `Basic ${auth}`,
+      Authorization: `Basic ${auth}`,
     };
 
     let body: string | undefined;
@@ -381,7 +417,9 @@ export class TwilioSMSService implements SMSService {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Twilio API error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `Twilio API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
     }
 
     return await response.json();
@@ -391,11 +429,16 @@ export class TwilioSMSService implements SMSService {
   static isValidPhoneNumber(phoneNumber: string): boolean {
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     const digits = phoneNumber.replace(/\D/g, '');
-    return phoneRegex.test(phoneNumber) && digits.length >= 10 && digits.length <= 15;
+    return (
+      phoneRegex.test(phoneNumber) && digits.length >= 10 && digits.length <= 15
+    );
   }
 
   // Get delivery statistics
-  async getDeliveryStats(startDate?: Date, endDate?: Date): Promise<{
+  async getDeliveryStats(
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<{
     sent: number;
     delivered: number;
     failed: number;
@@ -443,7 +486,9 @@ export class MockSMSService implements SMSService {
   }): Promise<{ messageId: string; status: string }> {
     console.log('📱 Mock SMS Service - Sending SMS:', {
       to: params.to,
-      message: params.message.substring(0, 50) + (params.message.length > 50 ? '...' : ''),
+      message:
+        params.message.substring(0, 50) +
+        (params.message.length > 50 ? '...' : ''),
       templateId: params.templateId,
     });
 
@@ -469,7 +514,9 @@ export class MockSMSService implements SMSService {
   }): Promise<Array<{ messageId: string; status: string; recipient: string }>> {
     console.log('📱 Mock SMS Service - Sending bulk SMS:', {
       recipientCount: params.recipients.length,
-      message: params.message.substring(0, 50) + (params.message.length > 50 ? '...' : ''),
+      message:
+        params.message.substring(0, 50) +
+        (params.message.length > 50 ? '...' : ''),
       templateId: params.templateId,
     });
 

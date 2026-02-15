@@ -19,7 +19,7 @@ describe('VoiceService', () => {
   });
 
   // Helper function to create mock audio blob
-  const createMockAudioBlob = (size: number = 5000, type: string = 'audio/wav'): Blob => {
+  const createMockAudioBlob = (size = 5000, type = 'audio/wav'): Blob => {
     const buffer = new ArrayBuffer(size);
     return new Blob([buffer], { type });
   };
@@ -55,7 +55,9 @@ describe('VoiceService', () => {
       const result = await voiceService.validateAudioFile(tinyAudio);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Audio file too small. Please record at least 0.5 seconds of audio.');
+      expect(result.error).toBe(
+        'Audio file too small. Please record at least 0.5 seconds of audio.'
+      );
     });
 
     it('should reject unsupported audio format', async () => {
@@ -189,14 +191,19 @@ describe('VoiceService', () => {
     it('should call Google Speech API with correct parameters', async () => {
       const mockGoogleResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          results: [{
-            alternatives: [{
-              transcript: 'Find AI hackathons in Mumbai',
-              confidence: 0.92,
-            }],
-          }],
-        }),
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                alternatives: [
+                  {
+                    transcript: 'Find AI hackathons in Mumbai',
+                    confidence: 0.92,
+                  },
+                ],
+              },
+            ],
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockGoogleResponse);
@@ -210,7 +217,7 @@ describe('VoiceService', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-google-key',
+            Authorization: 'Bearer test-google-key',
             'Content-Type': 'application/json',
           }),
           body: expect.stringContaining('"languageCode":"en-US"'),
@@ -234,9 +241,10 @@ describe('VoiceService', () => {
     it('should handle empty Google API response', async () => {
       const mockEmptyResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          results: [],
-        }),
+        json: () =>
+          Promise.resolve({
+            results: [],
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockEmptyResponse);
@@ -261,14 +269,19 @@ describe('VoiceService', () => {
     it('should use correct language codes for Google API', async () => {
       const mockGoogleResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          results: [{
-            alternatives: [{
-              transcript: 'मुंबई में AI हैकाथॉन खोजें',
-              confidence: 0.88,
-            }],
-          }],
-        }),
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                alternatives: [
+                  {
+                    transcript: 'मुंबई में AI हैकाथॉन खोजें',
+                    confidence: 0.88,
+                  },
+                ],
+              },
+            ],
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockGoogleResponse);
@@ -306,11 +319,12 @@ describe('VoiceService', () => {
     it('should call Azure Speech API with correct parameters', async () => {
       const mockAzureResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          RecognitionStatus: 'Success',
-          DisplayText: 'Find machine learning workshops',
-          Confidence: 0.89,
-        }),
+        json: () =>
+          Promise.resolve({
+            RecognitionStatus: 'Success',
+            DisplayText: 'Find machine learning workshops',
+            Confidence: 0.89,
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockAzureResponse);
@@ -347,9 +361,10 @@ describe('VoiceService', () => {
     it('should handle Azure recognition failure', async () => {
       const mockFailureResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          RecognitionStatus: 'NoMatch',
-        }),
+        json: () =>
+          Promise.resolve({
+            RecognitionStatus: 'NoMatch',
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockFailureResponse);
@@ -374,11 +389,12 @@ describe('VoiceService', () => {
     it('should use correct language codes for Azure API', async () => {
       const mockAzureResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          RecognitionStatus: 'Success',
-          DisplayText: 'वेब डेवलपमेंट वर्कशॉप',
-          Confidence: 0.85,
-        }),
+        json: () =>
+          Promise.resolve({
+            RecognitionStatus: 'Success',
+            DisplayText: 'वेब डेवलपमेंट वर्कशॉप',
+            Confidence: 0.85,
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockAzureResponse);
@@ -459,7 +475,7 @@ describe('VoiceService', () => {
       expect(result.success).toBe(true);
       expect(result.data?.followUpQuestions).toBeInstanceOf(Array);
       expect(result.data?.followUpQuestions.length).toBeGreaterThan(0);
-      
+
       // Should contain hackathon-specific questions
       const questions = result.data?.followUpQuestions.join(' ').toLowerCase();
       expect(questions).toMatch(/programming|team|online|offline/);
@@ -483,7 +499,7 @@ describe('VoiceService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.followUpQuestions).toBeInstanceOf(Array);
-      
+
       const questions = result.data?.followUpQuestions.join(' ').toLowerCase();
       expect(questions).toMatch(/field|paid|long/);
 
@@ -506,9 +522,11 @@ describe('VoiceService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.followUpQuestions).toBeInstanceOf(Array);
-      
+
       const questions = result.data?.followUpQuestions.join(' ').toLowerCase();
-      expect(questions).toMatch(/skill level|certification|hands-on|theoretical/);
+      expect(questions).toMatch(
+        /skill level|certification|hands-on|theoretical/
+      );
 
       // Restore original method
       (voiceService as any).speechToText = originalMethod;
@@ -529,7 +547,7 @@ describe('VoiceService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.followUpQuestions).toBeInstanceOf(Array);
-      
+
       const questions = result.data?.followUpQuestions.join(' ').toLowerCase();
       expect(questions).toMatch(/skill level|remote|location/);
 
@@ -557,7 +575,7 @@ describe('VoiceService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.followUpQuestions).toBeInstanceOf(Array);
-      
+
       // Should contain Hindi text
       const questions = result.data?.followUpQuestions.join(' ');
       expect(questions).toMatch(/[\u0900-\u097F]/); // Hindi Unicode range
@@ -581,7 +599,7 @@ describe('VoiceService', () => {
 
       expect(languages).toBeInstanceOf(Array);
       expect(languages.length).toBeGreaterThan(0);
-      
+
       const englishLang = languages.find(lang => lang.code === 'en');
       const hindiLang = languages.find(lang => lang.code === 'hi');
 
@@ -607,7 +625,7 @@ describe('VoiceService', () => {
 
       expect(englishResult.success).toBe(true);
       expect(hindiResult.success).toBe(true);
-      
+
       // Both should have valid responses
       expect(englishResult.data?.transcription).toBeDefined();
       expect(hindiResult.data?.transcription).toBeDefined();
@@ -629,16 +647,20 @@ describe('VoiceService', () => {
       expect(result.data.languageBreakdown.en).toBeGreaterThan(0);
       expect(result.data.languageBreakdown.hi).toBeGreaterThan(0);
       expect(result.data.averageProcessingTime).toBeGreaterThan(0);
-      expect(result.message).toBe('Voice processing statistics retrieved successfully');
+      expect(result.message).toBe(
+        'Voice processing statistics retrieved successfully'
+      );
     });
 
     it('should handle statistics retrieval errors', async () => {
       // Mock console.error to avoid test output
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       // Mock the method to throw an error
       const originalMethod = voiceService.getProcessingStats;
-      voiceService.getProcessingStats = jest.fn().mockRejectedValue(new Error('Stats error'));
+      voiceService.getProcessingStats = jest
+        .fn()
+        .mockRejectedValue(new Error('Stats error'));
 
       const result = await voiceService.getProcessingStats();
 
@@ -656,7 +678,9 @@ describe('VoiceService', () => {
       process.env.SPEECH_PROVIDER = 'google';
       process.env.GOOGLE_SPEECH_TO_TEXT_API_KEY = 'test-key';
 
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network timeout'));
+      (global.fetch as jest.Mock).mockRejectedValue(
+        new Error('Network timeout')
+      );
 
       const googleService = new VoiceService();
       const result = await googleService.processVoiceInput(mockVoiceRequest);
@@ -714,13 +738,15 @@ describe('VoiceService', () => {
         audioData: createMockAudioBlob(0), // Empty blob
       };
 
-      const validationResult = await voiceService.validateAudioFile(emptyRequest.audioData);
+      const validationResult = await voiceService.validateAudioFile(
+        emptyRequest.audioData
+      );
       expect(validationResult.success).toBe(false);
     });
 
     it('should handle corrupted audio data', async () => {
       const corruptedBlob = new Blob(['corrupted data'], { type: 'audio/wav' });
-      
+
       const result = await voiceService.processVoiceInput({
         ...mockVoiceRequest,
         audioData: corruptedBlob,
@@ -746,7 +772,7 @@ describe('VoiceService', () => {
     it('should handle very long transcriptions', async () => {
       const originalMethod = (voiceService as any).speechToText;
       const longTranscription = 'a'.repeat(10000); // Very long transcription
-      
+
       (voiceService as any).speechToText = jest.fn().mockResolvedValue({
         success: true,
         data: {
@@ -768,8 +794,9 @@ describe('VoiceService', () => {
 
     it('should handle special characters in transcription', async () => {
       const originalMethod = (voiceService as any).speechToText;
-      const specialCharTranscription = 'Find AI/ML & web-dev workshops @Mumbai!';
-      
+      const specialCharTranscription =
+        'Find AI/ML & web-dev workshops @Mumbai!';
+
       (voiceService as any).speechToText = jest.fn().mockResolvedValue({
         success: true,
         data: {

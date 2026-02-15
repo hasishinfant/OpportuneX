@@ -52,7 +52,8 @@ describe('Notification System Integration Tests', () => {
         priority: 'normal',
       };
 
-      const notification = await notificationService.sendNotification(notificationRequest);
+      const notification =
+        await notificationService.sendNotification(notificationRequest);
 
       expect(notification).toBeDefined();
       expect(notification.userId).toBe(testUserId);
@@ -129,7 +130,8 @@ describe('Notification System Integration Tests', () => {
       expect(notification.userId).toBe(testUserId);
       expect(notification.read).toBe(false);
 
-      const userNotifications = await inAppNotificationService.getUserNotifications(testUserId);
+      const userNotifications =
+        await inAppNotificationService.getUserNotifications(testUserId);
       expect(userNotifications.notifications).toHaveLength(1);
       expect(userNotifications.notifications[0].id).toBe(notification.id);
     });
@@ -143,13 +145,17 @@ describe('Notification System Integration Tests', () => {
         priority: 'high',
       });
 
-      const success = await inAppNotificationService.markAsRead(notification.id, testUserId);
-      expect(success).toBe(true);
-
-      const updatedNotification = await inAppNotificationService.getNotification(
+      const success = await inAppNotificationService.markAsRead(
         notification.id,
         testUserId
       );
+      expect(success).toBe(true);
+
+      const updatedNotification =
+        await inAppNotificationService.getNotification(
+          notification.id,
+          testUserId
+        );
       expect(updatedNotification?.read).toBe(true);
       expect(updatedNotification?.readAt).toBeDefined();
     });
@@ -208,10 +214,13 @@ describe('Notification System Integration Tests', () => {
         deadline: testOpportunity.deadline,
       });
 
-      const reminders = await deadlineReminderService.getUserReminders(testUserId, {
-        active: true,
-        upcoming: true,
-      });
+      const reminders = await deadlineReminderService.getUserReminders(
+        testUserId,
+        {
+          active: true,
+          upcoming: true,
+        }
+      );
 
       expect(reminders).toHaveLength(1);
       expect(reminders[0].active).toBe(true);
@@ -228,10 +237,13 @@ describe('Notification System Integration Tests', () => {
         channels: ['email'],
       });
 
-      const updated = await deadlineReminderService.updateReminder(reminder.id, {
-        channels: ['email', 'sms', 'push'],
-        active: false,
-      });
+      const updated = await deadlineReminderService.updateReminder(
+        reminder.id,
+        {
+          channels: ['email', 'sms', 'push'],
+          active: false,
+        }
+      );
 
       expect(updated).toBeDefined();
       expect(updated!.channels).toEqual(['email', 'sms', 'push']);
@@ -279,7 +291,10 @@ describe('Notification System Integration Tests', () => {
         channels: ['in_app'],
       });
 
-      const matches = await opportunityAlertsService.checkOpportunityAgainstAlerts(testOpportunity);
+      const matches =
+        await opportunityAlertsService.checkOpportunityAgainstAlerts(
+          testOpportunity
+        );
 
       expect(matches).toHaveLength(1);
       expect(matches[0].alertId).toBe(alert.id);
@@ -301,13 +316,19 @@ describe('Notification System Integration Tests', () => {
       });
 
       // Simulate some matches
-      await opportunityAlertsService.checkOpportunityAgainstAlerts(testOpportunity);
+      await opportunityAlertsService.checkOpportunityAgainstAlerts(
+        testOpportunity
+      );
 
-      const result = await opportunityAlertsService.getAlertMatches(alert.id, testUserId, {
-        limit: 10,
-        offset: 0,
-        minScore: 50,
-      });
+      const result = await opportunityAlertsService.getAlertMatches(
+        alert.id,
+        testUserId,
+        {
+          limit: 10,
+          offset: 0,
+          minScore: 50,
+        }
+      );
 
       expect(result).toBeDefined();
       expect(result.matches).toBeDefined();
@@ -317,25 +338,29 @@ describe('Notification System Integration Tests', () => {
 
   describe('Notification Template Service', () => {
     it('should render template with variables', async () => {
-      const templates = await notificationTemplateService.getTemplatesByType('new_opportunity');
+      const templates =
+        await notificationTemplateService.getTemplatesByType('new_opportunity');
       expect(templates.length).toBeGreaterThan(0);
 
       const template = templates[0];
-      const rendered = await notificationTemplateService.renderTemplate(template.id, {
-        variables: {
-          userName: 'John Doe',
-          opportunityType: 'hackathon',
-          title: testOpportunity.title,
-          organizer: testOpportunity.organizer.name,
-          deadline: testOpportunity.deadline.toLocaleDateString(),
-          location: testOpportunity.location,
-          mode: testOpportunity.mode,
-          description: testOpportunity.description,
-          url: testOpportunity.url,
-          unsubscribeUrl: 'https://example.com/unsubscribe',
-          preferencesUrl: 'https://example.com/preferences',
-        },
-      });
+      const rendered = await notificationTemplateService.renderTemplate(
+        template.id,
+        {
+          variables: {
+            userName: 'John Doe',
+            opportunityType: 'hackathon',
+            title: testOpportunity.title,
+            organizer: testOpportunity.organizer.name,
+            deadline: testOpportunity.deadline.toLocaleDateString(),
+            location: testOpportunity.location,
+            mode: testOpportunity.mode,
+            description: testOpportunity.description,
+            url: testOpportunity.url,
+            unsubscribeUrl: 'https://example.com/unsubscribe',
+            preferencesUrl: 'https://example.com/preferences',
+          },
+        }
+      );
 
       expect(rendered).toBeDefined();
       expect(rendered!.title).toContain('hackathon');
@@ -344,13 +369,17 @@ describe('Notification System Integration Tests', () => {
     });
 
     it('should validate template variables', async () => {
-      const templates = await notificationTemplateService.getTemplatesByType('new_opportunity');
+      const templates =
+        await notificationTemplateService.getTemplatesByType('new_opportunity');
       const template = templates[0];
 
-      const validation = await notificationTemplateService.validateTemplate(template.id, {
-        userName: 'John Doe',
-        // Missing required variables
-      });
+      const validation = await notificationTemplateService.validateTemplate(
+        template.id,
+        {
+          userName: 'John Doe',
+          // Missing required variables
+        }
+      );
 
       expect(validation.valid).toBe(false);
       expect(validation.errors.length).toBeGreaterThan(0);
@@ -382,14 +411,19 @@ describe('Notification System Integration Tests', () => {
 
       await notificationDeliveryService.trackDelivery(delivery);
 
-      const status = await notificationDeliveryService.getDeliveryStatus(delivery.id);
+      const status = await notificationDeliveryService.getDeliveryStatus(
+        delivery.id
+      );
       expect(status.delivery).toBeDefined();
       expect(status.delivery!.id).toBe(delivery.id);
       expect(status.attempts).toHaveLength(1);
     });
 
     it('should calculate delivery statistics', async () => {
-      const stats = await notificationDeliveryService.getChannelStats('email', 'day');
+      const stats = await notificationDeliveryService.getChannelStats(
+        'email',
+        'day'
+      );
 
       expect(stats).toBeDefined();
       expect(stats.channel).toBe('email');
@@ -398,10 +432,12 @@ describe('Notification System Integration Tests', () => {
     });
 
     it('should check circuit breaker functionality', async () => {
-      const shouldAttempt = await notificationDeliveryService.shouldAttemptDelivery('email');
+      const shouldAttempt =
+        await notificationDeliveryService.shouldAttemptDelivery('email');
       expect(typeof shouldAttempt).toBe('boolean');
 
-      const circuitBreakers = notificationDeliveryService.getCircuitBreakerStates();
+      const circuitBreakers =
+        notificationDeliveryService.getCircuitBreakerStates();
       expect(circuitBreakers).toHaveLength(4); // email, sms, push, in_app
       expect(circuitBreakers.every(cb => cb.state === 'closed')).toBe(true);
     });
@@ -432,11 +468,15 @@ describe('Notification System Integration Tests', () => {
       });
 
       // 3. Check opportunity against alerts (should trigger notification)
-      const matches = await opportunityAlertsService.checkOpportunityAgainstAlerts(testOpportunity);
+      const matches =
+        await opportunityAlertsService.checkOpportunityAgainstAlerts(
+          testOpportunity
+        );
       expect(matches).toHaveLength(1);
 
       // 4. Verify in-app notification was created
-      const notifications = await inAppNotificationService.getUserNotifications(testUserId);
+      const notifications =
+        await inAppNotificationService.getUserNotifications(testUserId);
       expect(notifications.notifications.length).toBeGreaterThan(0);
 
       // 5. Check notification badge
@@ -445,7 +485,10 @@ describe('Notification System Integration Tests', () => {
 
       // 6. Mark notification as read
       const firstNotification = notifications.notifications[0];
-      await inAppNotificationService.markAsRead(firstNotification.id, testUserId);
+      await inAppNotificationService.markAsRead(
+        firstNotification.id,
+        testUserId
+      );
 
       // 7. Verify badge updated
       const updatedBadge = await inAppNotificationService.getBadge(testUserId);
@@ -487,25 +530,29 @@ describe('Notification System Integration Tests', () => {
 
     it('should handle template rendering in notification flow', async () => {
       // Get a template
-      const templates = await notificationTemplateService.getTemplatesByType('new_opportunity');
+      const templates =
+        await notificationTemplateService.getTemplatesByType('new_opportunity');
       const template = templates[0];
 
       // Render template
-      const rendered = await notificationTemplateService.renderTemplate(template.id, {
-        variables: {
-          userName: 'Test User',
-          opportunityType: testOpportunity.type,
-          title: testOpportunity.title,
-          organizer: testOpportunity.organizer.name,
-          deadline: testOpportunity.deadline.toLocaleDateString(),
-          location: testOpportunity.location,
-          mode: testOpportunity.mode,
-          description: testOpportunity.description,
-          url: testOpportunity.url,
-          unsubscribeUrl: 'https://example.com/unsubscribe',
-          preferencesUrl: 'https://example.com/preferences',
-        },
-      });
+      const rendered = await notificationTemplateService.renderTemplate(
+        template.id,
+        {
+          variables: {
+            userName: 'Test User',
+            opportunityType: testOpportunity.type,
+            title: testOpportunity.title,
+            organizer: testOpportunity.organizer.name,
+            deadline: testOpportunity.deadline.toLocaleDateString(),
+            location: testOpportunity.location,
+            mode: testOpportunity.mode,
+            description: testOpportunity.description,
+            url: testOpportunity.url,
+            unsubscribeUrl: 'https://example.com/unsubscribe',
+            preferencesUrl: 'https://example.com/preferences',
+          },
+        }
+      );
 
       expect(rendered).toBeDefined();
 
@@ -545,7 +592,8 @@ describe('Notification System Integration Tests', () => {
     });
 
     it('should handle template rendering errors', async () => {
-      const templates = await notificationTemplateService.getTemplatesByType('new_opportunity');
+      const templates =
+        await notificationTemplateService.getTemplatesByType('new_opportunity');
       const template = templates[0];
 
       await expect(
@@ -556,13 +604,20 @@ describe('Notification System Integration Tests', () => {
     });
 
     it('should handle non-existent resources gracefully', async () => {
-      const nonExistentTemplate = await notificationTemplateService.getTemplate('non-existent');
+      const nonExistentTemplate =
+        await notificationTemplateService.getTemplate('non-existent');
       expect(nonExistentTemplate).toBeNull();
 
-      const nonExistentAlert = await opportunityAlertsService.getAlert('non-existent', testUserId);
+      const nonExistentAlert = await opportunityAlertsService.getAlert(
+        'non-existent',
+        testUserId
+      );
       expect(nonExistentAlert).toBeNull();
 
-      const deleteResult = await deadlineReminderService.deleteReminder('non-existent', testUserId);
+      const deleteResult = await deadlineReminderService.deleteReminder(
+        'non-existent',
+        testUserId
+      );
       expect(deleteResult).toBe(false);
     });
   });

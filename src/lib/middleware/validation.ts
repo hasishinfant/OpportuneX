@@ -38,9 +38,10 @@ export const validateRequest = (
         field: error.type === 'field' ? error.path : 'unknown',
         message: error.msg,
         // Don't expose actual values in production for security
-        value: process.env.NODE_ENV === 'development' && error.type === 'field' 
-          ? error.value 
-          : undefined,
+        value:
+          process.env.NODE_ENV === 'development' && error.type === 'field'
+            ? error.value
+            : undefined,
       })),
     });
     return;
@@ -112,10 +113,6 @@ export const commonValidations = {
         options: { min: 1, max: 500 },
         errorMessage: 'Search query must be between 1 and 500 characters',
       },
-      custom: {
-        options: (value: string) => customValidators.isSafeSearchQuery(value),
-        errorMessage: 'Search query contains potentially unsafe content',
-      },
     },
   },
 
@@ -145,8 +142,10 @@ export const commonValidations = {
       errorMessage: 'Password must be between 8 and 128 characters',
     },
     matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      errorMessage: 'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character',
+      options:
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      errorMessage:
+        'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character',
     },
   },
 

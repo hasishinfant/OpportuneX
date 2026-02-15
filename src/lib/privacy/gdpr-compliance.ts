@@ -33,15 +33,18 @@ export class GDPRCompliance {
   /**
    * Record user consent for data processing
    */
-  static async recordConsent(userId: string, consentData: {
-    purpose: string;
-    lawfulBasis: string;
-    dataCategories: string[];
-    consentGiven: boolean;
-    consentMethod: 'explicit' | 'implicit' | 'opt_in' | 'pre_checked';
-    ipAddress?: string;
-    userAgent?: string;
-  }): Promise<void> {
+  static async recordConsent(
+    userId: string,
+    consentData: {
+      purpose: string;
+      lawfulBasis: string;
+      dataCategories: string[];
+      consentGiven: boolean;
+      consentMethod: 'explicit' | 'implicit' | 'opt_in' | 'pre_checked';
+      ipAddress?: string;
+      userAgent?: string;
+    }
+  ): Promise<void> {
     try {
       await this.prisma.userConsent.create({
         data: {
@@ -153,7 +156,9 @@ export class GDPRCompliance {
       const now = new Date();
 
       // Delete old search history
-      const searchCutoff = new Date(now.getTime() - retentionPeriods.searchHistory * 24 * 60 * 60 * 1000);
+      const searchCutoff = new Date(
+        now.getTime() - retentionPeriods.searchHistory * 24 * 60 * 60 * 1000
+      );
       await this.prisma.userSearch.deleteMany({
         where: {
           timestamp: { lt: searchCutoff },
@@ -161,7 +166,9 @@ export class GDPRCompliance {
       });
 
       // Delete old session data
-      const sessionCutoff = new Date(now.getTime() - retentionPeriods.sessionData * 24 * 60 * 60 * 1000);
+      const sessionCutoff = new Date(
+        now.getTime() - retentionPeriods.sessionData * 24 * 60 * 60 * 1000
+      );
       await this.prisma.userSession.deleteMany({
         where: {
           createdAt: { lt: sessionCutoff },
@@ -169,7 +176,9 @@ export class GDPRCompliance {
       });
 
       // Mark inactive users for review
-      const inactiveCutoff = new Date(now.getTime() - retentionPeriods.inactiveUsers * 24 * 60 * 60 * 1000);
+      const inactiveCutoff = new Date(
+        now.getTime() - retentionPeriods.inactiveUsers * 24 * 60 * 60 * 1000
+      );
       await this.prisma.user.updateMany({
         where: {
           lastLoginAt: { lt: inactiveCutoff },
@@ -201,7 +210,10 @@ export class GDPRCompliance {
         {
           purpose: 'Opportunity Discovery',
           lawfulBasis: this.LAWFUL_BASES.LEGITIMATE_INTERESTS,
-          dataCategories: [this.DATA_CATEGORIES.PERSONAL, this.DATA_CATEGORIES.ACADEMIC],
+          dataCategories: [
+            this.DATA_CATEGORIES.PERSONAL,
+            this.DATA_CATEGORIES.ACADEMIC,
+          ],
           dataSubjects: 'Students seeking opportunities',
           recipients: 'Internal systems, opportunity providers',
           retentionPeriod: '3 years from last activity',
@@ -210,7 +222,10 @@ export class GDPRCompliance {
         {
           purpose: 'AI-Powered Recommendations',
           lawfulBasis: this.LAWFUL_BASES.CONSENT,
-          dataCategories: [this.DATA_CATEGORIES.BEHAVIORAL, this.DATA_CATEGORIES.ACADEMIC],
+          dataCategories: [
+            this.DATA_CATEGORIES.BEHAVIORAL,
+            this.DATA_CATEGORIES.ACADEMIC,
+          ],
           dataSubjects: 'Registered users',
           recipients: 'AI processing systems',
           retentionPeriod: '2 years from consent withdrawal',
@@ -219,7 +234,10 @@ export class GDPRCompliance {
         {
           purpose: 'Communication and Notifications',
           lawfulBasis: this.LAWFUL_BASES.CONSENT,
-          dataCategories: [this.DATA_CATEGORIES.PERSONAL, this.DATA_CATEGORIES.COMMUNICATION],
+          dataCategories: [
+            this.DATA_CATEGORIES.PERSONAL,
+            this.DATA_CATEGORIES.COMMUNICATION,
+          ],
           dataSubjects: 'Users who opted in to notifications',
           recipients: 'Email/SMS service providers',
           retentionPeriod: 'Until consent withdrawn',
@@ -245,7 +263,7 @@ export class GDPRCompliance {
   /**
    * Middleware to check GDPR consent before processing
    */
-  static checkConsent = (purpose: string, required: boolean = true) => {
+  static checkConsent = (purpose: string, required = true) => {
     return async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.user?.id;
 
@@ -300,14 +318,18 @@ export class GDPRCompliance {
    */
   private static getConsentDescription(purpose: string): string {
     const descriptions: Record<string, string> = {
-      'opportunity_discovery': 'Process your profile and preferences to find relevant opportunities',
-      'ai_recommendations': 'Use AI to generate personalized preparation roadmaps',
-      'notifications': 'Send you email and SMS notifications about opportunities',
-      'analytics': 'Analyze usage patterns to improve our service',
-      'marketing': 'Send promotional content about new features',
+      opportunity_discovery:
+        'Process your profile and preferences to find relevant opportunities',
+      ai_recommendations:
+        'Use AI to generate personalized preparation roadmaps',
+      notifications: 'Send you email and SMS notifications about opportunities',
+      analytics: 'Analyze usage patterns to improve our service',
+      marketing: 'Send promotional content about new features',
     };
 
-    return descriptions[purpose] || 'Process your data for the specified purpose';
+    return (
+      descriptions[purpose] || 'Process your data for the specified purpose'
+    );
   }
 
   /**
@@ -315,11 +337,11 @@ export class GDPRCompliance {
    */
   private static getLawfulBasis(purpose: string): string {
     const bases: Record<string, string> = {
-      'opportunity_discovery': this.LAWFUL_BASES.LEGITIMATE_INTERESTS,
-      'ai_recommendations': this.LAWFUL_BASES.CONSENT,
-      'notifications': this.LAWFUL_BASES.CONSENT,
-      'analytics': this.LAWFUL_BASES.LEGITIMATE_INTERESTS,
-      'marketing': this.LAWFUL_BASES.CONSENT,
+      opportunity_discovery: this.LAWFUL_BASES.LEGITIMATE_INTERESTS,
+      ai_recommendations: this.LAWFUL_BASES.CONSENT,
+      notifications: this.LAWFUL_BASES.CONSENT,
+      analytics: this.LAWFUL_BASES.LEGITIMATE_INTERESTS,
+      marketing: this.LAWFUL_BASES.CONSENT,
     };
 
     return bases[purpose] || this.LAWFUL_BASES.CONSENT;
@@ -328,9 +350,13 @@ export class GDPRCompliance {
   /**
    * Cookie consent management
    */
-  static cookieConsentMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  static cookieConsentMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const cookieConsent = req.cookies['cookie-consent'];
-    
+
     if (!cookieConsent) {
       // Set essential cookies only
       res.locals.cookieConsent = {
@@ -360,14 +386,25 @@ export class GDPRCompliance {
    */
   static minimizeData = (data: any, purpose: string): any => {
     const dataMinimizationRules: Record<string, string[]> = {
-      'opportunity_discovery': ['name', 'email', 'skills', 'location', 'preferences'],
-      'ai_recommendations': ['skills', 'academic', 'searchHistory', 'preferences'],
-      'notifications': ['name', 'email', 'phone', 'notificationPreferences'],
-      'analytics': ['userId', 'timestamp', 'action', 'metadata'],
+      opportunity_discovery: [
+        'name',
+        'email',
+        'skills',
+        'location',
+        'preferences',
+      ],
+      ai_recommendations: [
+        'skills',
+        'academic',
+        'searchHistory',
+        'preferences',
+      ],
+      notifications: ['name', 'email', 'phone', 'notificationPreferences'],
+      analytics: ['userId', 'timestamp', 'action', 'metadata'],
     };
 
     const allowedFields = dataMinimizationRules[purpose] || [];
-    
+
     if (allowedFields.length === 0) {
       return data; // No restrictions defined
     }
@@ -391,7 +428,8 @@ export class GDPRCompliance {
 
     for (const field of fields) {
       if (pseudonymizedData[field]) {
-        const hash = crypto.createHash('sha256')
+        const hash = crypto
+          .createHash('sha256')
           .update(pseudonymizedData[field] + process.env.PSEUDONYM_SALT)
           .digest('hex');
         pseudonymizedData[field] = `pseudo_${hash.substring(0, 16)}`;
@@ -414,27 +452,37 @@ export class GDPRCompliance {
 
     try {
       // Delete user searches
-      const searchCount = await this.prisma.userSearch.count({ where: { userId } });
+      const searchCount = await this.prisma.userSearch.count({
+        where: { userId },
+      });
       await this.prisma.userSearch.deleteMany({ where: { userId } });
       deletedRecords.searches = searchCount;
 
       // Delete user sessions
-      const sessionCount = await this.prisma.userSession.count({ where: { userId } });
+      const sessionCount = await this.prisma.userSession.count({
+        where: { userId },
+      });
       await this.prisma.userSession.deleteMany({ where: { userId } });
       deletedRecords.sessions = sessionCount;
 
       // Delete consent records
-      const consentCount = await this.prisma.userConsent.count({ where: { userId } });
+      const consentCount = await this.prisma.userConsent.count({
+        where: { userId },
+      });
       await this.prisma.userConsent.deleteMany({ where: { userId } });
       deletedRecords.consents = consentCount;
 
       // Delete notifications
-      const notificationCount = await this.prisma.notification.count({ where: { userId } });
+      const notificationCount = await this.prisma.notification.count({
+        where: { userId },
+      });
       await this.prisma.notification.deleteMany({ where: { userId } });
       deletedRecords.notifications = notificationCount;
 
       // Delete roadmaps
-      const roadmapCount = await this.prisma.roadmap.count({ where: { userId } });
+      const roadmapCount = await this.prisma.roadmap.count({
+        where: { userId },
+      });
       await this.prisma.roadmap.deleteMany({ where: { userId } });
       deletedRecords.roadmaps = roadmapCount;
 
@@ -463,7 +511,7 @@ export class GDPRCompliance {
     } catch (error) {
       console.error('Error processing data deletion request:', error);
       errors.push(error instanceof Error ? error.message : 'Unknown error');
-      
+
       return {
         success: false,
         deletedRecords,

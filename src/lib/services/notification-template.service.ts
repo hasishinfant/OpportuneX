@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import type { NotificationChannel, NotificationType } from './notification.service';
+import type {
+  NotificationChannel,
+  NotificationType,
+} from './notification.service';
 
 // Template interfaces
 export interface NotificationTemplate {
@@ -91,18 +94,25 @@ const templateVariableSchema = z.object({
   required: z.boolean().default(false),
   defaultValue: z.any().optional(),
   description: z.string().max(200).optional(),
-  validation: z.object({
-    min: z.number().optional(),
-    max: z.number().optional(),
-    pattern: z.string().optional(),
-    enum: z.array(z.any()).optional(),
-  }).optional(),
+  validation: z
+    .object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      pattern: z.string().optional(),
+      enum: z.array(z.any()).optional(),
+    })
+    .optional(),
 });
 
 const notificationTemplateSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  type: z.enum(['new_opportunity', 'deadline_reminder', 'recommendation', 'system']),
+  type: z.enum([
+    'new_opportunity',
+    'deadline_reminder',
+    'recommendation',
+    'system',
+  ]),
   channels: z.array(z.enum(['email', 'sms', 'in_app', 'push'])).min(1),
   subject: z.string().max(200).optional(),
   title: z.string().min(1).max(200),
@@ -129,10 +139,13 @@ export class NotificationTemplateService {
 
   // Initialize default templates
   private initializeDefaultTemplates(): void {
-    const defaultTemplates: Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    const defaultTemplates: Array<
+      Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>
+    > = [
       {
         name: 'New Opportunity Alert',
-        description: 'Notification sent when a new opportunity matches user criteria',
+        description:
+          'Notification sent when a new opportunity matches user criteria',
         type: 'new_opportunity',
         channels: ['email', 'in_app', 'push'],
         subject: 'New {{opportunityType}}: {{title}}',
@@ -172,17 +185,73 @@ The OpportuneX Team`,
 </div>`,
         },
         variables: [
-          { name: 'userName', type: 'string', required: true, description: 'User\'s display name' },
-          { name: 'opportunityType', type: 'string', required: true, description: 'Type of opportunity (hackathon, internship, workshop)' },
-          { name: 'title', type: 'string', required: true, description: 'Opportunity title' },
-          { name: 'organizer', type: 'string', required: true, description: 'Organizer name' },
-          { name: 'deadline', type: 'date', required: true, description: 'Application deadline' },
-          { name: 'location', type: 'string', required: false, description: 'Opportunity location' },
-          { name: 'mode', type: 'string', required: true, description: 'Online/offline/hybrid' },
-          { name: 'description', type: 'string', required: true, description: 'Opportunity description' },
-          { name: 'url', type: 'string', required: true, description: 'Link to opportunity' },
-          { name: 'unsubscribeUrl', type: 'string', required: true, description: 'Unsubscribe link' },
-          { name: 'preferencesUrl', type: 'string', required: true, description: 'Preferences management link' },
+          {
+            name: 'userName',
+            type: 'string',
+            required: true,
+            description: "User's display name",
+          },
+          {
+            name: 'opportunityType',
+            type: 'string',
+            required: true,
+            description:
+              'Type of opportunity (hackathon, internship, workshop)',
+          },
+          {
+            name: 'title',
+            type: 'string',
+            required: true,
+            description: 'Opportunity title',
+          },
+          {
+            name: 'organizer',
+            type: 'string',
+            required: true,
+            description: 'Organizer name',
+          },
+          {
+            name: 'deadline',
+            type: 'date',
+            required: true,
+            description: 'Application deadline',
+          },
+          {
+            name: 'location',
+            type: 'string',
+            required: false,
+            description: 'Opportunity location',
+          },
+          {
+            name: 'mode',
+            type: 'string',
+            required: true,
+            description: 'Online/offline/hybrid',
+          },
+          {
+            name: 'description',
+            type: 'string',
+            required: true,
+            description: 'Opportunity description',
+          },
+          {
+            name: 'url',
+            type: 'string',
+            required: true,
+            description: 'Link to opportunity',
+          },
+          {
+            name: 'unsubscribeUrl',
+            type: 'string',
+            required: true,
+            description: 'Unsubscribe link',
+          },
+          {
+            name: 'preferencesUrl',
+            type: 'string',
+            required: true,
+            description: 'Preferences management link',
+          },
         ],
         active: true,
         version: 1,
@@ -222,12 +291,42 @@ The OpportuneX Team`,
 </div>`,
         },
         variables: [
-          { name: 'userName', type: 'string', required: true, description: 'User\'s display name' },
-          { name: 'title', type: 'string', required: true, description: 'Opportunity title' },
-          { name: 'deadline', type: 'date', required: true, description: 'Application deadline' },
-          { name: 'timeLeft', type: 'string', required: true, description: 'Time remaining until deadline' },
-          { name: 'organizer', type: 'string', required: true, description: 'Organizer name' },
-          { name: 'url', type: 'string', required: true, description: 'Link to opportunity' },
+          {
+            name: 'userName',
+            type: 'string',
+            required: true,
+            description: "User's display name",
+          },
+          {
+            name: 'title',
+            type: 'string',
+            required: true,
+            description: 'Opportunity title',
+          },
+          {
+            name: 'deadline',
+            type: 'date',
+            required: true,
+            description: 'Application deadline',
+          },
+          {
+            name: 'timeLeft',
+            type: 'string',
+            required: true,
+            description: 'Time remaining until deadline',
+          },
+          {
+            name: 'organizer',
+            type: 'string',
+            required: true,
+            description: 'Organizer name',
+          },
+          {
+            name: 'url',
+            type: 'string',
+            required: true,
+            description: 'Link to opportunity',
+          },
         ],
         active: true,
         version: 1,
@@ -291,12 +390,42 @@ Unsubscribe: {{unsubscribeUrl}}`,
 </div>`,
         },
         variables: [
-          { name: 'userName', type: 'string', required: true, description: 'User\'s display name' },
-          { name: 'count', type: 'number', required: true, description: 'Number of opportunities' },
-          { name: 'opportunities', type: 'array', required: true, description: 'Array of opportunity objects' },
-          { name: 'allOpportunitiesUrl', type: 'string', required: true, description: 'Link to all opportunities' },
-          { name: 'unsubscribeUrl', type: 'string', required: true, description: 'Unsubscribe link' },
-          { name: 'preferencesUrl', type: 'string', required: true, description: 'Preferences management link' },
+          {
+            name: 'userName',
+            type: 'string',
+            required: true,
+            description: "User's display name",
+          },
+          {
+            name: 'count',
+            type: 'number',
+            required: true,
+            description: 'Number of opportunities',
+          },
+          {
+            name: 'opportunities',
+            type: 'array',
+            required: true,
+            description: 'Array of opportunity objects',
+          },
+          {
+            name: 'allOpportunitiesUrl',
+            type: 'string',
+            required: true,
+            description: 'Link to all opportunities',
+          },
+          {
+            name: 'unsubscribeUrl',
+            type: 'string',
+            required: true,
+            description: 'Unsubscribe link',
+          },
+          {
+            name: 'preferencesUrl',
+            type: 'string',
+            required: true,
+            description: 'Preferences management link',
+          },
         ],
         active: true,
         version: 1,
@@ -354,9 +483,24 @@ The OpportuneX Team`,
 </div>`,
         },
         variables: [
-          { name: 'userName', type: 'string', required: true, description: 'User\'s display name' },
-          { name: 'dashboardUrl', type: 'string', required: true, description: 'Link to user dashboard' },
-          { name: 'supportEmail', type: 'string', required: true, description: 'Support email address' },
+          {
+            name: 'userName',
+            type: 'string',
+            required: true,
+            description: "User's display name",
+          },
+          {
+            name: 'dashboardUrl',
+            type: 'string',
+            required: true,
+            description: 'Link to user dashboard',
+          },
+          {
+            name: 'supportEmail',
+            type: 'string',
+            required: true,
+            description: 'Support email address',
+          },
         ],
         active: true,
         version: 1,
@@ -377,7 +521,9 @@ The OpportuneX Team`,
 
   // Initialize default categories
   private initializeDefaultCategories(): void {
-    const defaultCategories: Omit<TemplateCategory, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    const defaultCategories: Array<
+      Omit<TemplateCategory, 'id' | 'createdAt' | 'updatedAt'>
+    > = [
       {
         name: 'Opportunity Alerts',
         description: 'Templates for opportunity-related notifications',
@@ -428,10 +574,12 @@ The OpportuneX Team`,
 
     templates.forEach(template => {
       let categoryId: string | undefined;
-      
+
       switch (template.type) {
         case 'new_opportunity':
-          categoryId = categoryMap.find(c => c.name === 'Opportunity Alerts')?.id;
+          categoryId = categoryMap.find(
+            c => c.name === 'Opportunity Alerts'
+          )?.id;
           break;
         case 'deadline_reminder':
           categoryId = categoryMap.find(c => c.name === 'Reminders')?.id;
@@ -455,7 +603,12 @@ The OpportuneX Team`,
   }
 
   // Create template
-  async createTemplate(params: Omit<NotificationTemplate, 'id' | 'version' | 'createdAt' | 'updatedAt'>): Promise<NotificationTemplate> {
+  async createTemplate(
+    params: Omit<
+      NotificationTemplate,
+      'id' | 'version' | 'createdAt' | 'updatedAt'
+    >
+  ): Promise<NotificationTemplate> {
     // Validate input
     const validatedParams = notificationTemplateSchema.parse(params);
 
@@ -468,10 +621,12 @@ The OpportuneX Team`,
     };
 
     this.templates.set(template.id, template);
-    
+
     // TODO: Store in database
-    console.log(`Created notification template ${template.id}: ${template.name}`);
-    
+    console.log(
+      `Created notification template ${template.id}: ${template.name}`
+    );
+
     return template;
   }
 
@@ -481,39 +636,58 @@ The OpportuneX Team`,
   }
 
   // Get templates by type
-  async getTemplatesByType(type: NotificationType): Promise<NotificationTemplate[]> {
+  async getTemplatesByType(
+    type: NotificationType
+  ): Promise<NotificationTemplate[]> {
     return Array.from(this.templates.values())
       .filter(template => template.type === type && template.active)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   // Get templates by channel
-  async getTemplatesByChannel(channel: NotificationChannel): Promise<NotificationTemplate[]> {
+  async getTemplatesByChannel(
+    channel: NotificationChannel
+  ): Promise<NotificationTemplate[]> {
     return Array.from(this.templates.values())
-      .filter(template => template.channels.includes(channel) && template.active)
+      .filter(
+        template => template.channels.includes(channel) && template.active
+      )
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   // Get all templates
-  async getAllTemplates(options: {
-    active?: boolean;
-    createdBy?: string;
-  } = {}): Promise<NotificationTemplate[]> {
+  async getAllTemplates(
+    options: {
+      active?: boolean;
+      createdBy?: string;
+    } = {}
+  ): Promise<NotificationTemplate[]> {
     let templates = Array.from(this.templates.values());
 
     if (options.active !== undefined) {
-      templates = templates.filter(template => template.active === options.active);
+      templates = templates.filter(
+        template => template.active === options.active
+      );
     }
 
     if (options.createdBy) {
-      templates = templates.filter(template => template.createdBy === options.createdBy);
+      templates = templates.filter(
+        template => template.createdBy === options.createdBy
+      );
     }
 
-    return templates.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return templates.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }
 
   // Update template
-  async updateTemplate(templateId: string, updates: Partial<Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>>): Promise<NotificationTemplate | null> {
+  async updateTemplate(
+    templateId: string,
+    updates: Partial<
+      Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>
+    >
+  ): Promise<NotificationTemplate | null> {
     const template = this.templates.get(templateId);
     if (!template) return null;
 
@@ -539,7 +713,7 @@ The OpportuneX Team`,
     if (!template) return false;
 
     this.templates.delete(templateId);
-    
+
     // Remove from categories
     for (const category of this.categories.values()) {
       const index = category.templates.indexOf(templateId);
@@ -548,25 +722,32 @@ The OpportuneX Team`,
         this.categories.set(category.id, category);
       }
     }
-    
+
     // TODO: Delete from database
     console.log(`Deleted template ${templateId}`);
-    
+
     return true;
   }
 
   // Render template with context
-  async renderTemplate(templateId: string, context: TemplateRenderContext): Promise<RenderedTemplate | null> {
+  async renderTemplate(
+    templateId: string,
+    context: TemplateRenderContext
+  ): Promise<RenderedTemplate | null> {
     const template = this.templates.get(templateId);
     if (!template) return null;
 
     // Validate required variables
     const missingVariables = template.variables
-      .filter(variable => variable.required && !(variable.name in context.variables))
+      .filter(
+        variable => variable.required && !(variable.name in context.variables)
+      )
       .map(variable => variable.name);
 
     if (missingVariables.length > 0) {
-      throw new Error(`Missing required variables: ${missingVariables.join(', ')}`);
+      throw new Error(
+        `Missing required variables: ${missingVariables.join(', ')}`
+      );
     }
 
     // Prepare render context with defaults
@@ -579,7 +760,11 @@ The OpportuneX Team`,
 
     // Add default values for missing optional variables
     template.variables.forEach(variable => {
-      if (!variable.required && !(variable.name in renderContext) && variable.defaultValue !== undefined) {
+      if (
+        !variable.required &&
+        !(variable.name in renderContext) &&
+        variable.defaultValue !== undefined
+      ) {
         renderContext[variable.name] = variable.defaultValue;
       }
     });
@@ -597,7 +782,10 @@ The OpportuneX Team`,
     }
 
     if (template.content.html) {
-      rendered.content.html = this.processTemplate(template.content.html, renderContext);
+      rendered.content.html = this.processTemplate(
+        template.content.html,
+        renderContext
+      );
     }
 
     if (template.metadata) {
@@ -608,58 +796,78 @@ The OpportuneX Team`,
   }
 
   // Process template string with variables
-  private processTemplate(template: string, context: Record<string, any>): string {
+  private processTemplate(
+    template: string,
+    context: Record<string, any>
+  ): string {
     let processed = template;
 
     // Handle simple variable substitution {{variable}}
     processed = processed.replace(/\{\{(\w+)\}\}/g, (match, key) => {
       const value = context[key];
       if (value === undefined || value === null) return match;
-      
+
       // Format dates
       if (value instanceof Date) {
         return value.toLocaleDateString();
       }
-      
+
       return String(value);
     });
 
     // Handle array iteration {{#array}}...{{/array}}
-    processed = processed.replace(/\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, arrayKey, itemTemplate) => {
-      const array = context[arrayKey];
-      if (!Array.isArray(array)) return '';
-      
-      return array.map(item => {
-        return itemTemplate.replace(/\{\{(\w+)\}\}/g, (itemMatch: string, itemKey: string) => {
-          const value = item[itemKey];
-          if (value === undefined || value === null) return itemMatch;
-          
-          if (value instanceof Date) {
-            return value.toLocaleDateString();
-          }
-          
-          return String(value);
-        });
-      }).join('');
-    });
+    processed = processed.replace(
+      /\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g,
+      (match, arrayKey, itemTemplate) => {
+        const array = context[arrayKey];
+        if (!Array.isArray(array)) return '';
+
+        return array
+          .map(item => {
+            return itemTemplate.replace(
+              /\{\{(\w+)\}\}/g,
+              (itemMatch: string, itemKey: string) => {
+                const value = item[itemKey];
+                if (value === undefined || value === null) return itemMatch;
+
+                if (value instanceof Date) {
+                  return value.toLocaleDateString();
+                }
+
+                return String(value);
+              }
+            );
+          })
+          .join('');
+      }
+    );
 
     // Handle conditional blocks {{#if condition}}...{{/if}}
-    processed = processed.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, conditionKey, content) => {
-      const condition = context[conditionKey];
-      return condition ? content : '';
-    });
+    processed = processed.replace(
+      /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      (match, conditionKey, content) => {
+        const condition = context[conditionKey];
+        return condition ? content : '';
+      }
+    );
 
     // Handle negative conditional blocks {{#unless condition}}...{{/unless}}
-    processed = processed.replace(/\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (match, conditionKey, content) => {
-      const condition = context[conditionKey];
-      return !condition ? content : '';
-    });
+    processed = processed.replace(
+      /\{\{#unless (\w+)\}\}([\s\S]*?)\{\{\/unless\}\}/g,
+      (match, conditionKey, content) => {
+        const condition = context[conditionKey];
+        return !condition ? content : '';
+      }
+    );
 
     return processed;
   }
 
   // Validate template variables
-  async validateTemplate(templateId: string, variables: Record<string, any>): Promise<{
+  async validateTemplate(
+    templateId: string,
+    variables: Record<string, any>
+  ): Promise<{
     valid: boolean;
     errors: string[];
     warnings: string[];
@@ -683,28 +891,50 @@ The OpportuneX Team`,
         // Type validation
         const expectedType = variable.type;
         const actualType = Array.isArray(value) ? 'array' : typeof value;
-        
+
         if (expectedType !== actualType) {
-          errors.push(`Variable ${variable.name} should be ${expectedType}, got ${actualType}`);
+          errors.push(
+            `Variable ${variable.name} should be ${expectedType}, got ${actualType}`
+          );
         }
 
         // Range validation
         if (typeof value === 'number') {
-          if (variable.validation.min !== undefined && value < variable.validation.min) {
-            errors.push(`Variable ${variable.name} should be >= ${variable.validation.min}`);
+          if (
+            variable.validation.min !== undefined &&
+            value < variable.validation.min
+          ) {
+            errors.push(
+              `Variable ${variable.name} should be >= ${variable.validation.min}`
+            );
           }
-          if (variable.validation.max !== undefined && value > variable.validation.max) {
-            errors.push(`Variable ${variable.name} should be <= ${variable.validation.max}`);
+          if (
+            variable.validation.max !== undefined &&
+            value > variable.validation.max
+          ) {
+            errors.push(
+              `Variable ${variable.name} should be <= ${variable.validation.max}`
+            );
           }
         }
 
         // String length validation
         if (typeof value === 'string') {
-          if (variable.validation.min !== undefined && value.length < variable.validation.min) {
-            errors.push(`Variable ${variable.name} should have at least ${variable.validation.min} characters`);
+          if (
+            variable.validation.min !== undefined &&
+            value.length < variable.validation.min
+          ) {
+            errors.push(
+              `Variable ${variable.name} should have at least ${variable.validation.min} characters`
+            );
           }
-          if (variable.validation.max !== undefined && value.length > variable.validation.max) {
-            errors.push(`Variable ${variable.name} should have at most ${variable.validation.max} characters`);
+          if (
+            variable.validation.max !== undefined &&
+            value.length > variable.validation.max
+          ) {
+            errors.push(
+              `Variable ${variable.name} should have at most ${variable.validation.max} characters`
+            );
           }
         }
 
@@ -712,13 +942,20 @@ The OpportuneX Team`,
         if (typeof value === 'string' && variable.validation.pattern) {
           const regex = new RegExp(variable.validation.pattern);
           if (!regex.test(value)) {
-            errors.push(`Variable ${variable.name} does not match required pattern`);
+            errors.push(
+              `Variable ${variable.name} does not match required pattern`
+            );
           }
         }
 
         // Enum validation
-        if (variable.validation.enum && !variable.validation.enum.includes(value)) {
-          errors.push(`Variable ${variable.name} should be one of: ${variable.validation.enum.join(', ')}`);
+        if (
+          variable.validation.enum &&
+          !variable.validation.enum.includes(value)
+        ) {
+          errors.push(
+            `Variable ${variable.name} should be one of: ${variable.validation.enum.join(', ')}`
+          );
         }
       }
     });
@@ -746,7 +983,9 @@ The OpportuneX Team`,
   }
 
   // Create template category
-  async createCategory(params: Omit<TemplateCategory, 'id' | 'createdAt' | 'updatedAt'>): Promise<TemplateCategory> {
+  async createCategory(
+    params: Omit<TemplateCategory, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<TemplateCategory> {
     const category: TemplateCategory = {
       ...params,
       id: this.generateId(),
@@ -755,10 +994,10 @@ The OpportuneX Team`,
     };
 
     this.categories.set(category.id, category);
-    
+
     // TODO: Store in database
     console.log(`Created template category ${category.id}: ${category.name}`);
-    
+
     return category;
   }
 
@@ -792,7 +1031,7 @@ The OpportuneX Team`,
 
     templates.forEach(template => {
       byType[template.type]++;
-      
+
       template.channels.forEach(channel => {
         byChannel[channel]++;
       });

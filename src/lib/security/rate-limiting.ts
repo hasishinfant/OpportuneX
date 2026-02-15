@@ -108,7 +108,8 @@ export class RateLimiting {
     message: {
       success: false,
       error: 'Too many voice requests',
-      message: 'Too many voice processing requests, please wait before trying again.',
+      message:
+        'Too many voice processing requests, please wait before trying again.',
     },
     keyGenerator: (req: Request) => {
       return req.user?.id || req.ip;
@@ -134,7 +135,8 @@ export class RateLimiting {
     message: {
       success: false,
       error: 'Too many AI requests',
-      message: 'AI processing is resource-intensive. Please wait before requesting another roadmap.',
+      message:
+        'AI processing is resource-intensive. Please wait before requesting another roadmap.',
     },
     keyGenerator: (req: Request) => {
       return req.user?.id || req.ip;
@@ -208,10 +210,10 @@ export class RateLimiting {
       try {
         // Remove old entries
         await redis.zremrangebyscore(key, 0, windowStart);
-        
+
         // Count current requests in window
         const currentCount = await redis.zcard(key);
-        
+
         if (currentCount >= maxRequests) {
           console.warn('Sliding window rate limit exceeded:', {
             key,
@@ -244,48 +246,52 @@ export class RateLimiting {
   /**
    * Adaptive rate limiting based on user behavior
    */
-  static adaptiveLimit = async (req: Request, res: Response, next: NextFunction) => {
+  static adaptiveLimit = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const userId = req.user?.id;
-    const ip = req.ip;
-    
+    const { ip } = req;
+
     if (!userId && !ip) {
       return next();
     }
 
     const key = userId ? `adaptive:user:${userId}` : `adaptive:ip:${ip}`;
-    
+
     try {
       // Get user's recent behavior
       const recentRequests = await redis.lrange(`${key}:requests`, 0, -1);
       const recentErrors = await redis.lrange(`${key}:errors`, 0, -1);
-      
+
       const now = Date.now();
       const fiveMinutesAgo = now - 5 * 60 * 1000;
-      
+
       // Count recent requests and errors
       const recentRequestCount = recentRequests.filter(
         timestamp => parseInt(timestamp) > fiveMinutesAgo
       ).length;
-      
+
       const recentErrorCount = recentErrors.filter(
         timestamp => parseInt(timestamp) > fiveMinutesAgo
       ).length;
-      
+
       // Calculate dynamic limit based on behavior
       let maxRequests = 60; // Base limit per 5 minutes
-      
+
       // Reduce limit if user has many errors (potential abuse)
       if (recentErrorCount > 10) {
         maxRequests = 20;
       } else if (recentErrorCount > 5) {
         maxRequests = 40;
       }
-      
+
       // Increase limit for authenticated users with good behavior
       if (userId && recentErrorCount < 2) {
         maxRequests = 100;
       }
-      
+
       if (recentRequestCount >= maxRequests) {
         console.warn('Adaptive rate limit exceeded:', {
           key,
@@ -302,12 +308,12 @@ export class RateLimiting {
           message: 'Request rate too high. Please slow down.',
         });
       }
-      
+
       // Record this request
       await redis.lpush(`${key}:requests`, now.toString());
       await redis.ltrim(`${key}:requests`, 0, 99); // Keep last 100 requests
       await redis.expire(`${key}:requests`, 3600); // 1 hour TTL
-      
+
       next();
     } catch (error) {
       console.error('Error in adaptive rate limiter:', error);
@@ -321,11 +327,11 @@ export class RateLimiting {
    */
   static recordError = async (req: Request, statusCode: number) => {
     if (statusCode < 400) return;
-    
+
     const userId = req.user?.id;
-    const ip = req.ip;
+    const { ip } = req;
     const key = userId ? `adaptive:user:${userId}` : `adaptive:ip:${ip}`;
-    
+
     try {
       await redis.lpush(`${key}:errors`, Date.now().toString());
       await redis.ltrim(`${key}:errors`, 0, 49); // Keep last 50 errors
@@ -340,14 +346,14 @@ export class RateLimiting {
    */
   static createWhitelistMiddleware(whitelist: string[]) {
     return (req: Request, res: Response, next: NextFunction) => {
-      const ip = req.ip;
+      const { ip } = req;
       const userId = req.user?.id;
-      
+
       if (whitelist.includes(ip) || (userId && whitelist.includes(userId))) {
         // Skip rate limiting for whitelisted IPs/users
         return next();
       }
-      
+
       // Continue with normal rate limiting
       next();
     };
@@ -356,13 +362,17 @@ export class RateLimiting {
   /**
    * Global rate limiting with different tiers
    */
-  static tieredRateLimit = (req: Request, res: Response, next: NextFunction) => {
+  static tieredRateLimit = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const userAgent = req.get('User-Agent') || '';
     const isBot = /bot|crawler|spider|scraper/i.test(userAgent);
     const isAuthenticated = !!req.user;
-    
+
     let limit: any;
-    
+
     if (isBot) {
       // Very restrictive for bots
       limit = rateLimit({
@@ -371,7 +381,8 @@ export class RateLimiting {
         message: {
           success: false,
           error: 'Bot rate limit exceeded',
-          message: 'Automated requests are limited. Please contact support for API access.',
+          message:
+            'Automated requests are limited. Please contact support for API access.',
         },
       });
     } else if (isAuthenticated) {
@@ -388,7 +399,7 @@ export class RateLimiting {
         max: 50,
       });
     }
-    
+
     limit(req, res, next);
   };
 }

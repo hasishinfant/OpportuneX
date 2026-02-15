@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { prisma } from './database';
 
 /**
@@ -32,7 +32,7 @@ class QueryPerformanceMonitor {
     }
   }
 
-  getSlowQueries(thresholdMs: number = 1000): QueryMetrics[] {
+  getSlowQueries(thresholdMs = 1000): QueryMetrics[] {
     return this.metrics.filter(m => m.duration > thresholdMs);
   }
 
@@ -91,11 +91,12 @@ export class OptimizedQueries {
             mode: 'insensitive',
           },
         }),
-        ...(skills && skills.length > 0 && {
-          requiredSkills: {
-            hasSome: skills,
-          },
-        }),
+        ...(skills &&
+          skills.length > 0 && {
+            requiredSkills: {
+              hasSome: skills,
+            },
+          }),
         // Only show opportunities with future deadlines
         applicationDeadline: {
           gte: new Date(),
@@ -147,7 +148,13 @@ export class OptimizedQueries {
       ]);
 
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getOpportunities', duration, { page, limit, type, skills, location });
+      queryMonitor.logQuery('getOpportunities', duration, {
+        page,
+        limit,
+        type,
+        skills,
+        location,
+      });
 
       return {
         opportunities: opportunities.map(opp => ({
@@ -162,7 +169,9 @@ export class OptimizedQueries {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getOpportunities:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('getOpportunities:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -189,7 +198,7 @@ export class OptimizedQueries {
     try {
       // Use PostgreSQL full-text search for better performance
       const searchQuery = query.trim().split(' ').join(' & ');
-      
+
       const where: Prisma.OpportunityWhereInput = {
         isActive: true,
         applicationDeadline: { gte: new Date() },
@@ -249,10 +258,7 @@ export class OptimizedQueries {
               },
             }),
           },
-          orderBy: [
-            { qualityScore: 'desc' },
-            { applicationDeadline: 'asc' },
-          ],
+          orderBy: [{ qualityScore: 'desc' }, { applicationDeadline: 'asc' }],
           skip: offset,
           take: limit,
         }),
@@ -260,7 +266,11 @@ export class OptimizedQueries {
       ]);
 
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('searchOpportunities', duration, { query, page, limit });
+      queryMonitor.logQuery('searchOpportunities', duration, {
+        query,
+        page,
+        limit,
+      });
 
       return {
         opportunities: opportunities.map(opp => ({
@@ -275,7 +285,9 @@ export class OptimizedQueries {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('searchOpportunities:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('searchOpportunities:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -344,7 +356,9 @@ export class OptimizedQueries {
       return user;
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getUserProfile:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('getUserProfile:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -352,7 +366,7 @@ export class OptimizedQueries {
   /**
    * Get personalized recommendations for user
    */
-  static async getPersonalizedRecommendations(userId: string, limit: number = 10) {
+  static async getPersonalizedRecommendations(userId: string, limit = 10) {
     const startTime = Date.now();
 
     try {
@@ -380,22 +394,30 @@ export class OptimizedQueries {
         applicationDeadline: { gte: new Date() },
         AND: [
           // Match preferred opportunity types
-          user.preferredOpportunityTypes.length > 0 ? {
-            type: { in: user.preferredOpportunityTypes },
-          } : {},
+          user.preferredOpportunityTypes.length > 0
+            ? {
+                type: { in: user.preferredOpportunityTypes },
+              }
+            : {},
           // Match preferred mode
-          user.preferredMode ? {
-            mode: user.preferredMode,
-          } : {},
+          user.preferredMode
+            ? {
+                mode: user.preferredMode,
+              }
+            : {},
           // Match skills or domains
           {
             OR: [
-              user.technicalSkills.length > 0 ? {
-                requiredSkills: { hasSome: user.technicalSkills },
-              } : {},
-              user.domains.length > 0 ? {
-                tags: { hasSome: user.domains },
-              } : {},
+              user.technicalSkills.length > 0
+                ? {
+                    requiredSkills: { hasSome: user.technicalSkills },
+                  }
+                : {},
+              user.domains.length > 0
+                ? {
+                    tags: { hasSome: user.domains },
+                  }
+                : {},
             ],
           },
         ],
@@ -429,15 +451,15 @@ export class OptimizedQueries {
             select: { id: true },
           },
         },
-        orderBy: [
-          { qualityScore: 'desc' },
-          { applicationDeadline: 'asc' },
-        ],
+        orderBy: [{ qualityScore: 'desc' }, { applicationDeadline: 'asc' }],
         take: limit,
       });
 
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getPersonalizedRecommendations', duration, { userId, limit });
+      queryMonitor.logQuery('getPersonalizedRecommendations', duration, {
+        userId,
+        limit,
+      });
 
       return recommendations.map(opp => ({
         ...opp,
@@ -446,7 +468,9 @@ export class OptimizedQueries {
       }));
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getPersonalizedRecommendations:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('getPersonalizedRecommendations:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -490,7 +514,9 @@ export class OptimizedQueries {
       return { success: true };
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('updateQualityScores:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('updateQualityScores:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -526,7 +552,9 @@ export class OptimizedQueries {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      queryMonitor.logQuery('getPerformanceStats:ERROR', duration, { error: error.message });
+      queryMonitor.logQuery('getPerformanceStats:ERROR', duration, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   }
@@ -544,24 +572,24 @@ export const indexRecommendations = {
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_type_active ON opportunities (type, is_active) WHERE is_active = true',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_organizer_type ON opportunities (organizer_type, is_active) WHERE is_active = true',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_mode ON opportunities (mode, is_active) WHERE is_active = true',
-      'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_location ON opportunities USING gin (to_tsvector(\'english\', location)) WHERE is_active = true',
+      "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_location ON opportunities USING gin (to_tsvector('english', location)) WHERE is_active = true",
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_skills ON opportunities USING gin (required_skills) WHERE is_active = true',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_tags ON opportunities USING gin (tags) WHERE is_active = true',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_quality_score ON opportunities (quality_score DESC, application_deadline ASC) WHERE is_active = true',
-      'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_full_text ON opportunities USING gin (to_tsvector(\'english\', title || \' \' || COALESCE(description, \'\'))) WHERE is_active = true',
-      
+      "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_opportunities_full_text ON opportunities USING gin (to_tsvector('english', title || ' ' || COALESCE(description, ''))) WHERE is_active = true",
+
       // User searches indexes
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_searches_user_created ON user_searches (user_id, created_at DESC)',
-      'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_searches_created ON user_searches (created_at) WHERE created_at > NOW() - INTERVAL \'30 days\'',
-      
+      "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_searches_created ON user_searches (created_at) WHERE created_at > NOW() - INTERVAL '30 days'",
+
       // User favorites indexes
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_favorites_user ON user_favorites (user_id, created_at DESC)',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_favorites_opportunity ON user_favorites (opportunity_id)',
-      
+
       // Notifications indexes
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notifications_user_unread ON notifications (user_id, is_read, created_at DESC) WHERE is_read = false',
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notifications_cleanup ON notifications (is_read, created_at) WHERE is_read = true',
-      
+
       // Sources indexes
       'CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sources_active_scrape ON sources (is_active, last_scraped_at) WHERE is_active = true',
     ];
@@ -572,7 +600,11 @@ export const indexRecommendations = {
         await prisma.$executeRawUnsafe(indexQuery);
         results.push({ query: indexQuery, success: true });
       } catch (error) {
-        results.push({ query: indexQuery, success: false, error: error.message });
+        results.push({
+          query: indexQuery,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
     }
 
@@ -590,12 +622,13 @@ export const indexRecommendations = {
       await prisma.$executeRaw`ANALYZE user_favorites`;
       await prisma.$executeRaw`ANALYZE notifications`;
       await prisma.$executeRaw`ANALYZE sources`;
-      
+
       return { success: true, message: 'Table statistics updated' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   },
 };
-
-export { OptimizedQueries };

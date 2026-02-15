@@ -44,7 +44,7 @@ export class DataDeletion {
     error?: string;
   }> {
     const deletionId = `del_${userId}_${Date.now()}`;
-    
+
     try {
       // Create deletion request record
       await this.prisma.dataDeletionRequest.create({
@@ -79,7 +79,7 @@ export class DataDeletion {
         data: {
           status: 'COMPLETED',
           completedAt: new Date(),
-          summary: summary,
+          summary,
         },
       });
 
@@ -99,7 +99,7 @@ export class DataDeletion {
       };
     } catch (error) {
       console.error('Error processing user deletion request:', error);
-      
+
       // Update deletion request with error
       try {
         await this.prisma.dataDeletionRequest.update({
@@ -202,7 +202,7 @@ export class DataDeletion {
     };
 
     // Delete in order to respect foreign key constraints
-    
+
     // Delete user searches
     const searchCount = await this.prisma.userSearch.deleteMany({
       where: { userId },
@@ -359,10 +359,13 @@ export class DataDeletion {
     try {
       // Decrypt if encrypted
       const decryptedQuery = DataEncryption.decryptField(query);
-      
+
       // Remove common personal identifiers
-      let anonymized = decryptedQuery
-        .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL]')
+      const anonymized = decryptedQuery
+        .replace(
+          /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+          '[EMAIL]'
+        )
         .replace(/\b\d{10}\b/g, '[PHONE]')
         .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]')
         .replace(/\b\d{6}\b/g, '[PINCODE]');
@@ -379,7 +382,12 @@ export class DataDeletion {
    */
   static async deleteDataCategory(
     userId: string,
-    category: 'search_history' | 'notifications' | 'roadmaps' | 'sessions' | 'favorites'
+    category:
+      | 'search_history'
+      | 'notifications'
+      | 'roadmaps'
+      | 'sessions'
+      | 'favorites'
   ): Promise<{
     success: boolean;
     deletedCount?: number;
@@ -493,7 +501,9 @@ export class DataDeletion {
       }
 
       // Delete old notifications (older than 2 years)
-      const notificationCutoff = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
+      const notificationCutoff = new Date(
+        now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000
+      );
       const oldNotifications = await this.prisma.notification.deleteMany({
         where: {
           createdAt: { lt: notificationCutoff },
@@ -509,7 +519,9 @@ export class DataDeletion {
       }
 
       // Mark inactive users for review (inactive for 3 years)
-      const inactiveCutoff = new Date(now.getTime() - 3 * 365 * 24 * 60 * 60 * 1000);
+      const inactiveCutoff = new Date(
+        now.getTime() - 3 * 365 * 24 * 60 * 60 * 1000
+      );
       const inactiveUsers = await this.prisma.user.updateMany({
         where: {
           lastLoginAt: { lt: inactiveCutoff },
@@ -603,7 +615,7 @@ export class DataDeletion {
 
       try {
         const files = await fs.readdir(uploadsDir);
-        
+
         for (const file of files) {
           const filePath = path.join(uploadsDir, file);
           await fs.unlink(filePath);

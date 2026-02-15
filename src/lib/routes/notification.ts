@@ -95,8 +95,11 @@ router.patch(
     const userId = req.user!.id;
     const { notificationId } = req.params;
 
-    const success = await inAppNotificationService.markAsRead(notificationId, userId);
-    
+    const success = await inAppNotificationService.markAsRead(
+      notificationId,
+      userId
+    );
+
     if (!success) {
       const response: ApiResponse<null> = {
         success: false,
@@ -146,8 +149,11 @@ router.delete(
     const userId = req.user!.id;
     const { notificationId } = req.params;
 
-    const success = await inAppNotificationService.deleteNotification(notificationId, userId);
-    
+    const success = await inAppNotificationService.deleteNotification(
+      notificationId,
+      userId
+    );
+
     if (!success) {
       const response: ApiResponse<null> = {
         success: false,
@@ -174,7 +180,7 @@ router.get(
     const userId = req.user!.id;
 
     const preferences = await notificationService.getUserPreferences(userId);
-    
+
     if (!preferences) {
       // Return default preferences
       const defaultPreferences = {
@@ -240,7 +246,12 @@ router.put(
     body('types').optional().isArray().withMessage('Types must be an array'),
     body('types.*')
       .optional()
-      .isIn(['new_opportunity', 'deadline_reminder', 'recommendation', 'system'])
+      .isIn([
+        'new_opportunity',
+        'deadline_reminder',
+        'recommendation',
+        'system',
+      ])
       .withMessage('Invalid notification type'),
     body('quietHours.enabled')
       .optional()
@@ -263,7 +274,10 @@ router.put(
     const userId = req.user!.id;
     const preferences = req.body;
 
-    const updatedPreferences = await notificationService.updateUserPreferences(userId, preferences);
+    const updatedPreferences = await notificationService.updateUserPreferences(
+      userId,
+      preferences
+    );
 
     const response: ApiResponse<typeof updatedPreferences> = {
       success: true,
@@ -322,7 +336,12 @@ router.post(
   '/test',
   validate([
     body('type')
-      .isIn(['new_opportunity', 'deadline_reminder', 'recommendation', 'system'])
+      .isIn([
+        'new_opportunity',
+        'deadline_reminder',
+        'recommendation',
+        'system',
+      ])
       .withMessage('Invalid notification type'),
     body('channels')
       .isArray({ min: 1 })
@@ -373,15 +392,16 @@ router.patch(
     body('notificationIds')
       .isArray({ min: 1 })
       .withMessage('At least one notification ID is required'),
-    body('notificationIds.*')
-      .isString()
-      .withMessage('Invalid notification ID'),
+    body('notificationIds.*').isString().withMessage('Invalid notification ID'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { notificationIds } = req.body;
 
-    const markedCount = await inAppNotificationService.bulkMarkAsRead(notificationIds, userId);
+    const markedCount = await inAppNotificationService.bulkMarkAsRead(
+      notificationIds,
+      userId
+    );
 
     const response: ApiResponse<{ markedCount: number }> = {
       success: true,
@@ -402,15 +422,16 @@ router.delete(
     body('notificationIds')
       .isArray({ min: 1 })
       .withMessage('At least one notification ID is required'),
-    body('notificationIds.*')
-      .isString()
-      .withMessage('Invalid notification ID'),
+    body('notificationIds.*').isString().withMessage('Invalid notification ID'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { notificationIds } = req.body;
 
-    const deletedCount = await inAppNotificationService.bulkDelete(notificationIds, userId);
+    const deletedCount = await inAppNotificationService.bulkDelete(
+      notificationIds,
+      userId
+    );
 
     const response: ApiResponse<{ deletedCount: number }> = {
       success: true,
@@ -430,7 +451,8 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
 
-    const deletedCount = await inAppNotificationService.deleteAllNotifications(userId);
+    const deletedCount =
+      await inAppNotificationService.deleteAllNotifications(userId);
 
     const response: ApiResponse<{ deletedCount: number }> = {
       success: true,
@@ -453,7 +475,9 @@ router.post(
   '/reminders',
   validate([
     body('opportunityId').isString().withMessage('Opportunity ID is required'),
-    body('opportunityTitle').isString().withMessage('Opportunity title is required'),
+    body('opportunityTitle')
+      .isString()
+      .withMessage('Opportunity title is required'),
     body('opportunityType')
       .isIn(['hackathon', 'internship', 'workshop'])
       .withMessage('Invalid opportunity type'),
@@ -470,7 +494,14 @@ router.post(
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
-    const { opportunityId, opportunityTitle, opportunityType, deadline, channels, scheduleId } = req.body;
+    const {
+      opportunityId,
+      opportunityTitle,
+      opportunityType,
+      deadline,
+      channels,
+      scheduleId,
+    } = req.body;
 
     const reminder = await deadlineReminderService.createReminder({
       userId,
@@ -498,13 +529,27 @@ router.post(
 router.get(
   '/reminders',
   validate([
-    query('active').optional().isBoolean().withMessage('Active must be a boolean'),
-    query('opportunityId').optional().isString().withMessage('Invalid opportunity ID'),
-    query('upcoming').optional().isBoolean().withMessage('Upcoming must be a boolean'),
+    query('active')
+      .optional()
+      .isBoolean()
+      .withMessage('Active must be a boolean'),
+    query('opportunityId')
+      .optional()
+      .isString()
+      .withMessage('Invalid opportunity ID'),
+    query('upcoming')
+      .optional()
+      .isBoolean()
+      .withMessage('Upcoming must be a boolean'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
-    const active = req.query.active === 'true' ? true : req.query.active === 'false' ? false : undefined;
+    const active =
+      req.query.active === 'true'
+        ? true
+        : req.query.active === 'false'
+          ? false
+          : undefined;
     const upcoming = req.query.upcoming === 'true';
     const opportunityId = req.query.opportunityId as string;
 
@@ -539,13 +584,19 @@ router.patch(
       .optional()
       .isIn(['email', 'sms', 'in_app', 'push'])
       .withMessage('Invalid notification channel'),
-    body('active').optional().isBoolean().withMessage('Active must be a boolean'),
+    body('active')
+      .optional()
+      .isBoolean()
+      .withMessage('Active must be a boolean'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { reminderId } = req.params;
     const updates = req.body;
 
-    const reminder = await deadlineReminderService.updateReminder(reminderId, updates);
+    const reminder = await deadlineReminderService.updateReminder(
+      reminderId,
+      updates
+    );
 
     if (!reminder) {
       const response: ApiResponse<null> = {
@@ -570,14 +621,15 @@ router.patch(
  */
 router.delete(
   '/reminders/:reminderId',
-  validate([
-    param('reminderId').isString().withMessage('Invalid reminder ID'),
-  ]),
+  validate([param('reminderId').isString().withMessage('Invalid reminder ID')]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { reminderId } = req.params;
 
-    const success = await deadlineReminderService.deleteReminder(reminderId, userId);
+    const success = await deadlineReminderService.deleteReminder(
+      reminderId,
+      userId
+    );
 
     if (!success) {
       const response: ApiResponse<null> = {
@@ -606,12 +658,26 @@ router.delete(
 router.post(
   '/alerts',
   validate([
-    body('name').isString().isLength({ min: 1, max: 100 }).withMessage('Name must be 1-100 characters'),
-    body('description').optional().isString().isLength({ max: 500 }).withMessage('Description must be max 500 characters'),
+    body('name')
+      .isString()
+      .isLength({ min: 1, max: 100 })
+      .withMessage('Name must be 1-100 characters'),
+    body('description')
+      .optional()
+      .isString()
+      .isLength({ max: 500 })
+      .withMessage('Description must be max 500 characters'),
     body('criteria').isObject().withMessage('Criteria is required'),
-    body('channels').isArray({ min: 1 }).withMessage('At least one channel is required'),
-    body('channels.*').isIn(['email', 'sms', 'in_app', 'push']).withMessage('Invalid notification channel'),
-    body('frequency').optional().isIn(['immediate', 'daily', 'weekly']).withMessage('Invalid frequency'),
+    body('channels')
+      .isArray({ min: 1 })
+      .withMessage('At least one channel is required'),
+    body('channels.*')
+      .isIn(['email', 'sms', 'in_app', 'push'])
+      .withMessage('Invalid notification channel'),
+    body('frequency')
+      .optional()
+      .isIn(['immediate', 'daily', 'weekly'])
+      .withMessage('Invalid frequency'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
@@ -642,13 +708,23 @@ router.post(
 router.get(
   '/alerts',
   validate([
-    query('active').optional().isBoolean().withMessage('Active must be a boolean'),
+    query('active')
+      .optional()
+      .isBoolean()
+      .withMessage('Active must be a boolean'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
-    const active = req.query.active === 'true' ? true : req.query.active === 'false' ? false : undefined;
+    const active =
+      req.query.active === 'true'
+        ? true
+        : req.query.active === 'false'
+          ? false
+          : undefined;
 
-    const alerts = await opportunityAlertsService.getUserAlerts(userId, { active });
+    const alerts = await opportunityAlertsService.getUserAlerts(userId, {
+      active,
+    });
 
     const response: ApiResponse<typeof alerts> = {
       success: true,
@@ -667,9 +743,18 @@ router.get(
   '/alerts/:alertId/matches',
   validate([
     param('alertId').isString().withMessage('Invalid alert ID'),
-    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be 1-100'),
-    query('offset').optional().isInt({ min: 0 }).withMessage('Offset must be >= 0'),
-    query('minScore').optional().isInt({ min: 0, max: 100 }).withMessage('Min score must be 0-100'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 100 })
+      .withMessage('Limit must be 1-100'),
+    query('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Offset must be >= 0'),
+    query('minScore')
+      .optional()
+      .isInt({ min: 0, max: 100 })
+      .withMessage('Min score must be 0-100'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
@@ -678,11 +763,15 @@ router.get(
     const offset = parseInt(req.query.offset as string) || 0;
     const minScore = parseInt(req.query.minScore as string) || undefined;
 
-    const result = await opportunityAlertsService.getAlertMatches(alertId, userId, {
-      limit,
-      offset,
-      minScore,
-    });
+    const result = await opportunityAlertsService.getAlertMatches(
+      alertId,
+      userId,
+      {
+        limit,
+        offset,
+        minScore,
+      }
+    );
 
     const response: ApiResponse<typeof result> = {
       success: true,
@@ -701,20 +790,44 @@ router.patch(
   '/alerts/:alertId',
   validate([
     param('alertId').isString().withMessage('Invalid alert ID'),
-    body('name').optional().isString().isLength({ min: 1, max: 100 }).withMessage('Name must be 1-100 characters'),
-    body('description').optional().isString().isLength({ max: 500 }).withMessage('Description must be max 500 characters'),
+    body('name')
+      .optional()
+      .isString()
+      .isLength({ min: 1, max: 100 })
+      .withMessage('Name must be 1-100 characters'),
+    body('description')
+      .optional()
+      .isString()
+      .isLength({ max: 500 })
+      .withMessage('Description must be max 500 characters'),
     body('criteria').optional().isObject().withMessage('Invalid criteria'),
-    body('channels').optional().isArray({ min: 1 }).withMessage('At least one channel is required'),
-    body('channels.*').optional().isIn(['email', 'sms', 'in_app', 'push']).withMessage('Invalid notification channel'),
-    body('frequency').optional().isIn(['immediate', 'daily', 'weekly']).withMessage('Invalid frequency'),
-    body('active').optional().isBoolean().withMessage('Active must be a boolean'),
+    body('channels')
+      .optional()
+      .isArray({ min: 1 })
+      .withMessage('At least one channel is required'),
+    body('channels.*')
+      .optional()
+      .isIn(['email', 'sms', 'in_app', 'push'])
+      .withMessage('Invalid notification channel'),
+    body('frequency')
+      .optional()
+      .isIn(['immediate', 'daily', 'weekly'])
+      .withMessage('Invalid frequency'),
+    body('active')
+      .optional()
+      .isBoolean()
+      .withMessage('Active must be a boolean'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { alertId } = req.params;
     const updates = req.body;
 
-    const alert = await opportunityAlertsService.updateAlert(alertId, userId, updates);
+    const alert = await opportunityAlertsService.updateAlert(
+      alertId,
+      userId,
+      updates
+    );
 
     if (!alert) {
       const response: ApiResponse<null> = {
@@ -739,9 +852,7 @@ router.patch(
  */
 router.delete(
   '/alerts/:alertId',
-  validate([
-    param('alertId').isString().withMessage('Invalid alert ID'),
-  ]),
+  validate([param('alertId').isString().withMessage('Invalid alert ID')]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { alertId } = req.params;
@@ -774,13 +885,12 @@ router.delete(
  */
 router.get(
   '/delivery/:deliveryId',
-  validate([
-    param('deliveryId').isString().withMessage('Invalid delivery ID'),
-  ]),
+  validate([param('deliveryId').isString().withMessage('Invalid delivery ID')]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { deliveryId } = req.params;
 
-    const result = await notificationDeliveryService.getDeliveryStatus(deliveryId);
+    const result =
+      await notificationDeliveryService.getDeliveryStatus(deliveryId);
 
     const response: ApiResponse<typeof result> = {
       success: true,
@@ -798,14 +908,22 @@ router.get(
 router.get(
   '/delivery/stats/:channel',
   validate([
-    param('channel').isIn(['email', 'sms', 'push', 'in_app']).withMessage('Invalid channel'),
-    query('period').optional().isIn(['hour', 'day', 'week', 'month']).withMessage('Invalid period'),
+    param('channel')
+      .isIn(['email', 'sms', 'push', 'in_app'])
+      .withMessage('Invalid channel'),
+    query('period')
+      .optional()
+      .isIn(['hour', 'day', 'week', 'month'])
+      .withMessage('Invalid period'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { channel } = req.params;
     const period = (req.query.period as any) || 'day';
 
-    const stats = await notificationDeliveryService.getChannelStats(channel as any, period);
+    const stats = await notificationDeliveryService.getChannelStats(
+      channel as any,
+      period
+    );
 
     const response: ApiResponse<typeof stats> = {
       success: true,
@@ -823,7 +941,10 @@ router.get(
 router.get(
   '/delivery/stats',
   validate([
-    query('period').optional().isIn(['hour', 'day', 'week', 'month']).withMessage('Invalid period'),
+    query('period')
+      .optional()
+      .isIn(['hour', 'day', 'week', 'month'])
+      .withMessage('Invalid period'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const period = (req.query.period as any) || 'day';
@@ -850,20 +971,40 @@ router.get(
 router.get(
   '/templates',
   validate([
-    query('type').optional().isIn(['new_opportunity', 'deadline_reminder', 'recommendation', 'system']).withMessage('Invalid type'),
-    query('channel').optional().isIn(['email', 'sms', 'in_app', 'push']).withMessage('Invalid channel'),
-    query('active').optional().isBoolean().withMessage('Active must be a boolean'),
+    query('type')
+      .optional()
+      .isIn([
+        'new_opportunity',
+        'deadline_reminder',
+        'recommendation',
+        'system',
+      ])
+      .withMessage('Invalid type'),
+    query('channel')
+      .optional()
+      .isIn(['email', 'sms', 'in_app', 'push'])
+      .withMessage('Invalid channel'),
+    query('active')
+      .optional()
+      .isBoolean()
+      .withMessage('Active must be a boolean'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const type = req.query.type as any;
     const channel = req.query.channel as any;
-    const active = req.query.active === 'true' ? true : req.query.active === 'false' ? false : undefined;
+    const active =
+      req.query.active === 'true'
+        ? true
+        : req.query.active === 'false'
+          ? false
+          : undefined;
 
     let templates;
     if (type) {
       templates = await notificationTemplateService.getTemplatesByType(type);
     } else if (channel) {
-      templates = await notificationTemplateService.getTemplatesByChannel(channel);
+      templates =
+        await notificationTemplateService.getTemplatesByChannel(channel);
     } else {
       templates = await notificationTemplateService.getAllTemplates({ active });
     }
@@ -883,9 +1024,7 @@ router.get(
  */
 router.get(
   '/templates/:templateId',
-  validate([
-    param('templateId').isString().withMessage('Invalid template ID'),
-  ]),
+  validate([param('templateId').isString().withMessage('Invalid template ID')]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { templateId } = req.params;
 
@@ -918,20 +1057,29 @@ router.post(
     param('templateId').isString().withMessage('Invalid template ID'),
     body('variables').isObject().withMessage('Variables must be an object'),
     body('user').optional().isObject().withMessage('User must be an object'),
-    body('opportunity').optional().isObject().withMessage('Opportunity must be an object'),
-    body('system').optional().isObject().withMessage('System must be an object'),
+    body('opportunity')
+      .optional()
+      .isObject()
+      .withMessage('Opportunity must be an object'),
+    body('system')
+      .optional()
+      .isObject()
+      .withMessage('System must be an object'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { templateId } = req.params;
     const { variables, user, opportunity, system } = req.body;
 
     try {
-      const rendered = await notificationTemplateService.renderTemplate(templateId, {
-        variables,
-        user,
-        opportunity,
-        system,
-      });
+      const rendered = await notificationTemplateService.renderTemplate(
+        templateId,
+        {
+          variables,
+          user,
+          opportunity,
+          system,
+        }
+      );
 
       if (!rendered) {
         const response: ApiResponse<null> = {
@@ -951,7 +1099,8 @@ router.post(
     } catch (error) {
       const response: ApiResponse<null> = {
         success: false,
-        message: error instanceof Error ? error.message : 'Template rendering failed',
+        message:
+          error instanceof Error ? error.message : 'Template rendering failed',
       };
       res.status(400).json(response);
     }

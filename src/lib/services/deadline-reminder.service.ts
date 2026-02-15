@@ -10,7 +10,7 @@ export interface DeadlineReminder {
   opportunityType: 'hackathon' | 'internship' | 'workshop';
   deadline: Date;
   reminderTimes: Date[];
-  channels: ('email' | 'sms' | 'in_app' | 'push')[];
+  channels: Array<'email' | 'sms' | 'in_app' | 'push'>;
   sent: boolean[];
   active: boolean;
   createdAt: Date;
@@ -36,10 +36,14 @@ const deadlineReminderSchema = z.object({
   opportunityTitle: z.string().min(1),
   opportunityType: z.enum(['hackathon', 'internship', 'workshop']),
   deadline: z.date(),
-  reminderIntervals: z.array(z.object({
-    value: z.number().positive(),
-    unit: z.enum(['minutes', 'hours', 'days', 'weeks']),
-  })).optional(),
+  reminderIntervals: z
+    .array(
+      z.object({
+        value: z.number().positive(),
+        unit: z.enum(['minutes', 'hours', 'days', 'weeks']),
+      })
+    )
+    .optional(),
   channels: z.array(z.enum(['email', 'sms', 'in_app', 'push'])).min(1),
 });
 
@@ -56,7 +60,7 @@ export class DeadlineReminderService {
 
   // Initialize default reminder schedules
   private initializeDefaultSchedules(): void {
-    const defaultSchedules: Omit<ReminderSchedule, 'id'>[] = [
+    const defaultSchedules: Array<Omit<ReminderSchedule, 'id'>> = [
       {
         name: 'Standard Reminders',
         description: 'Standard reminder schedule for most opportunities',
@@ -109,7 +113,7 @@ export class DeadlineReminderService {
       value: number;
       unit: 'minutes' | 'hours' | 'days' | 'weeks';
     }>;
-    channels?: ('email' | 'sms' | 'in_app' | 'push')[];
+    channels?: Array<'email' | 'sms' | 'in_app' | 'push'>;
     scheduleId?: string;
   }): Promise<DeadlineReminder> {
     // Validate input
@@ -149,7 +153,7 @@ export class DeadlineReminderService {
             reminderTime.setDate(reminderTime.getDate() - interval.value);
             break;
           case 'weeks':
-            reminderTime.setDate(reminderTime.getDate() - (interval.value * 7));
+            reminderTime.setDate(reminderTime.getDate() - interval.value * 7);
             break;
         }
         return reminderTime;
@@ -173,28 +177,38 @@ export class DeadlineReminderService {
     };
 
     this.reminders.set(reminder.id, reminder);
-    
+
     // TODO: Store in database
-    console.log(`Created deadline reminder ${reminder.id} for opportunity ${params.opportunityId}`);
-    
+    console.log(
+      `Created deadline reminder ${reminder.id} for opportunity ${params.opportunityId}`
+    );
+
     return reminder;
   }
 
   // Get user's deadline reminders
-  async getUserReminders(userId: string, options: {
-    active?: boolean;
-    opportunityId?: string;
-    upcoming?: boolean;
-  } = {}): Promise<DeadlineReminder[]> {
-    let userReminders = Array.from(this.reminders.values())
-      .filter(reminder => reminder.userId === userId);
+  async getUserReminders(
+    userId: string,
+    options: {
+      active?: boolean;
+      opportunityId?: string;
+      upcoming?: boolean;
+    } = {}
+  ): Promise<DeadlineReminder[]> {
+    let userReminders = Array.from(this.reminders.values()).filter(
+      reminder => reminder.userId === userId
+    );
 
     if (options.active !== undefined) {
-      userReminders = userReminders.filter(reminder => reminder.active === options.active);
+      userReminders = userReminders.filter(
+        reminder => reminder.active === options.active
+      );
     }
 
     if (options.opportunityId) {
-      userReminders = userReminders.filter(reminder => reminder.opportunityId === options.opportunityId);
+      userReminders = userReminders.filter(
+        reminder => reminder.opportunityId === options.opportunityId
+      );
     }
 
     if (options.upcoming) {
@@ -202,14 +216,19 @@ export class DeadlineReminderService {
       userReminders = userReminders.filter(reminder => reminder.deadline > now);
     }
 
-    return userReminders.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+    return userReminders.sort(
+      (a, b) => a.deadline.getTime() - b.deadline.getTime()
+    );
   }
 
   // Update reminder
-  async updateReminder(reminderId: string, updates: {
-    channels?: ('email' | 'sms' | 'in_app' | 'push')[];
-    active?: boolean;
-  }): Promise<DeadlineReminder | null> {
+  async updateReminder(
+    reminderId: string,
+    updates: {
+      channels?: Array<'email' | 'sms' | 'in_app' | 'push'>;
+      active?: boolean;
+    }
+  ): Promise<DeadlineReminder | null> {
     const reminder = this.reminders.get(reminderId);
     if (!reminder) return null;
 
@@ -238,17 +257,20 @@ export class DeadlineReminderService {
     }
 
     this.reminders.delete(reminderId);
-    
+
     // TODO: Delete from database
     console.log(`Deleted reminder ${reminderId}`);
-    
+
     return true;
   }
 
   // Process due reminders
   private async processReminders(): Promise<void> {
     const now = new Date();
-    const dueReminders: Array<{ reminder: DeadlineReminder; reminderIndex: number }> = [];
+    const dueReminders: Array<{
+      reminder: DeadlineReminder;
+      reminderIndex: number;
+    }> = [];
 
     // Find due reminders
     for (const reminder of this.reminders.values()) {
@@ -278,14 +300,17 @@ export class DeadlineReminderService {
   }
 
   // Send individual reminder
-  private async sendReminder(reminder: DeadlineReminder, reminderIndex: number): Promise<void> {
+  private async sendReminder(
+    reminder: DeadlineReminder,
+    reminderIndex: number
+  ): Promise<void> {
     const reminderTime = reminder.reminderTimes[reminderIndex];
     const timeLeft = this.formatTimeLeft(reminder.deadline);
-    
+
     // Create notification content
     const title = `Deadline Reminder: ${reminder.opportunityTitle}`;
     const message = `The deadline for "${reminder.opportunityTitle}" is ${timeLeft}. Don't miss out!`;
-    
+
     // Send notification through notification service
     await notificationService.sendNotification({
       userId: reminder.userId,
@@ -306,11 +331,15 @@ export class DeadlineReminderService {
       priority: this.calculatePriority(reminder.deadline),
     });
 
-    console.log(`Sent deadline reminder for ${reminder.opportunityTitle} to user ${reminder.userId}`);
+    console.log(
+      `Sent deadline reminder for ${reminder.opportunityTitle} to user ${reminder.userId}`
+    );
   }
 
   // Calculate notification priority based on time left
-  private calculatePriority(deadline: Date): 'low' | 'normal' | 'high' | 'urgent' {
+  private calculatePriority(
+    deadline: Date
+  ): 'low' | 'normal' | 'high' | 'urgent' {
     const now = new Date();
     const timeLeft = deadline.getTime() - now.getTime();
     const hoursLeft = timeLeft / (1000 * 60 * 60);
@@ -329,7 +358,9 @@ export class DeadlineReminderService {
     if (timeLeft <= 0) return 'expired';
 
     const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
 
     if (days > 0) {
@@ -362,7 +393,9 @@ export class DeadlineReminderService {
 
     if (expiredReminders.length > 0) {
       // TODO: Delete from database
-      console.log(`Cleaned up ${expiredReminders.length} expired deadline reminders`);
+      console.log(
+        `Cleaned up ${expiredReminders.length} expired deadline reminders`
+      );
     }
 
     return expiredReminders.length;
@@ -371,11 +404,14 @@ export class DeadlineReminderService {
   // Start reminder processor
   private startReminderProcessor(): void {
     // Process reminders every 5 minutes
-    this.intervalId = setInterval(() => {
-      this.processReminders().catch(error => {
-        console.error('Error processing deadline reminders:', error);
-      });
-    }, 5 * 60 * 1000);
+    this.intervalId = setInterval(
+      () => {
+        this.processReminders().catch(error => {
+          console.error('Error processing deadline reminders:', error);
+        });
+      },
+      5 * 60 * 1000
+    );
 
     console.log('Deadline reminder processor started');
   }
@@ -391,11 +427,15 @@ export class DeadlineReminderService {
 
   // Get reminder schedules
   getReminderSchedules(): ReminderSchedule[] {
-    return Array.from(this.schedules.values()).filter(schedule => schedule.active);
+    return Array.from(this.schedules.values()).filter(
+      schedule => schedule.active
+    );
   }
 
   // Add custom reminder schedule
-  addReminderSchedule(schedule: Omit<ReminderSchedule, 'id'>): ReminderSchedule {
+  addReminderSchedule(
+    schedule: Omit<ReminderSchedule, 'id'>
+  ): ReminderSchedule {
     const id = this.generateId();
     const fullSchedule: ReminderSchedule = { ...schedule, id };
     this.schedules.set(id, fullSchedule);
@@ -412,15 +452,17 @@ export class DeadlineReminderService {
     byChannel: Record<string, number>;
   }> {
     let reminders = Array.from(this.reminders.values());
-    
+
     if (userId) {
       reminders = reminders.filter(r => r.userId === userId);
     }
 
     const now = new Date();
     const activeReminders = reminders.filter(r => r.active);
-    const upcomingReminders = reminders.filter(r => r.deadline > now && r.active);
-    
+    const upcomingReminders = reminders.filter(
+      r => r.deadline > now && r.active
+    );
+
     let sentCount = 0;
     reminders.forEach(r => {
       sentCount += r.sent.filter(Boolean).length;
@@ -430,8 +472,9 @@ export class DeadlineReminderService {
     const byChannel: Record<string, number> = {};
 
     reminders.forEach(reminder => {
-      byOpportunityType[reminder.opportunityType] = (byOpportunityType[reminder.opportunityType] || 0) + 1;
-      
+      byOpportunityType[reminder.opportunityType] =
+        (byOpportunityType[reminder.opportunityType] || 0) + 1;
+
       reminder.channels.forEach(channel => {
         byChannel[channel] = (byChannel[channel] || 0) + 1;
       });
@@ -457,7 +500,7 @@ export class DeadlineReminderService {
       deadline: Date;
     }>;
     scheduleId?: string;
-    channels?: ('email' | 'sms' | 'in_app' | 'push')[];
+    channels?: Array<'email' | 'sms' | 'in_app' | 'push'>;
   }): Promise<DeadlineReminder[]> {
     const reminders: DeadlineReminder[] = [];
 
@@ -474,7 +517,10 @@ export class DeadlineReminderService {
         });
         reminders.push(reminder);
       } catch (error) {
-        console.error(`Failed to create reminder for opportunity ${opportunity.id}:`, error);
+        console.error(
+          `Failed to create reminder for opportunity ${opportunity.id}:`,
+          error
+        );
       }
     }
 

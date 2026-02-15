@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "close": "बंद करें",
+    "back": "वापस",
+    "next": "अगला",
+    "previous": "पिछला",
+    "submit": "जमा करें",
+    "reset": "रीसेट करें"
+  },
+  "header": {
+    "search": "खोजें",
+    "myRoadmaps": "मेरे रोडमैप",
+    "profile": "प्रोफ़ाइल",
+    "signIn": "साइन इन करें",
+    "getStarted": "शुरू करें",
+    "analytics": "विश्लेषण",
+    "social": "सामाजिक"
+  },
+  "home": {
+    "title": "अपना अगला अवसर खोजें",
+    "subtitle": "आपके लिए हैकाथॉन, इंटर्नशिप और वर्कशॉप खोजने के लिए AI-संचालित प्लेटफ़ॉर्म",
+    "searchPlaceholder": "अवसरों की खोज करें...",
+    "voiceSearch": "वॉयस सर्च",
+    "featuredOpportunities": "विशेष अवसर"
+  },
+  "search": {
+    "title": "अवसर खोजें",
+    "placeholder": "आप क्या खोज रहे हैं?",
+    "voiceSearchButton": "वॉयस सर्च का उपयोग करें",
+    "filters": "फ़िल्टर",
+    "results": "परिणाम",
+    "noResults": "कोई अवसर नहीं मिला",
+    "tryDifferentSearch": "एक अलग खोज शब्द आज़माएं"
+  },
+  "filters": {
+    "type": "प्रकार",
+    "location": "स्थान",
+    "skillLevel": "कौशल स्तर",
+    "remote": "रिमोट",
+    "category": "श्रेणी",
+    "deadline": "समय सीमा",
+    "clearAll": "सभी साफ़ करें",
+    "apply": "फ़िल्टर लागू करें"
+  },
+  "opportunity": {
+    "hackathon": "हैकाथॉन",
+    "internship": "इंटर्नशिप",
+    "workshop": "वर्कशॉप",
+    "deadline": "समय सीमा",
+    "location": "स्थान",
+    "remote": "रिमोट",
+    "skillLevel": "कौशल स्तर",
+    "beginner": "शुरुआती",
+    "intermediate": "मध्यवर्ती",
+    "advanced": "उन्नत",
+    "viewDetails": "विवरण देखें",
+    "apply": "अभी आवेदन करें",
+    "save": "सहेजें"
+  },
+  "profile": {
+    "title": "मेरी प्रोफ़ाइल",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "name": "नाम",
+    "email": "ईमेल",
+    "phone": "फ़ोन",
+    "location": "स्थान",
+    "skills": "कौशल",
+    "interests": "रुचियां",
+    "education": "शिक्षा",
+    "experience": "अनुभव",
+    "preferences": "प्राथमिकताएं",
+    "notifications": "सूचना सेटिंग्स",
+    "language": "भाषा",
+    "theme": "थीम",
+    "saveChanges": "परिवर्तन सहेजें"
+  },
+  "roadmap": {
+    "title": "मेरे रोडमैप",
+    "createNew": "नया रोडमैप बनाएं",
+    "inProgress": "प्रगति में",
+    "completed": "पूर्ण",
+    "viewRoadmap": "रोडमैप देखें",
+    "progress": "प्रगति",
+    "steps": "चरण",
+    "resources": "संसाधन"
+  },
+  "voice": {
+    "listening": "सुन रहा है...",
+    "processing": "प्रोसेस हो रहा है...",
+    "speak": "अब बोलें",
+    "tryAgain": "फिर से कोशिश करें",
+    "error": "वॉयस इनपुट प्रोसेस नहीं हो सका",
+    "permissionDenied": "माइक्रोफ़ोन अनुमति अस्वीकृत",
+    "notSupported": "इस ब्राउज़र में वॉयस सर्च समर्थित नहीं है"
+  },
+  "notifications": {
+    "title": "सूचनाएं",
+    "markAllRead": "सभी को पढ़ा हुआ चिह्नित करें",
+    "noNotifications": "कोई सूचना नहीं",
+    "newOpportunity": "नया अवसर आपकी रुचियों से मेल खाता है",
+    "deadlineReminder": "समय सीमा नज़दीक आ रही है",
+    "applicationUpdate": "आवेदन स्थिति अपडेट की गई"
+  },
+  "footer": {
+    "about": "के बारे में",
+    "contact": "संपर्क करें",
+    "privacy": "गोपनीयता नीति",
+    "terms": "सेवा की शर्तें",
+    "help": "सहायता केंद्र"
+  }
+}

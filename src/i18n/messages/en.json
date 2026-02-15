@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset"
+  },
+  "header": {
+    "search": "Search",
+    "myRoadmaps": "My Roadmaps",
+    "profile": "Profile",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "analytics": "Analytics",
+    "social": "Social"
+  },
+  "home": {
+    "title": "Discover Your Next Opportunity",
+    "subtitle": "AI-powered platform to find hackathons, internships, and workshops tailored for you",
+    "searchPlaceholder": "Search for opportunities...",
+    "voiceSearch": "Voice Search",
+    "featuredOpportunities": "Featured Opportunities"
+  },
+  "search": {
+    "title": "Search Opportunities",
+    "placeholder": "What are you looking for?",
+    "voiceSearchButton": "Use Voice Search",
+    "filters": "Filters",
+    "results": "Results",
+    "noResults": "No opportunities found",
+    "tryDifferentSearch": "Try a different search term"
+  },
+  "filters": {
+    "type": "Type",
+    "location": "Location",
+    "skillLevel": "Skill Level",
+    "remote": "Remote",
+    "category": "Category",
+    "deadline": "Deadline",
+    "clearAll": "Clear All",
+    "apply": "Apply Filters"
+  },
+  "opportunity": {
+    "hackathon": "Hackathon",
+    "internship": "Internship",
+    "workshop": "Workshop",
+    "deadline": "Deadline",
+    "location": "Location",
+    "remote": "Remote",
+    "skillLevel": "Skill Level",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "viewDetails": "View Details",
+    "apply": "Apply Now",
+    "save": "Save"
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "skills": "Skills",
+    "interests": "Interests",
+    "education": "Education",
+    "experience": "Experience",
+    "preferences": "Preferences",
+    "notifications": "Notification Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "saveChanges": "Save Changes"
+  },
+  "roadmap": {
+    "title": "My Roadmaps",
+    "createNew": "Create New Roadmap",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "viewRoadmap": "View Roadmap",
+    "progress": "Progress",
+    "steps": "Steps",
+    "resources": "Resources"
+  },
+  "voice": {
+    "listening": "Listening...",
+    "processing": "Processing...",
+    "speak": "Speak now",
+    "tryAgain": "Try again",
+    "error": "Could not process voice input",
+    "permissionDenied": "Microphone permission denied",
+    "notSupported": "Voice search not supported in this browser"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "newOpportunity": "New opportunity matches your interests",
+    "deadlineReminder": "Deadline approaching",
+    "applicationUpdate": "Application status updated"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "help": "Help Center"
+  }
+}

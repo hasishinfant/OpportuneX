@@ -17,7 +17,9 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-feature-settings:
+    'rlig' 1,
+    'calt' 1;
 }
 
 @layer utilities {
@@ -48,4 +50,74 @@ body {
 .focus-visible:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+}
+
+/* Gamification animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 0.5s ease-in-out;
+}
+
+/* Badge glow effect */
+.badge-glow {
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+.badge-glow:hover {
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.8);
+}
+
+/* Level progress bar animation */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-bar-animated {
+  animation: progress-fill 1s ease-out;
+}
+
+/* Streak fire animation */
+@keyframes fire-flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.streak-fire {
+  display: inline-block;
+  animation: fire-flicker 1s ease-in-out infinite;
 }

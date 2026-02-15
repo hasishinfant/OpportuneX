@@ -608,9 +608,21 @@ export function UserProfileForm({
             </label>
             <div className='grid grid-cols-3 gap-2'>
               {[
-                { value: 'hackathon', label: 'Hackathons', icon: <Monitor className="h-5 w-5" /> },
-                { value: 'internship', label: 'Internships', icon: <Briefcase className="h-5 w-5" /> },
-                { value: 'workshop', label: 'Workshops', icon: <Target className="h-5 w-5" /> },
+                {
+                  value: 'hackathon',
+                  label: 'Hackathons',
+                  icon: <Monitor className='h-5 w-5' />,
+                },
+                {
+                  value: 'internship',
+                  label: 'Internships',
+                  icon: <Briefcase className='h-5 w-5' />,
+                },
+                {
+                  value: 'workshop',
+                  label: 'Workshops',
+                  icon: <Target className='h-5 w-5' />,
+                },
               ].map(({ value, label, icon }) => (
                 <button
                   key={value}

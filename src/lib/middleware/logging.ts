@@ -35,7 +35,7 @@ export const loggingMiddleware = (
 
   // Override res.end to capture response details
   const originalEnd = res.end;
-  res.end = function (chunk?: any, encoding?: any) {
+  res.end = function (chunk?: any, encoding?: any): any {
     const responseTime = Date.now() - startTime;
 
     logEntry.statusCode = res.statusCode;

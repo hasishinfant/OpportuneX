@@ -88,7 +88,7 @@ export class VoiceService {
    */
   private async speechToText(
     audioData: Blob,
-    language: 'en' | 'hi'
+    language: 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te'
   ): Promise<ApiResponse<AudioProcessingResult>> {
     try {
       switch (this.config.provider) {
@@ -114,7 +114,7 @@ export class VoiceService {
    */
   private async googleSpeechToText(
     audioData: Blob,
-    language: 'en' | 'hi'
+    language: 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te'
   ): Promise<ApiResponse<AudioProcessingResult>> {
     try {
       if (!this.config.apiKey) {
@@ -122,7 +122,16 @@ export class VoiceService {
       }
 
       // Convert language code
-      const languageCode = language === 'hi' ? 'hi-IN' : 'en-US';
+      const languageCodeMap: Record<string, string> = {
+        en: 'en-US',
+        hi: 'hi-IN',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        de: 'de-DE',
+        ta: 'ta-IN',
+        te: 'te-IN',
+      };
+      const languageCode = languageCodeMap[language];
 
       // Convert Blob to base64
       const arrayBuffer = await audioData.arrayBuffer();
@@ -192,7 +201,7 @@ export class VoiceService {
    */
   private async azureSpeechToText(
     audioData: Blob,
-    language: 'en' | 'hi'
+    language: 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te'
   ): Promise<ApiResponse<AudioProcessingResult>> {
     try {
       if (!this.config.apiKey || !this.config.region) {
@@ -200,7 +209,16 @@ export class VoiceService {
       }
 
       // Convert language code
-      const languageCode = language === 'hi' ? 'hi-IN' : 'en-US';
+      const languageCodeMap: Record<string, string> = {
+        en: 'en-US',
+        hi: 'hi-IN',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        de: 'de-DE',
+        ta: 'ta-IN',
+        te: 'te-IN',
+      };
+      const languageCode = languageCodeMap[language];
 
       // Azure Speech-to-Text API request
       const response = await fetch(
@@ -251,13 +269,13 @@ export class VoiceService {
    */
   private async mockSpeechToText(
     audioData: Blob,
-    language: 'en' | 'hi'
+    language: 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te'
   ): Promise<ApiResponse<AudioProcessingResult>> {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock transcriptions based on language
-    const mockTranscriptions = {
+    const mockTranscriptions: Record<string, string[]> = {
       en: [
         'Find AI hackathons in Mumbai',
         'Show me remote internships',
@@ -272,18 +290,64 @@ export class VoiceService {
         'मशीन लर्निंग प्रतियोगिताएं खोजें',
         'शुरुआती लोगों के लिए स्टार्टअप इंटर्नशिप खोजें',
       ],
+      es: [
+        'Buscar hackathons de IA en Mumbai',
+        'Mostrar pasantías remotas',
+        'Quiero participar en talleres de desarrollo web',
+        'Buscar competencias de aprendizaje automático',
+        'Encontrar pasantías de startups para principiantes',
+      ],
+      fr: [
+        'Trouver des hackathons IA à Mumbai',
+        'Montrer les stages à distance',
+        'Je veux participer à des ateliers de développement web',
+        "Rechercher des compétitions d'apprentissage automatique",
+        'Trouver des stages de startups pour débutants',
+      ],
+      de: [
+        'KI-Hackathons in Mumbai finden',
+        'Remote-Praktika anzeigen',
+        'Ich möchte an Webentwicklungs-Workshops teilnehmen',
+        'Nach Machine-Learning-Wettbewerben suchen',
+        'Startup-Praktika für Anfänger finden',
+      ],
+      ta: [
+        'மும்பையில் AI ஹேக்கத்தான்களைக் கண்டறியுங்கள்',
+        'தொலைநிலை பயிற்சிகளைக் காட்டு',
+        'வலை மேம்பாட்டு பட்டறைகளில் பங்கேற்க விரும்புகிறேன்',
+        'இயந்திர கற்றல் போட்டிகளைத் தேடு',
+        'தொடக்கநிலைக்கான ஸ்டார்ட்அப் பயிற்சிகளைக் கண்டறியுங்கள்',
+      ],
+      te: [
+        'ముంబైలో AI హ్యాకథాన్‌లను కనుగొనండి',
+        'రిమోట్ ఇంటర్న్‌షిప్‌లను చూపించు',
+        'వెబ్ డెవలప్‌మెంట్ వర్క్‌షాప్‌లలో పాల్గొనాలనుకుంటున్నాను',
+        'మెషిన్ లెర్నింగ్ పోటీలను వెతకండి',
+        'ప్రారంభకుల కోసం స్టార్టప్ ఇంటర్న్‌షిప్‌లను కనుగొనండి',
+      ],
     };
 
-    const transcriptions = mockTranscriptions[language];
+    const transcriptions =
+      mockTranscriptions[language] || mockTranscriptions.en;
     const randomTranscription =
       transcriptions[Math.floor(Math.random() * transcriptions.length)];
+
+    const languageCodeMap: Record<string, string> = {
+      en: 'en-US',
+      hi: 'hi-IN',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      de: 'de-DE',
+      ta: 'ta-IN',
+      te: 'te-IN',
+    };
 
     return {
       success: true,
       data: {
         transcription: randomTranscription,
         confidence: 0.85 + Math.random() * 0.1, // Random confidence between 0.85-0.95
-        language: language === 'hi' ? 'hi-IN' : 'en-US',
+        language: languageCodeMap[language],
       },
       message: 'Mock speech transcribed successfully',
     };
@@ -294,18 +358,23 @@ export class VoiceService {
    */
   private async extractSearchIntent(
     transcription: string,
-    language: 'en' | 'hi'
+    language: 'en' | 'hi' | 'es' | 'fr' | 'de' | 'ta' | 'te'
   ): Promise<string> {
     // Simple intent extraction - in production, this could use NLP services
     let searchQuery = transcription.toLowerCase();
 
     // Remove common voice command prefixes
-    const prefixesToRemove = {
+    const prefixesToRemove: Record<string, string[]> = {
       en: ['find', 'search for', 'show me', 'i want', 'looking for', 'get me'],
       hi: ['खोजें', 'दिखाएं', 'चाहिए', 'ढूंढें', 'मुझे चाहिए'],
+      es: ['buscar', 'mostrar', 'quiero', 'encontrar', 'dame'],
+      fr: ['trouver', 'montrer', 'je veux', 'chercher', 'donne-moi'],
+      de: ['finden', 'zeigen', 'ich möchte', 'suchen', 'gib mir'],
+      ta: ['கண்டறியுங்கள்', 'காட்டு', 'வேண்டும்', 'தேடு', 'எனக்கு வேண்டும்'],
+      te: ['కనుగొనండి', 'చూపించు', 'కావాలి', 'వెతకండి', 'నాకు కావాలి'],
     };
 
-    const prefixes = prefixesToRemove[language];
+    const prefixes = prefixesToRemove[language] || prefixesToRemove.en;
     for (const prefix of prefixes) {
       if (searchQuery.startsWith(prefix)) {
         searchQuery = searchQuery.substring(prefix.length).trim();
@@ -466,6 +535,11 @@ export class VoiceService {
     return [
       { code: 'en', name: 'English', nativeName: 'English' },
       { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+      { code: 'es', name: 'Spanish', nativeName: 'Español' },
+      { code: 'fr', name: 'French', nativeName: 'Français' },
+      { code: 'de', name: 'German', nativeName: 'Deutsch' },
+      { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
+      { code: 'te', name: 'Telugu', nativeName: 'తెలుగు' },
     ];
   }
 

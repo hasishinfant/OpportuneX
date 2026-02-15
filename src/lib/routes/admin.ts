@@ -8,6 +8,7 @@ import { asyncHandler } from '../middleware/error-handler';
 import { validate } from '../middleware/validation';
 import { dataQualityService } from '../services/data-quality.service';
 import { externalAPIService } from '../services/external-api.service';
+import { schedulerService } from '../services/scheduler.service';
 import { scrapingService } from '../services/scraping.service';
 import { searchService } from '../services/search.service';
 
@@ -32,7 +33,9 @@ router.post(
       .withMessage('Source ID is required'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { sourceId } = req.params;
+    const sourceId = Array.isArray(req.params.sourceId)
+      ? req.params.sourceId[0]
+      : req.params.sourceId;
 
     const result = await scrapingService.startScrapingJob(sourceId);
 
@@ -53,7 +56,9 @@ router.get(
     param('jobId').isString().notEmpty().withMessage('Job ID is required'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { jobId } = req.params;
+    const jobId = Array.isArray(req.params.jobId)
+      ? req.params.jobId[0]
+      : req.params.jobId;
 
     const result = await scrapingService.getJobStatus(jobId);
 
@@ -90,7 +95,9 @@ router.post(
     param('jobId').isString().notEmpty().withMessage('Job ID is required'),
   ]),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { jobId } = req.params;
+    const jobId = Array.isArray(req.params.jobId)
+      ? req.params.jobId[0]
+      : req.params.jobId;
 
     const result = await scrapingService.cancelJob(jobId);
 
@@ -289,7 +296,9 @@ router.post(
     param('source').isString().notEmpty().withMessage('Source is required'),
   ]),
   asyncHandler(async (req: Request, res: Response) => {
-    const { source } = req.params;
+    const source = Array.isArray(req.params.source)
+      ? req.params.source[0]
+      : req.params.source;
     const payload = {
       event: req.body.event || 'unknown',
       data: req.body.data || req.body,

@@ -50,16 +50,16 @@ class HealthCheckService {
    */
   async checkDatabase(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       // Test basic connectivity
       await prisma.$queryRaw`SELECT 1`;
-      
+
       // Get database stats
       const stats = await prisma.$queryRaw<Array<{ count: bigint }>>`
         SELECT COUNT(*) as count FROM opportunities WHERE is_active = true
       `;
-      
+
       const responseTime = Date.now() - startTime;
       const activeOpportunities = Number(stats[0]?.count || 0);
 
@@ -81,7 +81,8 @@ class HealthCheckService {
         name: 'database',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Database connection failed',
+        error:
+          error instanceof Error ? error.message : 'Database connection failed',
         timestamp: new Date(),
       };
     }
@@ -92,28 +93,29 @@ class HealthCheckService {
    */
   async checkRedis(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const client = await getRedisClient();
-      
+
       // Test basic connectivity
       const pong = await client.ping();
-      
+
       // Test set/get operations
       const testKey = `health_check_${Date.now()}`;
       await client.set(testKey, 'test', { EX: 10 });
       const testValue = await client.get(testKey);
       await client.del(testKey);
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       // Get Redis info
       const info = await client.info('memory');
       const memoryUsage = this.parseRedisInfo(info);
 
       return {
         name: 'redis',
-        status: pong === 'PONG' && testValue === 'test' ? 'healthy' : 'degraded',
+        status:
+          pong === 'PONG' && testValue === 'test' ? 'healthy' : 'degraded',
         responseTime,
         details: {
           ping: pong,
@@ -127,7 +129,8 @@ class HealthCheckService {
         name: 'redis',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Redis connection failed',
+        error:
+          error instanceof Error ? error.message : 'Redis connection failed',
         timestamp: new Date(),
       };
     }
@@ -138,11 +141,11 @@ class HealthCheckService {
    */
   async checkElasticsearch(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       // Test cluster health
       const clusterHealth = await elasticsearch.cluster.health();
-      
+
       // Test search functionality
       const searchResult = await elasticsearch.search({
         index: 'opportunities',
@@ -150,14 +153,18 @@ class HealthCheckService {
           query: { match_all: {} },
           size: 1,
         },
-      });
-      
+      } as any);
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'elasticsearch',
-        status: clusterHealth.status === 'red' ? 'unhealthy' : 
-                clusterHealth.status === 'yellow' ? 'degraded' : 'healthy',
+        status:
+          clusterHealth.status === 'red'
+            ? 'unhealthy'
+            : clusterHealth.status === 'yellow'
+              ? 'degraded'
+              : 'healthy',
         responseTime,
         details: {
           clusterStatus: clusterHealth.status,
@@ -174,7 +181,10 @@ class HealthCheckService {
         name: 'elasticsearch',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Elasticsearch connection failed',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Elasticsearch connection failed',
         timestamp: new Date(),
       };
     }
@@ -186,14 +196,14 @@ class HealthCheckService {
   async checkExternalAPIs(): Promise<HealthCheckResult> {
     const startTime = Date.now();
     const results: Record<string, boolean> = {};
-    
+
     try {
       // Check OpenAI API
       if (process.env.OPENAI_API_KEY) {
         try {
           const response = await fetch('https://api.openai.com/v1/models', {
             headers: {
-              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+              Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
             },
             signal: AbortSignal.timeout(5000),
           });
@@ -206,12 +216,15 @@ class HealthCheckService {
       // Check SendGrid API
       if (process.env.SENDGRID_API_KEY) {
         try {
-          const response = await fetch('https://api.sendgrid.com/v3/user/profile', {
-            headers: {
-              'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-            },
-            signal: AbortSignal.timeout(5000),
-          });
+          const response = await fetch(
+            'https://api.sendgrid.com/v3/user/profile',
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
           results.sendgrid = response.ok;
         } catch {
           results.sendgrid = false;
@@ -221,7 +234,7 @@ class HealthCheckService {
       const responseTime = Date.now() - startTime;
       const healthyAPIs = Object.values(results).filter(Boolean).length;
       const totalAPIs = Object.values(results).length;
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy';
       if (totalAPIs === 0) {
         status = 'healthy'; // No external APIs configured
@@ -245,7 +258,8 @@ class HealthCheckService {
         name: 'external_apis',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'External API check failed',
+        error:
+          error instanceof Error ? error.message : 'External API check failed',
         timestamp: new Date(),
       };
     }
@@ -256,13 +270,13 @@ class HealthCheckService {
    */
   async checkApplicationMetrics(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const metrics = applicationMonitor.getMetrics();
       const healthStatus = applicationMonitor.getHealthStatus();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'application_metrics',
         status: healthStatus.status,
@@ -289,12 +303,12 @@ class HealthCheckService {
    */
   async checkSystemResources(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const memoryUsage = process.memoryUsage();
       const cpuUsage = process.cpuUsage();
       const uptime = process.uptime();
-      
+
       // Convert bytes to MB
       const memoryMB = {
         rss: Math.round(memoryUsage.rss / 1024 / 1024),
@@ -302,10 +316,11 @@ class HealthCheckService {
         heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
         external: Math.round(memoryUsage.external / 1024 / 1024),
       };
-      
+
       // Check if memory usage is concerning
-      const heapUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
-      
+      const heapUsagePercent =
+        (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+
       let status: 'healthy' | 'degraded' | 'unhealthy';
       if (heapUsagePercent > 90) {
         status = 'unhealthy';
@@ -314,9 +329,9 @@ class HealthCheckService {
       } else {
         status = 'healthy';
       }
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'system_resources',
         status,
@@ -334,7 +349,10 @@ class HealthCheckService {
         name: 'system_resources',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'System resources check failed',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'System resources check failed',
         timestamp: new Date(),
       };
     }
@@ -345,13 +363,13 @@ class HealthCheckService {
    */
   async checkCacheService(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const healthCheck = await cacheService.healthCheck();
       const stats = cacheService.getStats();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'cache_service',
         status: healthCheck.healthy ? 'healthy' : 'unhealthy',
@@ -368,7 +386,8 @@ class HealthCheckService {
         name: 'cache_service',
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Cache service check failed',
+        error:
+          error instanceof Error ? error.message : 'Cache service check failed',
         timestamp: new Date(),
       };
     }
@@ -379,7 +398,7 @@ class HealthCheckService {
    */
   async runAllChecks(): Promise<SystemHealthStatus> {
     const startTime = Date.now();
-    
+
     try {
       // Run all checks in parallel
       const checks = await Promise.all([
@@ -430,8 +449,8 @@ class HealthCheckService {
 
       return healthStatus;
     } catch (error) {
-      logger.error('Health check failed', error);
-      
+      logger.error('Health check failed', error as Error);
+
       return {
         status: 'unhealthy',
         timestamp: new Date(),
@@ -506,14 +525,14 @@ class HealthCheckService {
   private parseRedisInfo(info: string): Record<string, string> {
     const result: Record<string, string> = {};
     const lines = info.split('\r\n');
-    
+
     for (const line of lines) {
       if (line.includes(':')) {
         const [key, value] = line.split(':');
         result[key] = value;
       }
     }
-    
+
     return result;
   }
 }
@@ -528,9 +547,13 @@ export function createHealthCheckRoutes() {
     async health(req: any, res: any) {
       try {
         const healthStatus = await healthCheckService.runAllChecks();
-        const statusCode = healthStatus.status === 'healthy' ? 200 : 
-                          healthStatus.status === 'degraded' ? 200 : 503;
-        
+        const statusCode =
+          healthStatus.status === 'healthy'
+            ? 200
+            : healthStatus.status === 'degraded'
+              ? 200
+              : 503;
+
         res.status(statusCode).json(healthStatus);
       } catch (error) {
         res.status(503).json({
@@ -546,12 +569,13 @@ export function createHealthCheckRoutes() {
       try {
         const readiness = await healthCheckService.getReadinessStatus();
         const statusCode = readiness.ready ? 200 : 503;
-        
+
         res.status(statusCode).json(readiness);
       } catch (error) {
         res.status(503).json({
           ready: false,
-          error: error instanceof Error ? error.message : 'Readiness check failed',
+          error:
+            error instanceof Error ? error.message : 'Readiness check failed',
         });
       }
     },
@@ -561,12 +585,13 @@ export function createHealthCheckRoutes() {
       try {
         const liveness = await healthCheckService.getLivenessStatus();
         const statusCode = liveness.alive ? 200 : 503;
-        
+
         res.status(statusCode).json(liveness);
       } catch (error) {
         res.status(503).json({
           alive: false,
-          error: error instanceof Error ? error.message : 'Liveness check failed',
+          error:
+            error instanceof Error ? error.message : 'Liveness check failed',
         });
       }
     },
@@ -576,9 +601,13 @@ export function createHealthCheckRoutes() {
       try {
         const { component } = req.params;
         const result = await healthCheckService.runCheck(component);
-        const statusCode = result.status === 'healthy' ? 200 : 
-                          result.status === 'degraded' ? 200 : 503;
-        
+        const statusCode =
+          result.status === 'healthy'
+            ? 200
+            : result.status === 'degraded'
+              ? 200
+              : 503;
+
         res.status(statusCode).json(result);
       } catch (error) {
         res.status(404).json({

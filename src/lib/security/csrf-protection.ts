@@ -5,7 +5,8 @@ import type { NextFunction, Request, Response } from 'express';
  * CSRF Protection utilities
  */
 export class CSRFProtection {
-  private static readonly SECRET_KEY = process.env.CSRF_SECRET || 'default-csrf-secret-key';
+  private static readonly SECRET_KEY =
+    process.env.CSRF_SECRET || 'default-csrf-secret-key';
   private static readonly TOKEN_LENGTH = 32;
   private static readonly TOKEN_EXPIRY = 3600000; // 1 hour in milliseconds
 
@@ -16,11 +17,11 @@ export class CSRFProtection {
     const timestamp = Date.now().toString();
     const randomBytes = crypto.randomBytes(this.TOKEN_LENGTH).toString('hex');
     const payload = `${timestamp}:${sessionId || 'anonymous'}:${randomBytes}`;
-    
+
     const hmac = crypto.createHmac('sha256', this.SECRET_KEY);
     hmac.update(payload);
     const signature = hmac.digest('hex');
-    
+
     return Buffer.from(`${payload}:${signature}`).toString('base64');
   }
 
@@ -35,19 +36,19 @@ export class CSRFProtection {
 
       const decoded = Buffer.from(token, 'base64').toString('utf8');
       const parts = decoded.split(':');
-      
+
       if (parts.length !== 4) {
         return false;
       }
 
       const [timestamp, tokenSessionId, randomBytes, signature] = parts;
       const payload = `${timestamp}:${tokenSessionId}:${randomBytes}`;
-      
+
       // Verify signature
       const hmac = crypto.createHmac('sha256', this.SECRET_KEY);
       hmac.update(payload);
       const expectedSignature = hmac.digest('hex');
-      
+
       if (signature !== expectedSignature) {
         return false;
       }
@@ -55,13 +56,17 @@ export class CSRFProtection {
       // Check if token is expired
       const tokenTime = parseInt(timestamp, 10);
       const currentTime = Date.now();
-      
+
       if (currentTime - tokenTime > this.TOKEN_EXPIRY) {
         return false;
       }
 
       // Check session ID match (if provided)
-      if (sessionId && tokenSessionId !== sessionId && tokenSessionId !== 'anonymous') {
+      if (
+        sessionId &&
+        tokenSessionId !== sessionId &&
+        tokenSessionId !== 'anonymous'
+      ) {
         return false;
       }
 
@@ -80,40 +85,52 @@ export class CSRFProtection {
     if (req.session?.id) {
       return req.session.id;
     }
-    
+
     if (req.user?.id) {
       return req.user.id;
     }
-    
+
     // Fallback to IP + User-Agent hash
     const userAgent = req.get('User-Agent') || '';
     const ip = req.ip || req.connection.remoteAddress || '';
-    return crypto.createHash('sha256').update(`${ip}:${userAgent}`).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(`${ip}:${userAgent}`)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   /**
    * Middleware to generate and set CSRF token
    */
-  static generateCSRFToken = (req: Request, res: Response, next: NextFunction) => {
+  static generateCSRFToken = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const sessionId = this.getSessionId(req);
     const token = this.generateToken(sessionId);
-    
+
     // Set token in response header
     res.setHeader('X-CSRF-Token', token);
-    
+
     // Also make it available in locals for templates
     res.locals.csrfToken = token;
-    
+
     // Store in request for later use
     (req as any).csrfToken = token;
-    
+
     next();
   };
 
   /**
    * Middleware to verify CSRF token
    */
-  static verifyCSRFToken = (req: Request, res: Response, next: NextFunction) => {
+  static verifyCSRFToken = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Skip CSRF check for safe methods
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       return next();
@@ -125,13 +142,13 @@ export class CSRFProtection {
     }
 
     const sessionId = this.getSessionId(req);
-    
+
     // Get token from various sources
-    const token = 
-      req.headers['x-csrf-token'] as string ||
-      req.headers['csrf-token'] as string ||
+    const token =
+      (req.headers['x-csrf-token'] as string) ||
+      (req.headers['csrf-token'] as string) ||
       req.body._csrf ||
-      req.query._csrf as string;
+      (req.query._csrf as string);
 
     if (!token) {
       console.warn('CSRF token missing:', {
@@ -170,21 +187,25 @@ export class CSRFProtection {
   /**
    * Middleware for double submit cookie pattern
    */
-  static doubleSubmitCookie = (req: Request, res: Response, next: NextFunction) => {
+  static doubleSubmitCookie = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const cookieName = 'csrf-token';
     const headerName = 'x-csrf-token';
 
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       // For safe methods, generate and set cookie
       const token = crypto.randomBytes(32).toString('hex');
-      
+
       res.cookie(cookieName, token, {
         httpOnly: false, // Client needs to read this for AJAX requests
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 3600000, // 1 hour
       });
-      
+
       res.locals.csrfToken = token;
       return next();
     }
@@ -222,18 +243,22 @@ export class CSRFProtection {
   /**
    * SameSite cookie configuration
    */
-  static configureSameSiteCookies = (req: Request, res: Response, next: NextFunction) => {
+  static configureSameSiteCookies = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Override cookie method to enforce SameSite
     const originalCookie = res.cookie;
-    
-    res.cookie = function(name: string, value: any, options: any = {}) {
+
+    res.cookie = function (name: string, value: any, options: any = {}) {
       const secureOptions = {
         ...options,
         sameSite: options.sameSite || 'strict',
         secure: process.env.NODE_ENV === 'production' ? true : options.secure,
         httpOnly: options.httpOnly !== false, // Default to true unless explicitly set to false
       };
-      
+
       return originalCookie.call(this, name, value, secureOptions);
     };
 
@@ -251,8 +276,8 @@ export class CSRFProtection {
       'http://localhost:3001',
     ].filter(Boolean);
 
-    const origin = req.headers.origin;
-    const referer = req.headers.referer;
+    const { origin } = req.headers;
+    const { referer } = req.headers;
 
     // Skip origin check for same-origin requests
     if (!origin && !referer) {
@@ -300,7 +325,11 @@ export class CSRFProtection {
   /**
    * Custom header validation (for AJAX requests)
    */
-  static validateCustomHeader = (req: Request, res: Response, next: NextFunction) => {
+  static validateCustomHeader = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // Skip for safe methods
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       return next();
@@ -308,7 +337,7 @@ export class CSRFProtection {
 
     // Require custom header for AJAX requests
     const customHeader = req.headers['x-requested-with'];
-    
+
     if (!customHeader || customHeader !== 'XMLHttpRequest') {
       // Also accept Content-Type: application/json as valid AJAX indicator
       const contentType = req.headers['content-type'];
@@ -336,21 +365,24 @@ export class CSRFProtection {
    * Rate limiting for CSRF token generation
    */
   static rateLimitTokenGeneration = (() => {
-    const tokenRequests = new Map<string, { count: number; resetTime: number }>();
+    const tokenRequests = new Map<
+      string,
+      { count: number; resetTime: number }
+    >();
     const MAX_REQUESTS = 10;
     const WINDOW_MS = 60000; // 1 minute
 
     return (req: Request, res: Response, next: NextFunction) => {
       const clientId = req.ip || 'unknown';
       const now = Date.now();
-      
+
       const clientData = tokenRequests.get(clientId);
-      
+
       if (!clientData || now > clientData.resetTime) {
         tokenRequests.set(clientId, { count: 1, resetTime: now + WINDOW_MS });
         return next();
       }
-      
+
       if (clientData.count >= MAX_REQUESTS) {
         console.warn('CSRF token generation rate limit exceeded:', {
           ip: req.ip,
@@ -364,7 +396,7 @@ export class CSRFProtection {
           message: 'Too many token requests. Please try again later.',
         });
       }
-      
+
       clientData.count++;
       next();
     };

@@ -35,7 +35,9 @@ const mockPrisma = {
   },
 };
 
-(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(() => mockPrisma as any);
+(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(
+  () => mockPrisma as any
+);
 
 describe('Data Aggregation Pipeline', () => {
   let scrapingService: ScrapingService;
@@ -61,7 +63,7 @@ describe('Data Aggregation Pipeline', () => {
     requirements: {
       skills: ['JavaScript', 'Python', 'Machine Learning'],
       experience: '1-2 years',
-      education: 'Bachelor\'s degree',
+      education: "Bachelor's degree",
       eligibility: ['Students', 'Professionals'],
     },
     details: {
@@ -142,7 +144,9 @@ describe('Data Aggregation Pipeline', () => {
         const result = await scrapingService.startScrapingJob('source-1');
 
         expect(result.success).toBe(false);
-        expect(result.error).toBe('Scraping job already running for this source');
+        expect(result.error).toBe(
+          'Scraping job already running for this source'
+        );
       });
     });
 
@@ -236,7 +240,8 @@ describe('Data Aggregation Pipeline', () => {
       it('should detect no duplicates for unique opportunity', async () => {
         mockPrisma.opportunity.findMany.mockResolvedValue([]);
 
-        const result = await dataQualityService.detectDuplicates(mockOpportunity);
+        const result =
+          await dataQualityService.detectDuplicates(mockOpportunity);
 
         expect(result.success).toBe(true);
         expect(result.data?.isDuplicate).toBe(false);
@@ -256,7 +261,8 @@ describe('Data Aggregation Pipeline', () => {
 
         mockPrisma.opportunity.findMany.mockResolvedValue([similarOpportunity]);
 
-        const result = await dataQualityService.detectDuplicates(mockOpportunity);
+        const result =
+          await dataQualityService.detectDuplicates(mockOpportunity);
 
         expect(result.success).toBe(true);
         expect(result.data?.isDuplicate).toBe(true);
@@ -270,7 +276,8 @@ describe('Data Aggregation Pipeline', () => {
         const dbError = new Error('Database connection failed');
         mockPrisma.opportunity.findMany.mockRejectedValue(dbError);
 
-        const result = await dataQualityService.detectDuplicates(mockOpportunity);
+        const result =
+          await dataQualityService.detectDuplicates(mockOpportunity);
 
         expect(result.success).toBe(false);
         expect(result.error).toBe('Failed to detect duplicates');
@@ -297,14 +304,21 @@ describe('Data Aggregation Pipeline', () => {
           tags: ['ai', 'machine learning', 'AI'],
         };
 
-        const result = await dataQualityService.standardizeOpportunity(messyOpportunity);
+        const result =
+          await dataQualityService.standardizeOpportunity(messyOpportunity);
 
         expect(result.success).toBe(true);
         expect(result.data?.standardized.title).toBe('Ai Hackathon 2024');
         expect(result.data?.standardized.organizer.name).toBe('TechCorp');
-        expect(result.data?.standardized.requirements.skills).toContain('JavaScript');
-        expect(result.data?.standardized.requirements.skills).toContain('Python');
-        expect(result.data?.standardized.requirements.skills).toContain('Machine Learning');
+        expect(result.data?.standardized.requirements.skills).toContain(
+          'JavaScript'
+        );
+        expect(result.data?.standardized.requirements.skills).toContain(
+          'Python'
+        );
+        expect(result.data?.standardized.requirements.skills).toContain(
+          'Machine Learning'
+        );
         expect(result.data?.standardized.details.location).toBe('Mumbai');
         expect(result.data?.standardized.tags).not.toContain('ai'); // Should be standardized
         expect(result.data?.changes.length).toBeGreaterThan(0);
@@ -320,17 +334,24 @@ describe('Data Aggregation Pipeline', () => {
           },
         };
 
-        const result = await dataQualityService.standardizeOpportunity(inconsistentOpportunity);
+        const result = await dataQualityService.standardizeOpportunity(
+          inconsistentOpportunity
+        );
 
         expect(result.success).toBe(true);
-        expect(result.data?.warnings).toContain('Start date is before application deadline');
-        expect(result.data?.warnings).toContain('End date is before start date');
+        expect(result.data?.warnings).toContain(
+          'Start date is before application deadline'
+        );
+        expect(result.data?.warnings).toContain(
+          'End date is before start date'
+        );
       });
     });
 
     describe('calculateQualityScore', () => {
       it('should calculate high quality score for complete opportunity', async () => {
-        const result = await dataQualityService.calculateQualityScore(mockOpportunity);
+        const result =
+          await dataQualityService.calculateQualityScore(mockOpportunity);
 
         expect(result.success).toBe(true);
         expect(result.data?.overall).toBeGreaterThan(0.8);
@@ -355,13 +376,17 @@ describe('Data Aggregation Pipeline', () => {
           },
         };
 
-        const result = await dataQualityService.calculateQualityScore(incompleteOpportunity);
+        const result = await dataQualityService.calculateQualityScore(
+          incompleteOpportunity
+        );
 
         expect(result.success).toBe(true);
         expect(result.data?.overall).toBeLessThan(0.6);
         expect(result.data?.completeness).toBeLessThan(0.8);
         expect(result.data?.details.missingFields.length).toBeGreaterThan(0);
-        expect(result.data?.details.qualityIssues).toContain('Application deadline is in the past');
+        expect(result.data?.details.qualityIssues).toContain(
+          'Application deadline is in the past'
+        );
       });
 
       it('should detect invalid URLs', async () => {
@@ -370,10 +395,14 @@ describe('Data Aggregation Pipeline', () => {
           externalUrl: 'not-a-valid-url',
         };
 
-        const result = await dataQualityService.calculateQualityScore(invalidUrlOpportunity);
+        const result = await dataQualityService.calculateQualityScore(
+          invalidUrlOpportunity
+        );
 
         expect(result.success).toBe(true);
-        expect(result.data?.details.qualityIssues).toContain('Invalid external URL');
+        expect(result.data?.details.qualityIssues).toContain(
+          'Invalid external URL'
+        );
       });
     });
 
@@ -387,7 +416,9 @@ describe('Data Aggregation Pipeline', () => {
 
         mockPrisma.opportunity.findMany.mockResolvedValue([]);
 
-        const result = await dataQualityService.detectFraud(suspiciousOpportunity);
+        const result = await dataQualityService.detectFraud(
+          suspiciousOpportunity
+        );
 
         expect(result.success).toBe(true);
         expect(result.data?.isSuspicious).toBe(true);
@@ -406,11 +437,15 @@ describe('Data Aggregation Pipeline', () => {
 
         mockPrisma.opportunity.findMany.mockResolvedValue([]);
 
-        const result = await dataQualityService.detectFraud(unrealisticOpportunity);
+        const result = await dataQualityService.detectFraud(
+          unrealisticOpportunity
+        );
 
         expect(result.success).toBe(true);
         expect(result.data?.flags).toContain('unrealistic_prizes');
-        expect(result.data?.reasons).toContain('Prize amount seems unrealistic');
+        expect(result.data?.reasons).toContain(
+          'Prize amount seems unrealistic'
+        );
       });
 
       it('should detect suspicious URLs', async () => {
@@ -421,11 +456,15 @@ describe('Data Aggregation Pipeline', () => {
 
         mockPrisma.opportunity.findMany.mockResolvedValue([]);
 
-        const result = await dataQualityService.detectFraud(suspiciousUrlOpportunity);
+        const result = await dataQualityService.detectFraud(
+          suspiciousUrlOpportunity
+        );
 
         expect(result.success).toBe(true);
         expect(result.data?.flags).toContain('suspicious_url');
-        expect(result.data?.reasons).toContain('Uses suspicious or shortened URL');
+        expect(result.data?.reasons).toContain(
+          'Uses suspicious or shortened URL'
+        );
       });
 
       it('should detect urgent deadlines', async () => {
@@ -443,7 +482,9 @@ describe('Data Aggregation Pipeline', () => {
 
         expect(result.success).toBe(true);
         expect(result.data?.flags).toContain('urgent_deadline');
-        expect(result.data?.reasons).toContain('Extremely short application deadline');
+        expect(result.data?.reasons).toContain(
+          'Extremely short application deadline'
+        );
       });
     });
 
@@ -627,7 +668,8 @@ describe('Data Aggregation Pipeline', () => {
       it('should process opportunity creation webhook', async () => {
         mockPrisma.opportunity.upsert.mockResolvedValue({});
 
-        const result = await externalAPIService.processWebhook(mockWebhookPayload);
+        const result =
+          await externalAPIService.processWebhook(mockWebhookPayload);
 
         expect(result.success).toBe(true);
         expect(result.message).toBe('Webhook processed successfully');
@@ -671,7 +713,10 @@ describe('Data Aggregation Pipeline', () => {
 
     describe('createSyncSchedule', () => {
       it('should create sync schedule successfully', async () => {
-        const result = await externalAPIService.createSyncSchedule('source-1', 'daily');
+        const result = await externalAPIService.createSyncSchedule(
+          'source-1',
+          'daily'
+        );
 
         expect(result.success).toBe(true);
         expect(result.data?.sourceId).toBe('source-1');
@@ -732,11 +777,14 @@ describe('Data Aggregation Pipeline', () => {
 
         expect(result.success).toBe(true);
         expect(Array.isArray(result.data)).toBe(true);
-        expect(result.message).toBe('All API health statuses retrieved successfully');
+        expect(result.message).toBe(
+          'All API health statuses retrieved successfully'
+        );
       });
 
       it('should return error for non-existent API ID', async () => {
-        const result = await externalAPIService.getAPIHealthStatus('non-existent');
+        const result =
+          await externalAPIService.getAPIHealthStatus('non-existent');
 
         expect(result.success).toBe(false);
         expect(result.error).toBe('API health status not found');
@@ -773,16 +821,19 @@ describe('Data Aggregation Pipeline', () => {
       expect(scrapingResult.success).toBe(true);
 
       // Check for duplicates
-      const duplicateResult = await dataQualityService.detectDuplicates(mockOpportunity);
+      const duplicateResult =
+        await dataQualityService.detectDuplicates(mockOpportunity);
       expect(duplicateResult.success).toBe(true);
       expect(duplicateResult.data?.isDuplicate).toBe(false);
 
       // Standardize data
-      const standardizeResult = await dataQualityService.standardizeOpportunity(mockOpportunity);
+      const standardizeResult =
+        await dataQualityService.standardizeOpportunity(mockOpportunity);
       expect(standardizeResult.success).toBe(true);
 
       // Calculate quality score
-      const qualityResult = await dataQualityService.calculateQualityScore(mockOpportunity);
+      const qualityResult =
+        await dataQualityService.calculateQualityScore(mockOpportunity);
       expect(qualityResult.success).toBe(true);
       expect(qualityResult.data?.overall).toBeGreaterThan(0.5);
 
@@ -805,12 +856,16 @@ describe('Data Aggregation Pipeline', () => {
       };
 
       // Check quality score
-      const qualityResult = await dataQualityService.calculateQualityScore(lowQualityOpportunity);
+      const qualityResult = await dataQualityService.calculateQualityScore(
+        lowQualityOpportunity
+      );
       expect(qualityResult.success).toBe(true);
       expect(qualityResult.data?.overall).toBeLessThan(0.6);
 
       // Check for fraud
-      const fraudResult = await dataQualityService.detectFraud(lowQualityOpportunity);
+      const fraudResult = await dataQualityService.detectFraud(
+        lowQualityOpportunity
+      );
       expect(fraudResult.success).toBe(true);
       expect(fraudResult.data?.isSuspicious).toBe(true);
       expect(fraudResult.data?.flags.length).toBeGreaterThan(0);
@@ -837,7 +892,8 @@ describe('Data Aggregation Pipeline', () => {
         externalUrl: 'not-a-url', // Invalid URL
       } as any;
 
-      const qualityResult = await dataQualityService.calculateQualityScore(malformedOpportunity);
+      const qualityResult =
+        await dataQualityService.calculateQualityScore(malformedOpportunity);
       expect(qualityResult.success).toBe(false);
       expect(qualityResult.error).toBe('Failed to calculate quality score');
     });

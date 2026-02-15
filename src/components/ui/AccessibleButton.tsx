@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 import { Button } from './Button';
 
 interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,22 +19,28 @@ interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> 
   describedBy?: string;
 }
 
-export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonProps>(
-  ({
-    children,
-    ariaLabel,
-    ariaDescribedBy,
-    ariaExpanded,
-    ariaPressed,
-    hasPopup,
-    controls,
-    describedBy,
-    loading,
-    loadingText,
-    disabled,
-    className,
-    ...props
-  }, ref) => {
+export const AccessibleButton = forwardRef<
+  HTMLButtonElement,
+  AccessibleButtonProps
+>(
+  (
+    {
+      children,
+      ariaLabel,
+      ariaDescribedBy,
+      ariaExpanded,
+      ariaPressed,
+      hasPopup,
+      controls,
+      describedBy,
+      loading,
+      loadingText,
+      disabled,
+      className,
+      ...props
+    },
+    ref
+  ) => {
     const isDisabled = disabled || loading;
 
     return (

@@ -4,7 +4,10 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import type { RoadmapRequest, UserProfile } from '../lib/services/ai-instructor.service';
+import type {
+  RoadmapRequest,
+  UserProfile,
+} from '../lib/services/ai-instructor.service';
 import { AIInstructorService } from '../lib/services/ai-instructor.service';
 
 // Mock dependencies
@@ -20,7 +23,9 @@ const mockPrisma = {
   },
 };
 
-(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(() => mockPrisma as any);
+(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(
+  () => mockPrisma as any
+);
 
 // Mock fetch for LLM API calls
 global.fetch = jest.fn();
@@ -76,7 +81,12 @@ describe('AIInstructorService', () => {
     title: 'AI/ML Hackathon 2024',
     type: 'hackathon',
     organizerName: 'TechCorp',
-    requiredSkills: ['Python', 'Machine Learning', 'TensorFlow', 'Data Analysis'],
+    requiredSkills: [
+      'Python',
+      'Machine Learning',
+      'TensorFlow',
+      'Data Analysis',
+    ],
     applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   };
 
@@ -92,7 +102,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -114,7 +125,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(null);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.roadmap).toBeDefined();
@@ -125,7 +137,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.skillGaps).toContain('Python');
@@ -143,7 +156,9 @@ describe('AIInstructorService', () => {
         requiredSkills: ['JavaScript', 'React', 'Node.js', 'Database Design'],
       };
 
-      mockPrisma.opportunity.findUnique.mockResolvedValue(internshipOpportunity);
+      mockPrisma.opportunity.findUnique.mockResolvedValue(
+        internshipOpportunity
+      );
       mockPrisma.roadmap.create.mockResolvedValue({});
 
       const internshipRequest = {
@@ -151,12 +166,13 @@ describe('AIInstructorService', () => {
         opportunityId: 'internship-123',
       };
 
-      const result = await aiInstructorService.generateRoadmap(internshipRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(internshipRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.roadmap.phases).toBeInstanceOf(Array);
       expect(result.data?.roadmap.phases.length).toBeGreaterThan(0);
-      
+
       // Should have fewer skill gaps since user already has JavaScript, React, Node.js
       expect(result.data?.skillGaps.length).toBeLessThan(4);
     });
@@ -208,7 +224,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.recommendedActions).toContain(
@@ -220,7 +237,8 @@ describe('AIInstructorService', () => {
       const dbError = new Error('Database connection failed');
       mockPrisma.opportunity.findUnique.mockRejectedValue(dbError);
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to generate roadmap');
@@ -230,12 +248,13 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.roadmap.milestones).toBeInstanceOf(Array);
       expect(result.data?.roadmap.milestones.length).toBeGreaterThan(0);
-      
+
       const firstMilestone = result.data?.roadmap.milestones[0];
       expect(firstMilestone?.title).toBeDefined();
       expect(firstMilestone?.targetDate).toBeInstanceOf(Date);
@@ -247,7 +266,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.roadmap.resources).toBeInstanceOf(Array);
@@ -264,7 +284,11 @@ describe('AIInstructorService', () => {
 
   describe('trackProgress', () => {
     it('should successfully track task completion', async () => {
-      const result = await aiInstructorService.trackProgress('roadmap-123', 'task-456', true);
+      const result = await aiInstructorService.trackProgress(
+        'roadmap-123',
+        'task-456',
+        true
+      );
 
       expect(result.success).toBe(true);
       expect(result.message).toBe('Progress updated successfully');
@@ -277,7 +301,7 @@ describe('AIInstructorService', () => {
       const result = await aiInstructorService.trackProgress('', '', true);
 
       expect(result.success).toBe(true); // Current implementation always succeeds
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -290,15 +314,23 @@ describe('AIInstructorService', () => {
     };
 
     it('should successfully update roadmap based on feedback', async () => {
-      const result = await aiInstructorService.updateRoadmap('roadmap-123', mockFeedback);
+      const result = await aiInstructorService.updateRoadmap(
+        'roadmap-123',
+        mockFeedback
+      );
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Roadmap updated successfully based on your progress');
+      expect(result.message).toBe(
+        'Roadmap updated successfully based on your progress'
+      );
     });
 
     it('should handle update errors gracefully', async () => {
       // This would test actual update logic when implemented
-      const result = await aiInstructorService.updateRoadmap('invalid-id', mockFeedback);
+      const result = await aiInstructorService.updateRoadmap(
+        'invalid-id',
+        mockFeedback
+      );
 
       expect(result.success).toBe(true); // Current implementation always succeeds
     });
@@ -319,7 +351,9 @@ describe('AIInstructorService', () => {
           opportunity: {
             title: 'AI/ML Hackathon 2024',
             type: 'hackathon',
-            applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            applicationDeadline: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000
+            ),
           },
         },
       ];
@@ -371,7 +405,12 @@ describe('AIInstructorService', () => {
         ...mockUserProfile,
         skills: {
           ...mockUserProfile.skills,
-          technical: ['Python', 'Machine Learning', 'TensorFlow', 'Deep Learning'],
+          technical: [
+            'Python',
+            'Machine Learning',
+            'TensorFlow',
+            'Deep Learning',
+          ],
           proficiencyLevel: 'advanced' as const,
         },
       };
@@ -395,10 +434,11 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
-      
+
       // First phase should focus on foundation/skill gaps
       const firstPhase = result.data?.roadmap.phases[0];
       expect(firstPhase?.title).toMatch(/foundation|skill|gap/i);
@@ -443,7 +483,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(global.fetch).not.toHaveBeenCalled(); // Should not call external APIs
@@ -455,13 +496,16 @@ describe('AIInstructorService', () => {
 
       const mockOpenAIResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          choices: [{
-            message: {
-              content: 'Mock roadmap content from OpenAI'
-            }
-          }]
-        })
+        json: () =>
+          Promise.resolve({
+            choices: [
+              {
+                message: {
+                  content: 'Mock roadmap content from OpenAI',
+                },
+              },
+            ],
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockOpenAIResponse);
@@ -479,7 +523,7 @@ describe('AIInstructorService', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-key',
+            Authorization: 'Bearer test-key',
             'Content-Type': 'application/json',
           }),
         })
@@ -492,11 +536,14 @@ describe('AIInstructorService', () => {
 
       const mockClaudeResponse = {
         ok: true,
-        json: () => Promise.resolve({
-          content: [{
-            text: 'Mock roadmap content from Claude'
-          }]
-        })
+        json: () =>
+          Promise.resolve({
+            content: [
+              {
+                text: 'Mock roadmap content from Claude',
+              },
+            ],
+          }),
       };
 
       (global.fetch as jest.Mock).mockResolvedValue(mockClaudeResponse);
@@ -526,7 +573,7 @@ describe('AIInstructorService', () => {
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
-        statusText: 'API Error'
+        statusText: 'API Error',
       });
 
       const aiService = new AIInstructorService();
@@ -571,7 +618,9 @@ describe('AIInstructorService', () => {
       });
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(beginnerHackathonRequest);
+      const result = await aiInstructorService.generateRoadmap(
+        beginnerHackathonRequest
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.roadmap.title).toMatch(/hackathon/i);
@@ -612,7 +661,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(noSkillsOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(mockRoadmapRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(mockRoadmapRequest);
 
       expect(result.success).toBe(true);
       expect(result.data?.skillGaps).toEqual([]);
@@ -650,7 +700,8 @@ describe('AIInstructorService', () => {
 
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
 
-      const result = await aiInstructorService.generateRoadmap(malformedRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(malformedRequest);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to generate roadmap');
@@ -673,7 +724,8 @@ describe('AIInstructorService', () => {
       mockPrisma.opportunity.findUnique.mockResolvedValue(mockOpportunity);
       mockPrisma.roadmap.create.mockResolvedValue({});
 
-      const result = await aiInstructorService.generateRoadmap(manySkillsRequest);
+      const result =
+        await aiInstructorService.generateRoadmap(manySkillsRequest);
 
       expect(result.success).toBe(true);
       // Should handle large skill lists without issues

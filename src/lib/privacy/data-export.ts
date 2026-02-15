@@ -20,7 +20,7 @@ export class DataExport {
   }> {
     try {
       const userData = await this.collectUserData(userId);
-      
+
       if (!userData) {
         return {
           success: false,
@@ -59,7 +59,7 @@ export class DataExport {
   }> {
     try {
       const userData = await this.collectUserData(userId);
-      
+
       if (!userData) {
         return {
           success: false,
@@ -69,41 +69,51 @@ export class DataExport {
 
       const exportDir = path.join(process.cwd(), 'exports');
       await fs.mkdir(exportDir, { recursive: true });
-      
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const baseFileName = `user-data-${userId}-${timestamp}`;
-      
+
       // Export different data types to separate CSV files
       const files: string[] = [];
-      
+
       // User profile
       if (userData.profile) {
         const profileFile = path.join(exportDir, `${baseFileName}-profile.csv`);
         await this.writeCSV(profileFile, [userData.profile], 'profile');
         files.push(profileFile);
       }
-      
+
       // Search history
       if (userData.searchHistory?.length > 0) {
         const searchFile = path.join(exportDir, `${baseFileName}-searches.csv`);
         await this.writeCSV(searchFile, userData.searchHistory, 'searches');
         files.push(searchFile);
       }
-      
+
       // Roadmaps
       if (userData.roadmaps?.length > 0) {
-        const roadmapFile = path.join(exportDir, `${baseFileName}-roadmaps.csv`);
+        const roadmapFile = path.join(
+          exportDir,
+          `${baseFileName}-roadmaps.csv`
+        );
         await this.writeCSV(roadmapFile, userData.roadmaps, 'roadmaps');
         files.push(roadmapFile);
       }
-      
+
       // Notifications
       if (userData.notifications?.length > 0) {
-        const notificationFile = path.join(exportDir, `${baseFileName}-notifications.csv`);
-        await this.writeCSV(notificationFile, userData.notifications, 'notifications');
+        const notificationFile = path.join(
+          exportDir,
+          `${baseFileName}-notifications.csv`
+        );
+        await this.writeCSV(
+          notificationFile,
+          userData.notifications,
+          'notifications'
+        );
         files.push(notificationFile);
       }
-      
+
       // Consent history
       if (userData.consentHistory?.length > 0) {
         const consentFile = path.join(exportDir, `${baseFileName}-consent.csv`);
@@ -154,8 +164,12 @@ export class DataExport {
       // Decrypt sensitive fields
       const decryptedUser = {
         ...user,
-        email: user.email ? DataEncryption.decryptField(user.email) : user.email,
-        phone: user.phone ? DataEncryption.decryptField(user.phone) : user.phone,
+        email: user.email
+          ? DataEncryption.decryptField(user.email)
+          : user.email,
+        phone: user.phone
+          ? DataEncryption.decryptField(user.phone)
+          : user.phone,
         name: user.name ? DataEncryption.decryptField(user.name) : user.name,
       };
 
@@ -247,7 +261,9 @@ export class DataExport {
         profile: decryptedUser,
         searchHistory: searchHistory.map(search => ({
           ...search,
-          query: search.query ? DataEncryption.decryptField(search.query) : search.query,
+          query: search.query
+            ? DataEncryption.decryptField(search.query)
+            : search.query,
         })),
         roadmaps,
         notifications,
@@ -261,7 +277,9 @@ export class DataExport {
         })),
         sessionHistory: sessionHistory.map(session => ({
           ...session,
-          ipAddress: session.ipAddress ? DataEncryption.decryptField(session.ipAddress) : session.ipAddress,
+          ipAddress: session.ipAddress
+            ? DataEncryption.decryptField(session.ipAddress)
+            : session.ipAddress,
         })),
         exportSummary: {
           totalSearches: searchHistory.length,
@@ -281,7 +299,11 @@ export class DataExport {
   /**
    * Write data to CSV file
    */
-  private static async writeCSV(filePath: string, data: any[], type: string): Promise<void> {
+  private static async writeCSV(
+    filePath: string,
+    data: any[],
+    type: string
+  ): Promise<void> {
     if (!data || data.length === 0) {
       return;
     }
@@ -294,14 +316,16 @@ export class DataExport {
 
     // Flatten complex objects for CSV
     const flattenedData = data.map(item => this.flattenObject(item));
-    
+
     await csvWriter.writeRecords(flattenedData);
   }
 
   /**
    * Get CSV headers for different data types
    */
-  private static getCSVHeaders(type: string): Array<{ id: string; title: string }> {
+  private static getCSVHeaders(
+    type: string
+  ): Array<{ id: string; title: string }> {
     const headerMaps: Record<string, Array<{ id: string; title: string }>> = {
       profile: [
         { id: 'id', title: 'User ID' },
@@ -354,7 +378,7 @@ export class DataExport {
   /**
    * Flatten nested objects for CSV export
    */
-  private static flattenObject(obj: any, prefix: string = ''): any {
+  private static flattenObject(obj: any, prefix = ''): any {
     const flattened: any = {};
 
     for (const [key, value] of Object.entries(obj)) {
@@ -362,7 +386,11 @@ export class DataExport {
 
       if (value === null || value === undefined) {
         flattened[newKey] = '';
-      } else if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+      } else if (
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        !(value instanceof Date)
+      ) {
         Object.assign(flattened, this.flattenObject(value, newKey));
       } else if (Array.isArray(value)) {
         flattened[newKey] = JSON.stringify(value);
@@ -386,7 +414,7 @@ export class DataExport {
   }> {
     try {
       const userData = await this.collectUserData(userId);
-      
+
       if (!userData) {
         return {
           success: false,
@@ -424,12 +452,14 @@ export class DataExport {
             recordCount: userData.consentHistory?.length || 0,
           },
         },
-        totalRecords: (userData.exportSummary?.totalSearches || 0) +
-                     (userData.exportSummary?.totalRoadmaps || 0) +
-                     (userData.exportSummary?.totalNotifications || 0) +
-                     (userData.exportSummary?.totalConsentRecords || 0) +
-                     (userData.exportSummary?.totalFavorites || 0) +
-                     (userData.exportSummary?.totalSessions || 0) + 1, // +1 for profile
+        totalRecords:
+          (userData.exportSummary?.totalSearches || 0) +
+          (userData.exportSummary?.totalRoadmaps || 0) +
+          (userData.exportSummary?.totalNotifications || 0) +
+          (userData.exportSummary?.totalConsentRecords || 0) +
+          (userData.exportSummary?.totalFavorites || 0) +
+          (userData.exportSummary?.totalSessions || 0) +
+          1, // +1 for profile
         dataRetentionInfo: {
           profileData: 'Retained until account deletion',
           searchHistory: 'Retained for 1 year',
@@ -439,7 +469,8 @@ export class DataExport {
         },
         exportFormats: ['JSON', 'CSV'],
         contactInfo: {
-          dataProtectionOfficer: process.env.DPO_EMAIL || 'privacy@opportunex.com',
+          dataProtectionOfficer:
+            process.env.DPO_EMAIL || 'privacy@opportunex.com',
           supportEmail: process.env.SUPPORT_EMAIL || 'support@opportunex.com',
         },
       };
@@ -452,7 +483,8 @@ export class DataExport {
       console.error('Error generating export report:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Report generation failed',
+        error:
+          error instanceof Error ? error.message : 'Report generation failed',
       };
     }
   }
@@ -460,14 +492,17 @@ export class DataExport {
   /**
    * Schedule automatic data export for user
    */
-  static async scheduleDataExport(userId: string, format: 'JSON' | 'CSV' = 'JSON'): Promise<{
+  static async scheduleDataExport(
+    userId: string,
+    format: 'JSON' | 'CSV' = 'JSON'
+  ): Promise<{
     success: boolean;
     exportId?: string;
     error?: string;
   }> {
     try {
       const exportId = `export_${userId}_${Date.now()}`;
-      
+
       // In a real implementation, this would queue a background job
       // For now, we'll create a record to track the export request
       await this.prisma.dataExportRequest.create({
@@ -491,7 +526,8 @@ export class DataExport {
       console.error('Error scheduling data export:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Export scheduling failed',
+        error:
+          error instanceof Error ? error.message : 'Export scheduling failed',
       };
     }
   }

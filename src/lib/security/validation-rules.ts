@@ -1,4 +1,5 @@
-import { body, param, query, ValidationChain } from 'express-validator';
+import type { ValidationChain } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import validator from 'validator';
 
 /**
@@ -16,19 +17,25 @@ export class ValidationRules {
         .normalizeEmail()
         .isLength({ max: 254 })
         .withMessage('Email must not exceed 254 characters'),
-      
+
       body('password')
         .isLength({ min: 8, max: 128 })
         .withMessage('Password must be between 8 and 128 characters')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
-      
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
+        )
+        .withMessage(
+          'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'
+        ),
+
       body('name')
         .isLength({ min: 1, max: 100 })
         .withMessage('Name must be between 1 and 100 characters')
         .matches(/^[a-zA-Z\s'-]+$/)
-        .withMessage('Name can only contain letters, spaces, hyphens, and apostrophes'),
-      
+        .withMessage(
+          'Name can only contain letters, spaces, hyphens, and apostrophes'
+        ),
+
       body('phone')
         .optional()
         .isMobilePhone('any')
@@ -45,10 +52,8 @@ export class ValidationRules {
         .isEmail()
         .withMessage('Must be a valid email address')
         .normalizeEmail(),
-      
-      body('password')
-        .isLength({ min: 1 })
-        .withMessage('Password is required'),
+
+      body('password').isLength({ min: 1 }).withMessage('Password is required'),
     ];
   }
 
@@ -63,37 +68,40 @@ export class ValidationRules {
         .withMessage('Search query must be between 1 and 500 characters')
         .matches(/^[^<>'"\\;]*$/)
         .withMessage('Search query contains invalid characters'),
-      
+
       query('type')
         .optional()
         .isIn(['hackathon', 'internship', 'workshop'])
         .withMessage('Type must be hackathon, internship, or workshop'),
-      
+
       query('mode')
         .optional()
         .isIn(['online', 'offline', 'hybrid'])
         .withMessage('Mode must be online, offline, or hybrid'),
-      
+
       query('location')
         .optional()
         .isLength({ max: 100 })
         .withMessage('Location must not exceed 100 characters')
         .matches(/^[a-zA-Z\s,.-]+$/)
         .withMessage('Location contains invalid characters'),
-      
+
       query('skills')
         .optional()
-        .custom((value) => {
+        .custom(value => {
           if (Array.isArray(value)) {
-            return value.every(skill => 
-              typeof skill === 'string' && 
-              skill.length <= 50 && 
-              /^[a-zA-Z0-9\s+#.-]+$/.test(skill)
+            return value.every(
+              skill =>
+                typeof skill === 'string' &&
+                skill.length <= 50 &&
+                /^[a-zA-Z0-9\s+#.-]+$/.test(skill)
             );
           }
-          return typeof value === 'string' && 
-                 value.length <= 50 && 
-                 /^[a-zA-Z0-9\s+#.-]+$/.test(value);
+          return (
+            typeof value === 'string' &&
+            value.length <= 50 &&
+            /^[a-zA-Z0-9\s+#.-]+$/.test(value)
+          );
         })
         .withMessage('Skills must be valid technology names'),
     ];
@@ -107,9 +115,9 @@ export class ValidationRules {
       body('language')
         .isIn(['en', 'hi'])
         .withMessage('Language must be en or hi'),
-      
+
       body('audioData')
-        .custom((value) => {
+        .custom(value => {
           // Check if it's a valid base64 string or blob
           if (typeof value === 'string') {
             return validator.isBase64(value);
@@ -130,60 +138,63 @@ export class ValidationRules {
         .isLength({ min: 1, max: 100 })
         .withMessage('Name must be between 1 and 100 characters')
         .matches(/^[a-zA-Z\s'-]+$/)
-        .withMessage('Name can only contain letters, spaces, hyphens, and apostrophes'),
-      
+        .withMessage(
+          'Name can only contain letters, spaces, hyphens, and apostrophes'
+        ),
+
       body('phone')
         .optional()
         .isMobilePhone('any')
         .withMessage('Must be a valid phone number'),
-      
+
       body('location.city')
         .optional()
         .isLength({ max: 100 })
         .withMessage('City must not exceed 100 characters')
         .matches(/^[a-zA-Z\s.-]+$/)
         .withMessage('City contains invalid characters'),
-      
+
       body('location.state')
         .optional()
         .isLength({ max: 100 })
         .withMessage('State must not exceed 100 characters')
         .matches(/^[a-zA-Z\s.-]+$/)
         .withMessage('State contains invalid characters'),
-      
+
       body('academic.institution')
         .optional()
         .isLength({ max: 200 })
         .withMessage('Institution name must not exceed 200 characters'),
-      
+
       body('academic.degree')
         .optional()
         .isLength({ max: 100 })
         .withMessage('Degree must not exceed 100 characters'),
-      
+
       body('academic.year')
         .optional()
         .isInt({ min: 1, max: 6 })
         .withMessage('Academic year must be between 1 and 6'),
-      
+
       body('skills.technical')
         .optional()
         .isArray({ max: 50 })
         .withMessage('Technical skills must be an array with maximum 50 items')
-        .custom((skills) => {
-          return skills.every((skill: string) => 
-            typeof skill === 'string' && 
-            skill.length <= 50 && 
-            /^[a-zA-Z0-9\s+#.-]+$/.test(skill)
+        .custom(skills => {
+          return skills.every(
+            (skill: string) =>
+              typeof skill === 'string' &&
+              skill.length <= 50 &&
+              /^[a-zA-Z0-9\s+#.-]+$/.test(skill)
           );
         })
         .withMessage('Each technical skill must be valid'),
-      
+
       body('preferences.opportunityTypes')
         .optional()
         .isArray()
         .withMessage('Opportunity types must be an array')
-        .custom((types) => {
+        .custom(types => {
           const validTypes = ['hackathon', 'internship', 'workshop'];
           return types.every((type: string) => validTypes.includes(type));
         })
@@ -199,12 +210,12 @@ export class ValidationRules {
       body('opportunityId')
         .isUUID()
         .withMessage('Opportunity ID must be a valid UUID'),
-      
+
       body('targetDate')
         .optional()
         .isISO8601()
         .withMessage('Target date must be a valid ISO 8601 date')
-        .custom((date) => {
+        .custom(date => {
           const targetDate = new Date(date);
           const now = new Date();
           return targetDate > now;
@@ -222,27 +233,27 @@ export class ValidationRules {
         .optional()
         .isBoolean()
         .withMessage('Email preference must be boolean'),
-      
+
       body('sms')
         .optional()
         .isBoolean()
         .withMessage('SMS preference must be boolean'),
-      
+
       body('inApp')
         .optional()
         .isBoolean()
         .withMessage('In-app preference must be boolean'),
-      
+
       body('frequency')
         .optional()
         .isIn(['immediate', 'daily', 'weekly'])
         .withMessage('Frequency must be immediate, daily, or weekly'),
-      
+
       body('types')
         .optional()
         .isArray()
         .withMessage('Types must be an array')
-        .custom((types) => {
+        .custom(types => {
           const validTypes = ['deadline', 'new_opportunity', 'roadmap_update'];
           return types.every((type: string) => validTypes.includes(type));
         })
@@ -260,11 +271,11 @@ export class ValidationRules {
         .withMessage('File name must be between 1 and 255 characters')
         .matches(/^[a-zA-Z0-9._-]+$/)
         .withMessage('File name contains invalid characters'),
-      
+
       body('fileType')
         .isIn(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
         .withMessage('Invalid file type'),
-      
+
       body('fileSize')
         .isInt({ min: 1, max: 5242880 }) // 5MB max
         .withMessage('File size must be between 1 byte and 5MB'),
@@ -281,7 +292,7 @@ export class ValidationRules {
         .isInt({ min: 1, max: 1000 })
         .withMessage('Page must be between 1 and 1000')
         .toInt(),
-      
+
       query('limit')
         .optional()
         .isInt({ min: 1, max: 100 })
@@ -320,7 +331,7 @@ export class ValidationRules {
       body('action')
         .isIn(['approve', 'reject', 'delete', 'update'])
         .withMessage('Action must be approve, reject, delete, or update'),
-      
+
       body('reason')
         .optional()
         .isLength({ max: 500 })

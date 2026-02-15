@@ -16,7 +16,7 @@ interface TestNotification {
   type: 'new_opportunity' | 'deadline_reminder' | 'recommendation' | 'system';
   title: string;
   message: string;
-  channels: ('email' | 'sms' | 'in_app' | 'push')[];
+  channels: Array<'email' | 'sms' | 'in_app' | 'push'>;
   priority: 'low' | 'normal' | 'high' | 'urgent';
   createdAt: Date;
 }
@@ -41,20 +41,24 @@ console.log(`   Priority: ${testNotification.priority}`);
 // Test 2: Template processing logic
 console.log('\n2️⃣ Testing Template Processing...');
 
-function processTemplate(template: string, variables: Record<string, any>): string {
+function processTemplate(
+  template: string,
+  variables: Record<string, any>
+): string {
   return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     const value = variables[key];
     if (value === undefined || value === null) return match;
-    
+
     if (value instanceof Date) {
       return value.toLocaleDateString();
     }
-    
+
     return String(value);
   });
 }
 
-const template = 'Hi {{userName}}, new {{opportunityType}}: {{title}} by {{organizer}}. Deadline: {{deadline}}.';
+const template =
+  'Hi {{userName}}, new {{opportunityType}}: {{title}} by {{organizer}}. Deadline: {{deadline}}.';
 const variables = {
   userName: 'John Doe',
   opportunityType: 'hackathon',
@@ -74,7 +78,7 @@ console.log('\n3️⃣ Testing Alert Criteria Matching...');
 interface AlertCriteria {
   keywords?: string[];
   skills?: string[];
-  opportunityTypes?: ('hackathon' | 'internship' | 'workshop')[];
+  opportunityTypes?: Array<'hackathon' | 'internship' | 'workshop'>;
 }
 
 interface Opportunity {
@@ -84,16 +88,20 @@ interface Opportunity {
   skills: string[];
 }
 
-function calculateMatchScore(opportunity: Opportunity, criteria: AlertCriteria): number {
+function calculateMatchScore(
+  opportunity: Opportunity,
+  criteria: AlertCriteria
+): number {
   let score = 0;
   let maxScore = 0;
 
   // Keywords matching
   if (criteria.keywords && criteria.keywords.length > 0) {
     maxScore += 40;
-    const keywordMatches = criteria.keywords.filter(keyword =>
-      opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
-      opportunity.description.toLowerCase().includes(keyword.toLowerCase())
+    const keywordMatches = criteria.keywords.filter(
+      keyword =>
+        opportunity.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        opportunity.description.toLowerCase().includes(keyword.toLowerCase())
     );
     score += (keywordMatches.length / criteria.keywords.length) * 40;
   }
@@ -102,7 +110,7 @@ function calculateMatchScore(opportunity: Opportunity, criteria: AlertCriteria):
   if (criteria.skills && criteria.skills.length > 0) {
     maxScore += 30;
     const skillMatches = criteria.skills.filter(skill =>
-      opportunity.skills.some(oppSkill => 
+      opportunity.skills.some(oppSkill =>
         oppSkill.toLowerCase().includes(skill.toLowerCase())
       )
     );
@@ -148,7 +156,9 @@ interface NotificationPreferences {
   inApp: boolean;
   push: boolean;
   frequency: 'immediate' | 'daily' | 'weekly';
-  types: ('new_opportunity' | 'deadline_reminder' | 'recommendation' | 'system')[];
+  types: Array<
+    'new_opportunity' | 'deadline_reminder' | 'recommendation' | 'system'
+  >;
   quietHours: {
     enabled: boolean;
     start: string;
@@ -160,7 +170,7 @@ function shouldSendNotification(
   preferences: NotificationPreferences,
   type: 'new_opportunity' | 'deadline_reminder' | 'recommendation' | 'system',
   channel: 'email' | 'sms' | 'in_app' | 'push',
-  currentTime: string = '14:30'
+  currentTime = '14:30'
 ): boolean {
   // Check if notification type is enabled
   if (!preferences.types.includes(type)) return false;
@@ -184,7 +194,7 @@ function shouldSendNotification(
   // Check quiet hours
   if (preferences.quietHours.enabled) {
     const { start, end } = preferences.quietHours;
-    
+
     if (start > end) {
       // Quiet hours span midnight
       if (currentTime >= start || currentTime <= end) {
@@ -214,9 +224,24 @@ const testPreferences: NotificationPreferences = {
   },
 };
 
-const shouldSendEmail = shouldSendNotification(testPreferences, 'new_opportunity', 'email', '14:30');
-const shouldSendSMS = shouldSendNotification(testPreferences, 'new_opportunity', 'sms', '14:30');
-const shouldSendDuringQuietHours = shouldSendNotification(testPreferences, 'new_opportunity', 'email', '23:00');
+const shouldSendEmail = shouldSendNotification(
+  testPreferences,
+  'new_opportunity',
+  'email',
+  '14:30'
+);
+const shouldSendSMS = shouldSendNotification(
+  testPreferences,
+  'new_opportunity',
+  'sms',
+  '14:30'
+);
+const shouldSendDuringQuietHours = shouldSendNotification(
+  testPreferences,
+  'new_opportunity',
+  'email',
+  '23:00'
+);
 
 console.log('✅ Notification preferences work');
 console.log(`   Should send email: ${shouldSendEmail}`);
@@ -233,7 +258,9 @@ function formatTimeLeft(deadline: Date): string {
   if (timeLeft <= 0) return 'expired';
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(
+    (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
 
   if (days > 0) {
     return days === 1 ? '1 day' : `${days} days`;
@@ -245,7 +272,10 @@ function formatTimeLeft(deadline: Date): string {
   }
 }
 
-function calculateReminderTimes(deadline: Date, intervals: Array<{ value: number; unit: 'days' | 'hours' }>): Date[] {
+function calculateReminderTimes(
+  deadline: Date,
+  intervals: Array<{ value: number; unit: 'days' | 'hours' }>
+): Date[] {
   return intervals
     .map(interval => {
       const reminderTime = new Date(deadline);
@@ -295,7 +325,10 @@ function updateCircuitBreaker(
     circuitBreaker.failureCount++;
     circuitBreaker.lastFailureTime = now;
 
-    if (circuitBreaker.state === 'closed' && failureRate >= circuitBreaker.threshold) {
+    if (
+      circuitBreaker.state === 'closed' &&
+      failureRate >= circuitBreaker.threshold
+    ) {
       circuitBreaker.state = 'open';
     }
   } else {
@@ -337,7 +370,9 @@ console.log('✅ Deadline calculations and reminders');
 console.log('✅ Circuit breaker failure handling');
 
 console.log('\n✨ Notification system core logic validated!');
-console.log('🔧 Ready for integration with external services (email, SMS, push)');
+console.log(
+  '🔧 Ready for integration with external services (email, SMS, push)'
+);
 console.log('📱 Ready for database persistence layer');
 console.log('🌐 Ready for API endpoint integration');
 

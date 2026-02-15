@@ -22,7 +22,8 @@ interface UsePWAReturn {
 }
 
 export function usePWA(): UsePWAReturn {
-  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installPromptEvent, setInstallPromptEvent] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [isClient, setIsClient] = useState(false);
@@ -33,7 +34,8 @@ export function usePWA(): UsePWAReturn {
   }, []);
 
   // Check if PWA is supported
-  const isSupported = isClient && typeof window !== 'undefined' && 'serviceWorker' in navigator;
+  const isSupported =
+    isClient && typeof window !== 'undefined' && 'serviceWorker' in navigator;
 
   // Check if app is installable
   const isInstallable = installPromptEvent !== null && !isInstalled;
@@ -55,16 +57,20 @@ export function usePWA(): UsePWAReturn {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (
+                newWorker.state === 'installed' &&
+                navigator.serviceWorker.controller
+              ) {
                 // New content is available, prompt user to refresh
-                if (window.confirm('New version available! Refresh to update?')) {
+                if (
+                  window.confirm('New version available! Refresh to update?')
+                ) {
                   window.location.reload();
                 }
               }
             });
           }
         });
-
       } catch (error) {
         console.error('Service Worker registration failed:', error);
       }
@@ -92,7 +98,10 @@ export function usePWA(): UsePWAReturn {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, [isSupported, isClient]);
@@ -120,9 +129,10 @@ export function usePWA(): UsePWAReturn {
     if (!isClient || typeof window === 'undefined') return;
 
     // Check if running in standalone mode (installed PWA)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                        (window.navigator as any).standalone ||
-                        document.referrer.includes('android-app://');
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone ||
+      document.referrer.includes('android-app://');
 
     setIsInstalled(isStandalone);
   }, [isClient]);
@@ -136,14 +146,14 @@ export function usePWA(): UsePWAReturn {
     try {
       await installPromptEvent.prompt();
       const choiceResult = await installPromptEvent.userChoice;
-      
+
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
         setIsInstalled(true);
       } else {
         console.log('User dismissed the install prompt');
       }
-      
+
       setInstallPromptEvent(null);
     } catch (error) {
       console.error('Error during app installation:', error);

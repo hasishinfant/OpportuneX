@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import type { Request } from 'express';
 
 /**
@@ -31,8 +31,10 @@ export class SQLInjectionPrevention {
           .replace(/\bEXECUTE\b/gi, '') // Remove EXECUTE statements
           .trim();
       } else if (Array.isArray(value)) {
-        sanitized[key] = value.map(item => 
-          typeof item === 'string' ? this.sanitizeQueryParams({ item }).item : item
+        sanitized[key] = value.map(item =>
+          typeof item === 'string'
+            ? this.sanitizeQueryParams({ item }).item
+            : item
         );
       } else {
         sanitized[key] = value;
@@ -65,7 +67,7 @@ export class SQLInjectionPrevention {
       /**
        * Safe user search with parameterized queries
        */
-      searchUsers: async (searchTerm: string, limit: number = 10) => {
+      searchUsers: async (searchTerm: string, limit = 10) => {
         // Validate inputs
         if (!this.isSafeQuery(searchTerm)) {
           throw new Error('Invalid search query detected');
@@ -189,9 +191,13 @@ export class SQLInjectionPrevention {
       /**
        * Safe user profile update
        */
-      updateUserProfile: async (userId: string, updates: Record<string, any>) => {
+      updateUserProfile: async (
+        userId: string,
+        updates: Record<string, any>
+      ) => {
         // Validate UUID
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(userId)) {
           throw new Error('Invalid user ID format');
         }
@@ -201,7 +207,12 @@ export class SQLInjectionPrevention {
 
         // Only allow specific fields to be updated
         const allowedFields = [
-          'name', 'phone', 'location', 'academic', 'skills', 'preferences'
+          'name',
+          'phone',
+          'location',
+          'academic',
+          'skills',
+          'preferences',
         ];
 
         const safeUpdates: any = {};
@@ -283,21 +294,28 @@ export class SQLInjectionPrevention {
 
       // Check body parameters
       if (req.body) {
-        const checkObject = (obj: any, path: string = '') => {
+        const checkObject = (obj: any, path = '') => {
           for (const [key, value] of Object.entries(obj)) {
             const currentPath = path ? `${path}.${key}` : key;
-            
+
             if (typeof value === 'string' && !this.isSafeQuery(value)) {
-              console.warn('Potential SQL injection attempt detected in body:', {
-                ip: req.ip,
-                userAgent: req.get('User-Agent'),
-                path: req.path,
-                parameter: currentPath,
-                value: value.substring(0, 100),
-              });
+              console.warn(
+                'Potential SQL injection attempt detected in body:',
+                {
+                  ip: req.ip,
+                  userAgent: req.get('User-Agent'),
+                  path: req.path,
+                  parameter: currentPath,
+                  value: value.substring(0, 100),
+                }
+              );
 
               throw new Error('Unsafe content detected');
-            } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+            } else if (
+              value &&
+              typeof value === 'object' &&
+              !Array.isArray(value)
+            ) {
               checkObject(value, currentPath);
             } else if (Array.isArray(value)) {
               value.forEach((item, index) => {
@@ -342,19 +360,22 @@ export class SQLInjectionPrevention {
       connectionLimit: 10,
       acquireTimeout: 60000,
       timeout: 60000,
-      
+
       // Security settings
-      ssl: process.env.NODE_ENV === 'production' ? {
-        rejectUnauthorized: true,
-        ca: process.env.DATABASE_CA_CERT,
-      } : false,
-      
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? {
+              rejectUnauthorized: true,
+              ca: process.env.DATABASE_CA_CERT,
+            }
+          : false,
+
       // Query timeout
       statement_timeout: 30000,
-      
+
       // Prevent multiple statements
       multipleStatements: false,
-      
+
       // Escape query values
       escapeQueryValues: true,
     };
@@ -376,7 +397,9 @@ export const createSecurePrismaMiddleware = () => {
     }
 
     // Add security checks for sensitive operations
-    if (['delete', 'deleteMany', 'update', 'updateMany'].includes(params.action)) {
+    if (
+      ['delete', 'deleteMany', 'update', 'updateMany'].includes(params.action)
+    ) {
       // Ensure where clause exists for delete/update operations
       if (!params.args.where) {
         throw new Error('Delete/Update operations must include where clause');

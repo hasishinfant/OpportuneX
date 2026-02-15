@@ -157,7 +157,9 @@ class ScalingManager {
         enabled: process.env.LOAD_BALANCER_ENABLED === 'true',
         algorithm: (process.env.LB_ALGORITHM as any) || 'round_robin',
         healthCheckPath: process.env.HEALTH_CHECK_PATH || '/api/health/live',
-        healthCheckInterval: parseInt(process.env.HEALTH_CHECK_INTERVAL || '30'),
+        healthCheckInterval: parseInt(
+          process.env.HEALTH_CHECK_INTERVAL || '30'
+        ),
         healthCheckTimeout: parseInt(process.env.HEALTH_CHECK_TIMEOUT || '5'),
         maxRetries: parseInt(process.env.HEALTH_CHECK_MAX_RETRIES || '3'),
       },
@@ -166,16 +168,24 @@ class ScalingManager {
         enabled: process.env.AUTO_SCALING_ENABLED === 'true',
         minInstances: parseInt(process.env.MIN_INSTANCES || '2'),
         maxInstances: parseInt(process.env.MAX_INSTANCES || '10'),
-        targetCpuUtilization: parseInt(process.env.TARGET_CPU_UTILIZATION || '70'),
-        targetMemoryUtilization: parseInt(process.env.TARGET_MEMORY_UTILIZATION || '80'),
+        targetCpuUtilization: parseInt(
+          process.env.TARGET_CPU_UTILIZATION || '70'
+        ),
+        targetMemoryUtilization: parseInt(
+          process.env.TARGET_MEMORY_UTILIZATION || '80'
+        ),
         scaleUpCooldown: parseInt(process.env.SCALE_UP_COOLDOWN || '300'),
         scaleDownCooldown: parseInt(process.env.SCALE_DOWN_COOLDOWN || '600'),
         metrics: {
           cpuThreshold: parseInt(process.env.CPU_THRESHOLD || '80'),
           memoryThreshold: parseInt(process.env.MEMORY_THRESHOLD || '85'),
-          responseTimeThreshold: parseInt(process.env.RESPONSE_TIME_THRESHOLD || '1000'),
+          responseTimeThreshold: parseInt(
+            process.env.RESPONSE_TIME_THRESHOLD || '1000'
+          ),
           errorRateThreshold: parseInt(process.env.ERROR_RATE_THRESHOLD || '5'),
-          requestRateThreshold: parseInt(process.env.REQUEST_RATE_THRESHOLD || '1000'),
+          requestRateThreshold: parseInt(
+            process.env.REQUEST_RATE_THRESHOLD || '1000'
+          ),
         },
       },
 
@@ -203,7 +213,9 @@ class ScalingManager {
         readReplicas: {
           enabled: process.env.DB_READ_REPLICAS === 'true',
           count: parseInt(process.env.DB_READ_REPLICA_COUNT || '2'),
-          regions: (process.env.DB_READ_REPLICA_REGIONS || '').split(',').filter(Boolean),
+          regions: (process.env.DB_READ_REPLICA_REGIONS || '')
+            .split(',')
+            .filter(Boolean),
         },
         connectionPooling: {
           enabled: process.env.DB_CONNECTION_POOLING === 'true',
@@ -221,27 +233,43 @@ class ScalingManager {
 
       serviceDiscovery: {
         enabled: process.env.SERVICE_DISCOVERY === 'true',
-        provider: (process.env.SERVICE_DISCOVERY_PROVIDER as any) || 'kubernetes',
+        provider:
+          (process.env.SERVICE_DISCOVERY_PROVIDER as any) || 'kubernetes',
         namespace: process.env.SERVICE_DISCOVERY_NAMESPACE || 'default',
-        tags: (process.env.SERVICE_DISCOVERY_TAGS || '').split(',').filter(Boolean),
+        tags: (process.env.SERVICE_DISCOVERY_TAGS || '')
+          .split(',')
+          .filter(Boolean),
         healthCheck: {
           enabled: process.env.SERVICE_DISCOVERY_HEALTH_CHECK === 'true',
-          interval: parseInt(process.env.SERVICE_DISCOVERY_HEALTH_INTERVAL || '30'),
-          timeout: parseInt(process.env.SERVICE_DISCOVERY_HEALTH_TIMEOUT || '5'),
-          deregisterAfter: parseInt(process.env.SERVICE_DISCOVERY_DEREGISTER_AFTER || '90'),
+          interval: parseInt(
+            process.env.SERVICE_DISCOVERY_HEALTH_INTERVAL || '30'
+          ),
+          timeout: parseInt(
+            process.env.SERVICE_DISCOVERY_HEALTH_TIMEOUT || '5'
+          ),
+          deregisterAfter: parseInt(
+            process.env.SERVICE_DISCOVERY_DEREGISTER_AFTER || '90'
+          ),
         },
       },
 
       circuitBreaker: {
         enabled: process.env.CIRCUIT_BREAKER === 'true',
-        failureThreshold: parseInt(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '5'),
-        recoveryTimeout: parseInt(process.env.CIRCUIT_BREAKER_RECOVERY_TIMEOUT || '60'),
-        monitoringPeriod: parseInt(process.env.CIRCUIT_BREAKER_MONITORING_PERIOD || '60'),
+        failureThreshold: parseInt(
+          process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '5'
+        ),
+        recoveryTimeout: parseInt(
+          process.env.CIRCUIT_BREAKER_RECOVERY_TIMEOUT || '60'
+        ),
+        monitoringPeriod: parseInt(
+          process.env.CIRCUIT_BREAKER_MONITORING_PERIOD || '60'
+        ),
       },
 
       rateLimiting: {
         enabled: process.env.RATE_LIMITING === 'true',
-        strategy: (process.env.RATE_LIMITING_STRATEGY as any) || 'sliding_window',
+        strategy:
+          (process.env.RATE_LIMITING_STRATEGY as any) || 'sliding_window',
         limits: this.parseRateLimits(process.env.RATE_LIMITS || ''),
       },
     };
@@ -250,7 +278,9 @@ class ScalingManager {
   /**
    * Parse shard configuration from environment
    */
-  private parseShardConfig(shardsConfig: string): Array<{ id: string; weight: number; region: string }> {
+  private parseShardConfig(
+    shardsConfig: string
+  ): Array<{ id: string; weight: number; region: string }> {
     if (!shardsConfig) return [];
 
     try {
@@ -316,20 +346,26 @@ class ScalingManager {
       const memoryUsagePercent = (memUsage.heapUsed / memUsage.heapTotal) * 100;
 
       // Record scaling metrics
-      metricsCollector.getRegistry().setGauge('scaling_memory_usage_percent', memoryUsagePercent, {
-        instance_id: this.config.instance.id,
-        instance_type: this.config.instance.type,
-      });
+      metricsCollector
+        .getRegistry()
+        .setGauge('scaling_memory_usage_percent', memoryUsagePercent, {
+          instance_id: this.config.instance.id,
+          instance_type: this.config.instance.type,
+        });
 
-      metricsCollector.getRegistry().setGauge('scaling_cpu_usage_user', cpuUsage.user, {
-        instance_id: this.config.instance.id,
-        instance_type: this.config.instance.type,
-      });
+      metricsCollector
+        .getRegistry()
+        .setGauge('scaling_cpu_usage_user', cpuUsage.user, {
+          instance_id: this.config.instance.id,
+          instance_type: this.config.instance.type,
+        });
 
-      metricsCollector.getRegistry().setGauge('scaling_cpu_usage_system', cpuUsage.system, {
-        instance_id: this.config.instance.id,
-        instance_type: this.config.instance.type,
-      });
+      metricsCollector
+        .getRegistry()
+        .setGauge('scaling_cpu_usage_system', cpuUsage.system, {
+          instance_id: this.config.instance.id,
+          instance_type: this.config.instance.type,
+        });
 
       // Store metrics for scaling decisions
       this.instanceMetrics.set('memory_usage_percent', memoryUsagePercent);
@@ -354,9 +390,10 @@ class ScalingManager {
 
     // Check cooldown period
     if (this.lastScalingAction) {
-      const timeSinceLastAction = now.getTime() - this.lastScalingAction.getTime();
+      const timeSinceLastAction =
+        now.getTime() - this.lastScalingAction.getTime();
       const cooldownPeriod = this.config.autoScaling.scaleUpCooldown * 1000;
-      
+
       if (timeSinceLastAction < cooldownPeriod) {
         return; // Still in cooldown
       }
@@ -367,7 +404,10 @@ class ScalingManager {
       this.requestScaleUp('High memory usage');
     }
     // Check if scale down is possible (simplified logic)
-    else if (memoryUsage < this.config.autoScaling.metrics.memoryThreshold * 0.5) {
+    else if (
+      memoryUsage <
+      this.config.autoScaling.metrics.memoryThreshold * 0.5
+    ) {
       this.requestScaleDown('Low memory usage');
     }
   }
@@ -422,7 +462,10 @@ class ScalingManager {
   /**
    * Trigger actual scaling action
    */
-  private async triggerScalingAction(action: 'scale_up' | 'scale_down', reason: string) {
+  private async triggerScalingAction(
+    action: 'scale_up' | 'scale_down',
+    reason: string
+  ) {
     try {
       // This would integrate with your orchestration platform
       if (process.env.SCALING_WEBHOOK_URL) {
@@ -430,7 +473,7 @@ class ScalingManager {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SCALING_WEBHOOK_TOKEN}`,
+            Authorization: `Bearer ${process.env.SCALING_WEBHOOK_TOKEN}`,
           },
           body: JSON.stringify({
             action,
@@ -444,7 +487,10 @@ class ScalingManager {
 
       logger.info('Scaling action triggered', { action, reason });
     } catch (error) {
-      logger.error('Failed to trigger scaling action', error, { action, reason });
+      logger.error('Failed to trigger scaling action', error, {
+        action,
+        reason,
+      });
     }
   }
 
@@ -468,12 +514,14 @@ class ScalingManager {
         ],
         address: process.env.INSTANCE_IP || 'localhost',
         port: parseInt(process.env.PORT || '3000'),
-        check: this.config.serviceDiscovery.healthCheck.enabled ? {
-          http: `http://localhost:${process.env.PORT || '3000'}${this.config.loadBalancer.healthCheckPath}`,
-          interval: `${this.config.serviceDiscovery.healthCheck.interval}s`,
-          timeout: `${this.config.serviceDiscovery.healthCheck.timeout}s`,
-          deregister_critical_service_after: `${this.config.serviceDiscovery.healthCheck.deregisterAfter}s`,
-        } : undefined,
+        check: this.config.serviceDiscovery.healthCheck.enabled
+          ? {
+              http: `http://localhost:${process.env.PORT || '3000'}${this.config.loadBalancer.healthCheckPath}`,
+              interval: `${this.config.serviceDiscovery.healthCheck.interval}s`,
+              timeout: `${this.config.serviceDiscovery.healthCheck.timeout}s`,
+              deregister_critical_service_after: `${this.config.serviceDiscovery.healthCheck.deregisterAfter}s`,
+            }
+          : undefined,
       };
 
       // This would integrate with your service discovery provider
@@ -557,7 +605,12 @@ class ScalingManager {
                   },
                 ],
                 env: Object.entries(process.env)
-                  .filter(([key]) => key.startsWith('OPPORTUNEX_') || key.startsWith('DATABASE_') || key.startsWith('REDIS_'))
+                  .filter(
+                    ([key]) =>
+                      key.startsWith('OPPORTUNEX_') ||
+                      key.startsWith('DATABASE_') ||
+                      key.startsWith('REDIS_')
+                  )
                   .map(([name, value]) => ({ name, value })),
                 resources: {
                   requests: {
@@ -622,7 +675,8 @@ class ScalingManager {
               name: 'cpu',
               target: {
                 type: 'Utilization',
-                averageUtilization: this.config.autoScaling.targetCpuUtilization,
+                averageUtilization:
+                  this.config.autoScaling.targetCpuUtilization,
               },
             },
           },
@@ -632,7 +686,8 @@ class ScalingManager {
               name: 'memory',
               target: {
                 type: 'Utilization',
-                averageUtilization: this.config.autoScaling.targetMemoryUtilization,
+                averageUtilization:
+                  this.config.autoScaling.targetMemoryUtilization,
               },
             },
           },
@@ -649,7 +704,8 @@ class ScalingManager {
             ],
           },
           scaleDown: {
-            stabilizationWindowSeconds: this.config.autoScaling.scaleDownCooldown,
+            stabilizationWindowSeconds:
+              this.config.autoScaling.scaleDownCooldown,
             policies: [
               {
                 type: 'Percent',

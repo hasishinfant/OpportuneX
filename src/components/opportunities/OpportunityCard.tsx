@@ -5,15 +5,15 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
 import {
-    Building,
-    ExternalLink,
-    GraduationCap,
-    Heart,
-    Map,
-    MapPin,
-    Monitor,
-    Rocket,
-    RotateCcw
+  Building,
+  ExternalLink,
+  GraduationCap,
+  Heart,
+  Map,
+  MapPin,
+  Monitor,
+  Rocket,
+  RotateCcw,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -75,26 +75,26 @@ export function OpportunityCard({
   const getModeIcon = (mode: string) => {
     switch (mode) {
       case 'online':
-        return <Monitor className="h-4 w-4" />;
+        return <Monitor className='h-4 w-4' />;
       case 'offline':
-        return <Building className="h-4 w-4" />;
+        return <Building className='h-4 w-4' />;
       case 'hybrid':
-        return <RotateCcw className="h-4 w-4" />;
+        return <RotateCcw className='h-4 w-4' />;
       default:
-        return <MapPin className="h-4 w-4" />;
+        return <MapPin className='h-4 w-4' />;
     }
   };
 
   const getOrganizerIcon = (type: string) => {
     switch (type) {
       case 'company':
-        return <Building className="h-4 w-4" />;
+        return <Building className='h-4 w-4' />;
       case 'startup':
-        return <Rocket className="h-4 w-4" />;
+        return <Rocket className='h-4 w-4' />;
       case 'college':
-        return <GraduationCap className="h-4 w-4" />;
+        return <GraduationCap className='h-4 w-4' />;
       default:
-        return <Building className="h-4 w-4" />;
+        return <Building className='h-4 w-4' />;
     }
   };
 
@@ -111,7 +111,7 @@ export function OpportunityCard({
     return date.toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -172,13 +172,11 @@ export function OpportunityCard({
               </span>
               <span>{opportunity.platform}</span>
               <span className='mx-2'>•</span>
-              <span className='mr-1'>
-                {getModeIcon(opportunity.mode)}
-              </span>
+              <span className='mr-1'>{getModeIcon(opportunity.mode)}</span>
               <span className='capitalize'>{opportunity.mode}</span>
               <span className='mx-2'>•</span>
-              <span className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
+              <span className='flex items-center'>
+                <MapPin className='h-4 w-4 mr-1' />
                 {locationString}
               </span>
             </div>
@@ -253,7 +251,7 @@ export function OpportunityCard({
             {new Date(opportunity.start_date).toLocaleDateString('en-IN', {
               day: 'numeric',
               month: 'short',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </span>
         </div>
@@ -280,18 +278,18 @@ export function OpportunityCard({
             size='sm'
             onClick={handleGuideMe}
             disabled={isGeneratingRoadmap}
-            className="flex items-center gap-1"
+            className='flex items-center gap-1'
           >
-            <Map className="h-4 w-4" />
+            <Map className='h-4 w-4' />
             {isGeneratingRoadmap ? 'Generating...' : 'Guide Me'}
           </Button>
           <a
             href={opportunity.official_link}
-            target="_blank"
-            rel="noopener noreferrer"
+            target='_blank'
+            rel='noopener noreferrer'
           >
-            <Button size='sm' className="flex items-center gap-1">
-              <ExternalLink className="h-4 w-4" />
+            <Button size='sm' className='flex items-center gap-1'>
+              <ExternalLink className='h-4 w-4' />
               Apply Now
             </Button>
           </a>

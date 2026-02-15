@@ -1,0 +1,609 @@
+openapi: 3.0.3
+info:
+  title: OpportuneX Third-Party API
+  description: |
+    REST API for third-party developers to integrate with OpportuneX platform.
+
+    ## Authentication
+
+    The API supports two authentication methods:
+
+    1. **API Keys**: Simple authentication for server-to-server integrations
+       - Include in `Authorization` header: `Authorization: opx_your_api_key`
+       - Or with Bearer prefix: `Authorization: Bearer opx_your_api_key`
+
+    2. **OAuth 2.0**: For applications that need to act on behalf of users
+       - Authorization Code flow with PKCE support
+       - Access tokens included as: `Authorization: Bearer {access_token}`
+
+    ## Rate Limiting
+
+    All API requests are rate limited based on your API key configuration.
+    Rate limit information is included in response headers:
+
+    - `X-RateLimit-Limit`: Maximum requests allowed in the window
+    - `X-RateLimit-Remaining`: Remaining requests in current window
+    - `X-RateLimit-Reset`: Time when the rate limit resets (ISO 8601)
+
+    ## Webhooks
+
+    Subscribe to real-time events using webhooks. All webhook deliveries include:
+
+    - `X-Webhook-Signature`: HMAC-SHA256 signature for verification
+    - `X-Webhook-Event`: Event type
+    - `X-Webhook-Delivery-ID`: Unique delivery identifier
+
+  version: 1.0.0
+  contact:
+    name: OpportuneX API Support
+    email: api@opportunex.com
+    url: https://docs.opportunex.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.opportunex.com/v1
+    description: Production server
+  - url: https://api-staging.opportunex.com/v1
+    description: Staging server
+  - url: http://localhost:3001/api/v1
+    description: Local development server
+
+tags:
+  - name: Opportunities
+    description: Search and retrieve opportunity data
+  - name: Users
+    description: User profile and preferences
+  - name: Webhooks
+    description: Webhook management and event subscriptions
+  - name: Developer
+    description: API key and OAuth client management
+
+security:
+  - ApiKeyAuth: []
+  - OAuth2: []
+
+paths:
+  # Opportunities Endpoints
+  /api/opportunities/search:
+    get:
+      tags:
+        - Opportunities
+      summary: Search opportunities
+      description: Search for hackathons, internships, and workshops using natural language queries
+      operationId: searchOpportunities
+      parameters:
+        - name: q
+          in: query
+          description: Search query (natural language)
+          required: true
+          schema:
+            type: string
+            example: 'machine learning hackathons in bangalore'
+        - name: type
+          in: query
+          description: Filter by opportunity type
+          schema:
+            type: string
+            enum: [hackathon, internship, workshop]
+        - name: mode
+          in: query
+          description: Filter by mode
+          schema:
+            type: string
+            enum: [online, offline, hybrid]
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Opportunity'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /api/opportunities/{opportunityId}:
+    get:
+      tags:
+        - Opportunities
+      summary: Get opportunity details
+      description: Retrieve detailed information about a specific opportunity
+      operationId: getOpportunity
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          description: Opportunity ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Opportunity'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # Developer Endpoints
+  /developer/api-keys:
+    get:
+      tags:
+        - Developer
+      summary: List API keys
+      description: Get all API keys for the authenticated user
+      operationId: listApiKeys
+      security:
+        - OAuth2: [developer:read]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKey'
+
+    post:
+      tags:
+        - Developer
+      summary: Create API key
+      description: Generate a new API key
+      operationId: createApiKey
+      security:
+        - OAuth2: [developer:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - scopes
+              properties:
+                name:
+                  type: string
+                  description: Descriptive name for the API key
+                  example: 'Production API Key'
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                  description: List of permission scopes
+                  example: ['opportunities:read', 'users:read']
+                rateLimit:
+                  type: integer
+                  description: Maximum requests per window
+                  default: 1000
+                rateLimitWindow:
+                  type: integer
+                  description: Rate limit window in seconds
+                  default: 3600
+                expiresAt:
+                  type: string
+                  format: date-time
+                  description: Optional expiration date
+      responses:
+        '201':
+          description: API key created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ApiKeyWithSecret'
+                  message:
+                    type: string
+
+  /developer/api-keys/{keyId}:
+    patch:
+      tags:
+        - Developer
+      summary: Update API key
+      description: Update API key settings
+      operationId: updateApiKey
+      security:
+        - OAuth2: [developer:write]
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                rateLimit:
+                  type: integer
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: API key updated successfully
+
+    delete:
+      tags:
+        - Developer
+      summary: Revoke API key
+      description: Permanently revoke an API key
+      operationId: revokeApiKey
+      security:
+        - OAuth2: [developer:write]
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: API key revoked successfully
+
+  /developer/webhooks:
+    get:
+      tags:
+        - Webhooks
+      summary: List webhooks
+      description: Get all webhooks for the authenticated user
+      operationId: listWebhooks
+      security:
+        - OAuth2: [developer:read]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+
+    post:
+      tags:
+        - Webhooks
+      summary: Create webhook
+      description: Register a new webhook endpoint
+      operationId: createWebhook
+      security:
+        - OAuth2: [developer:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - apiKeyId
+                - url
+                - events
+              properties:
+                apiKeyId:
+                  type: string
+                  format: uuid
+                  description: API key to associate with this webhook
+                url:
+                  type: string
+                  format: uri
+                  description: Webhook endpoint URL
+                  example: 'https://example.com/webhooks/opportunex'
+                events:
+                  type: array
+                  items:
+                    type: string
+                  description: List of events to subscribe to
+                  example: ['opportunity.created', 'opportunity.updated']
+                retryCount:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  default: 3
+                timeoutMs:
+                  type: integer
+                  minimum: 1000
+                  maximum: 30000
+                  default: 5000
+      responses:
+        '201':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/WebhookWithSecret'
+
+  /developer/webhooks/{webhookId}/test:
+    post:
+      tags:
+        - Webhooks
+      summary: Test webhook
+      description: Send a test event to the webhook endpoint
+      operationId: testWebhook
+      security:
+        - OAuth2: [developer:write]
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      success:
+                        type: boolean
+                      responseStatus:
+                        type: integer
+                      responseBody:
+                        type: string
+                      errorMessage:
+                        type: string
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key authentication. Use format `opx_your_api_key` or `Bearer opx_your_api_key`
+
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.opportunex.com/oauth/authorize
+          tokenUrl: https://api.opportunex.com/oauth/token
+          scopes:
+            opportunities:read: Read opportunity data
+            opportunities:write: Create and update opportunities
+            users:read: Read user profile data
+            users:write: Update user profile
+            developer:read: Read API keys and webhooks
+            developer:write: Manage API keys and webhooks
+
+  schemas:
+    Opportunity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [hackathon, internship, workshop]
+        organizerName:
+          type: string
+        organizerType:
+          type: string
+          enum: [corporate, startup, government, academic]
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        mode:
+          type: string
+          enum: [online, offline, hybrid]
+        location:
+          type: string
+        applicationDeadline:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        externalUrl:
+          type: string
+          format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        keyPrefix:
+          type: string
+          description: First 12 characters of the API key
+        scopes:
+          type: array
+          items:
+            type: string
+        rateLimit:
+          type: integer
+        isActive:
+          type: boolean
+        lastUsedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiKeyWithSecret:
+      allOf:
+        - $ref: '#/components/schemas/ApiKey'
+        - type: object
+          properties:
+            key:
+              type: string
+              description: Full API key (only shown once on creation)
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        retryCount:
+          type: integer
+        lastTriggeredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    WebhookWithSecret:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            secret:
+              type: string
+              description: Webhook secret for signature verification (only shown once)
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        message:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimitError:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: string
+            format: date-time
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

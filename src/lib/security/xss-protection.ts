@@ -8,11 +8,14 @@ export class XSSProtection {
   /**
    * Sanitize HTML content to prevent XSS attacks
    */
-  static sanitizeHtml(html: string, options?: {
-    allowedTags?: string[];
-    allowedAttributes?: string[];
-    allowedSchemes?: string[];
-  }): string {
+  static sanitizeHtml(
+    html: string,
+    options?: {
+      allowedTags?: string[];
+      allowedAttributes?: string[];
+      allowedSchemes?: string[];
+    }
+  ): string {
     if (!html || typeof html !== 'string') {
       return '';
     }
@@ -28,7 +31,10 @@ export class XSSProtection {
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: config.allowedTags,
       ALLOWED_ATTR: config.allowedAttributes,
-      ALLOWED_URI_REGEXP: new RegExp(`^(${config.allowedSchemes.join('|')}):`, 'i'),
+      ALLOWED_URI_REGEXP: new RegExp(
+        `^(${config.allowedSchemes.join('|')}):`,
+        'i'
+      ),
       KEEP_CONTENT: true,
       REMOVE_DATA_ATTRIBUTES: true,
       REMOVE_UNKNOWN_PROTOCOLS: true,
@@ -55,7 +61,7 @@ export class XSSProtection {
       '=': '&#x3D;',
     };
 
-    return text.replace(/[&<>"'`=\/]/g, (char) => entityMap[char]);
+    return text.replace(/[&<>"'`=\/]/g, char => entityMap[char]);
   }
 
   /**
@@ -67,24 +73,27 @@ export class XSSProtection {
     }
 
     // Remove script tags and their content
-    let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    
+    let cleaned = input.replace(
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      ''
+    );
+
     // Remove javascript: protocol
     cleaned = cleaned.replace(/javascript:/gi, '');
-    
+
     // Remove on* event handlers
     cleaned = cleaned.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
     cleaned = cleaned.replace(/\s*on\w+\s*=\s*[^>\s]+/gi, '');
-    
+
     // Remove data: URLs that could contain JavaScript
     cleaned = cleaned.replace(/data:\s*text\/html/gi, 'data:text/plain');
-    
+
     // Remove vbscript: protocol
     cleaned = cleaned.replace(/vbscript:/gi, '');
-    
+
     // Remove expression() CSS
     cleaned = cleaned.replace(/expression\s*\(/gi, '');
-    
+
     return cleaned;
   }
 
@@ -162,7 +171,7 @@ export class XSSProtection {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      'upgrade-insecure-requests',
     ];
 
     return directives.join('; ');
@@ -174,22 +183,24 @@ export class XSSProtection {
   static setXSSHeaders = (req: Request, res: Response, next: NextFunction) => {
     // X-XSS-Protection header
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    
+
     // X-Content-Type-Options header
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    
+
     // X-Frame-Options header
     res.setHeader('X-Frame-Options', 'DENY');
-    
+
     // Referrer Policy
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
+
     // Content Security Policy
     res.setHeader('Content-Security-Policy', XSSProtection.getCSPConfig());
-    
+
     // Permissions Policy (formerly Feature Policy)
-    res.setHeader('Permissions-Policy', 
-      'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+    res.setHeader(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
+    );
 
     next();
   };
@@ -197,7 +208,11 @@ export class XSSProtection {
   /**
    * Middleware to sanitize request data
    */
-  static sanitizeRequest = (req: Request, res: Response, next: NextFunction) => {
+  static sanitizeRequest = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       // Sanitize request body
       if (req.body) {
@@ -212,7 +227,7 @@ export class XSSProtection {
           if (typeof value === 'string') {
             sanitizedQuery[sanitizedKey] = this.escapeHtml(value);
           } else if (Array.isArray(value)) {
-            sanitizedQuery[sanitizedKey] = value.map(v => 
+            sanitizedQuery[sanitizedKey] = value.map(v =>
               typeof v === 'string' ? this.escapeHtml(v) : v
             );
           } else {
@@ -249,18 +264,26 @@ export class XSSProtection {
       const sanitized: any = {};
       for (const [key, value] of Object.entries(body)) {
         const sanitizedKey = this.escapeHtml(key);
-        
+
         // Special handling for different field types
-        if (key.toLowerCase().includes('html') || key.toLowerCase().includes('content')) {
+        if (
+          key.toLowerCase().includes('html') ||
+          key.toLowerCase().includes('content')
+        ) {
           // For HTML content fields, use HTML sanitization
-          sanitized[sanitizedKey] = typeof value === 'string' 
-            ? this.sanitizeHtml(value) 
-            : this.sanitizeRequestBody(value);
-        } else if (key.toLowerCase().includes('url') || key.toLowerCase().includes('link')) {
+          sanitized[sanitizedKey] =
+            typeof value === 'string'
+              ? this.sanitizeHtml(value)
+              : this.sanitizeRequestBody(value);
+        } else if (
+          key.toLowerCase().includes('url') ||
+          key.toLowerCase().includes('link')
+        ) {
           // For URL fields, use URL sanitization
-          sanitized[sanitizedKey] = typeof value === 'string' 
-            ? this.sanitizeUrl(value) 
-            : this.sanitizeRequestBody(value);
+          sanitized[sanitizedKey] =
+            typeof value === 'string'
+              ? this.sanitizeUrl(value)
+              : this.sanitizeRequestBody(value);
         } else {
           // For other fields, use standard escaping
           sanitized[sanitizedKey] = this.sanitizeRequestBody(value);
@@ -281,9 +304,19 @@ export class XSSProtection {
     buffer: Buffer;
   }): { isValid: boolean; error?: string } {
     // Check file extension
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.txt'];
-    const fileExtension = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
-    
+    const allowedExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.pdf',
+      '.txt',
+    ];
+    const fileExtension = file.originalname
+      .toLowerCase()
+      .substring(file.originalname.lastIndexOf('.'));
+
     if (!allowedExtensions.includes(fileExtension)) {
       return { isValid: false, error: 'File type not allowed' };
     }
@@ -291,7 +324,7 @@ export class XSSProtection {
     // Check MIME type
     const allowedMimeTypes = [
       'image/jpeg',
-      'image/png', 
+      'image/png',
       'image/gif',
       'image/webp',
       'application/pdf',
@@ -303,7 +336,11 @@ export class XSSProtection {
     }
 
     // Check for embedded scripts in file content
-    const fileContent = file.buffer.toString('utf8', 0, Math.min(1024, file.buffer.length));
+    const fileContent = file.buffer.toString(
+      'utf8',
+      0,
+      Math.min(1024, file.buffer.length)
+    );
     const scriptPatterns = [
       /<script/i,
       /javascript:/i,
@@ -314,7 +351,10 @@ export class XSSProtection {
     ];
 
     if (scriptPatterns.some(pattern => pattern.test(fileContent))) {
-      return { isValid: false, error: 'File contains potentially malicious content' };
+      return {
+        isValid: false,
+        error: 'File contains potentially malicious content',
+      };
     }
 
     return { isValid: true };
@@ -345,7 +385,7 @@ export class XSSProtection {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      'upgrade-insecure-requests',
     ];
 
     return directives.join('; ');
@@ -355,10 +395,14 @@ export class XSSProtection {
 /**
  * Response sanitization middleware
  */
-export const sanitizeResponse = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeResponse = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const originalJson = res.json;
 
-  res.json = function(data: any) {
+  res.json = function (data: any) {
     // Sanitize response data
     const sanitizedData = XSSProtection.sanitizeJsonData(data);
     return originalJson.call(this, sanitizedData);

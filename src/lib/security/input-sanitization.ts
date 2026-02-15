@@ -13,7 +13,7 @@ export class InputSanitizer {
     if (!input || typeof input !== 'string') {
       return '';
     }
-    
+
     return DOMPurify.sanitize(input, {
       ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],
       ALLOWED_ATTR: [],
@@ -59,7 +59,8 @@ export class InputSanitizer {
       return '';
     }
 
-    const sanitized = validator.normalizeEmail(email.trim().toLowerCase()) || '';
+    const sanitized =
+      validator.normalizeEmail(email.trim().toLowerCase()) || '';
     return validator.isEmail(sanitized) ? sanitized : '';
   }
 
@@ -84,12 +85,14 @@ export class InputSanitizer {
     }
 
     const trimmed = url.trim();
-    
+
     // Check if it's a valid URL
-    if (!validator.isURL(trimmed, {
-      protocols: ['http', 'https'],
-      require_protocol: true,
-    })) {
+    if (
+      !validator.isURL(trimmed, {
+        protocols: ['http', 'https'],
+        require_protocol: true,
+      })
+    ) {
       return '';
     }
 
@@ -118,11 +121,11 @@ export class InputSanitizer {
     if (typeof input === 'string') {
       return this.sanitizeText(input);
     }
-    
+
     if (Array.isArray(input)) {
       return input.map(item => this.sanitizeJson(item));
     }
-    
+
     if (input && typeof input === 'object') {
       const sanitized: any = {};
       for (const [key, value] of Object.entries(input)) {
@@ -131,7 +134,7 @@ export class InputSanitizer {
       }
       return sanitized;
     }
-    
+
     return input;
   }
 
@@ -145,24 +148,33 @@ export class InputSanitizer {
 
     for (const [key, value] of Object.entries(body)) {
       const sanitizedKey = this.sanitizeText(key);
-      
+
       if (typeof value === 'string') {
         // Apply specific sanitization based on field name
         if (key.toLowerCase().includes('email')) {
           sanitized[sanitizedKey] = this.sanitizeEmail(value);
         } else if (key.toLowerCase().includes('phone')) {
           sanitized[sanitizedKey] = this.sanitizePhone(value);
-        } else if (key.toLowerCase().includes('url') || key.toLowerCase().includes('link')) {
+        } else if (
+          key.toLowerCase().includes('url') ||
+          key.toLowerCase().includes('link')
+        ) {
           sanitized[sanitizedKey] = this.sanitizeUrl(value);
-        } else if (key.toLowerCase().includes('query') || key.toLowerCase().includes('search')) {
+        } else if (
+          key.toLowerCase().includes('query') ||
+          key.toLowerCase().includes('search')
+        ) {
           sanitized[sanitizedKey] = this.sanitizeSearchQuery(value);
-        } else if (key.toLowerCase().includes('html') || key.toLowerCase().includes('content')) {
+        } else if (
+          key.toLowerCase().includes('html') ||
+          key.toLowerCase().includes('content')
+        ) {
           sanitized[sanitizedKey] = this.sanitizeHtml(value);
         } else {
           sanitized[sanitizedKey] = this.sanitizeText(value);
         }
       } else if (Array.isArray(value)) {
-        sanitized[sanitizedKey] = value.map(item => 
+        sanitized[sanitizedKey] = value.map(item =>
           typeof item === 'string' ? this.sanitizeText(item) : item
         );
       } else if (value && typeof value === 'object') {
@@ -194,7 +206,7 @@ export const sanitizeRequest = (req: Request, res: any, next: any) => {
         if (typeof value === 'string') {
           sanitizedQuery[sanitizedKey] = InputSanitizer.sanitizeText(value);
         } else if (Array.isArray(value)) {
-          sanitizedQuery[sanitizedKey] = value.map(v => 
+          sanitizedQuery[sanitizedKey] = value.map(v =>
             typeof v === 'string' ? InputSanitizer.sanitizeText(v) : v
           );
         } else {
@@ -209,9 +221,10 @@ export const sanitizeRequest = (req: Request, res: any, next: any) => {
       const sanitizedParams: any = {};
       for (const [key, value] of Object.entries(req.params)) {
         const sanitizedKey = InputSanitizer.sanitizeText(key);
-        sanitizedParams[sanitizedKey] = typeof value === 'string' 
-          ? InputSanitizer.sanitizeText(value) 
-          : value;
+        sanitizedParams[sanitizedKey] =
+          typeof value === 'string'
+            ? InputSanitizer.sanitizeText(value)
+            : value;
       }
       req.params = sanitizedParams;
     }
@@ -222,7 +235,8 @@ export const sanitizeRequest = (req: Request, res: any, next: any) => {
     res.status(400).json({
       success: false,
       error: 'Invalid request format',
-      message: 'Request contains invalid data that could not be processed safely.',
+      message:
+        'Request contains invalid data that could not be processed safely.',
     });
   }
 };

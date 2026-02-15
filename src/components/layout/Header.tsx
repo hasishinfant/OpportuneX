@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isClient } = useTheme();
 
   const navigation = [
     { name: 'Search', href: '/search' },
@@ -19,13 +21,29 @@ export function Header({ className }: HeaderProps) {
     { name: 'Profile', href: '/profile' },
   ];
 
+  // Use basic styling during SSR, theme-dependent styling only after hydration
+  const headerClasses = isClient
+    ? 'bg-white dark:bg-secondary-900 shadow-sm border-b border-secondary-200 dark:border-secondary-700'
+    : 'bg-white shadow-sm border-b border-gray-200';
+
+  const textClasses = isClient
+    ? 'text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400'
+    : 'text-gray-600 hover:text-blue-600';
+
+  const logoTextClasses = isClient
+    ? 'text-xl font-bold text-secondary-900 dark:text-white hidden sm:block'
+    : 'text-xl font-bold text-gray-900 hidden sm:block';
+
+  const mobileButtonClasses = isClient
+    ? 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 p-2'
+    : 'text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2';
+
+  const mobileBorderClasses = isClient
+    ? 'border-t border-secondary-200 dark:border-secondary-700'
+    : 'border-t border-gray-200';
+
   return (
-    <header
-      className={cn(
-        'bg-white dark:bg-secondary-900 shadow-sm border-b border-secondary-200 dark:border-secondary-700',
-        className
-      )}
-    >
+    <header className={cn(headerClasses, className)}>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Logo */}
@@ -34,9 +52,7 @@ export function Header({ className }: HeaderProps) {
               <div className='w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center'>
                 <span className='text-white font-bold text-lg'>O</span>
               </div>
-              <span className='text-xl font-bold text-secondary-900 dark:text-white hidden sm:block'>
-                OpportuneX
-              </span>
+              <span className={logoTextClasses}>OpportuneX</span>
             </Link>
           </div>
 
@@ -46,7 +62,10 @@ export function Header({ className }: HeaderProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className='text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors'
+                className={cn(
+                  textClasses,
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors'
+                )}
               >
                 {item.name}
               </Link>
@@ -64,10 +83,10 @@ export function Header({ className }: HeaderProps) {
 
           {/* Mobile menu button */}
           <div className='md:hidden flex items-center space-x-2'>
-            <ThemeToggle size="sm" />
+            <ThemeToggle size='sm' />
             <button
               type='button'
-              className='text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 p-2'
+              className={mobileButtonClasses}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-expanded='false'
             >
@@ -108,18 +127,26 @@ export function Header({ className }: HeaderProps) {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className='md:hidden'>
-            <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-secondary-200 dark:border-secondary-700'>
+            <div
+              className={cn(
+                'px-2 pt-2 pb-3 space-y-1 sm:px-3',
+                mobileBorderClasses
+              )}
+            >
               {navigation.map(item => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className='text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium transition-colors'
+                  className={cn(
+                    textClasses,
+                    'block px-3 py-2 rounded-md text-base font-medium transition-colors'
+                  )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              <div className='pt-4 pb-3 border-t border-secondary-200 dark:border-secondary-700'>
+              <div className={cn('pt-4 pb-3', mobileBorderClasses)}>
                 <div className='flex items-center px-3 space-x-3'>
                   <Button variant='outline' size='sm' className='flex-1'>
                     Sign In

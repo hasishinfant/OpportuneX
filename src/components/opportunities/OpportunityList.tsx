@@ -77,14 +77,12 @@ export function OpportunityList({
       case 'deadline':
         return sorted.sort(
           (a, b) =>
-            new Date(a.deadline).getTime() -
-            new Date(b.deadline).getTime()
+            new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
         );
       case 'newest':
         return sorted.sort(
           (a, b) =>
-            new Date(b.deadline).getTime() -
-            new Date(a.deadline).getTime()
+            new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
         );
       case 'relevance':
       default:
@@ -135,7 +133,8 @@ export function OpportunityList({
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
         <div className='flex items-center space-x-4'>
           <p className='text-sm text-secondary-600'>
-            {dataToUse.length} opportunities {enableInfiniteScroll ? 'loaded' : 'found'}
+            {dataToUse.length} opportunities{' '}
+            {enableInfiniteScroll ? 'loaded' : 'found'}
           </p>
 
           {/* Sort Options */}
@@ -202,7 +201,7 @@ export function OpportunityList({
           )}
           emptyComponent={emptyComponent}
           showItemCount={true}
-          itemCountLabel="opportunities"
+          itemCountLabel='opportunities'
         />
       ) : (
         <>
@@ -214,7 +213,7 @@ export function OpportunityList({
                 : 'space-y-4'
             )}
           >
-            {sortedOpportunities.map((opportunity) => 
+            {sortedOpportunities.map(opportunity =>
               renderOpportunityCard(opportunity)
             )}
           </div>

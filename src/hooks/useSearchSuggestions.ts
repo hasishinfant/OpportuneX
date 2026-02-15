@@ -45,79 +45,98 @@ export function useSearchSuggestions({
   }, []);
 
   // Save search to recent searches
-  const saveRecentSearch = useCallback((searchQuery: string) => {
-    if (typeof window === 'undefined' || !searchQuery.trim()) return;
-    
-    try {
-      const recent = getRecentSearches();
-      const updated = [
-        searchQuery.trim(),
-        ...recent.filter(s => s !== searchQuery.trim())
-      ].slice(0, 10); // Keep only last 10 searches
-      
-      localStorage.setItem('opportunex_recent_searches', JSON.stringify(updated));
-    } catch (error) {
-      console.error('Failed to save recent search:', error);
-    }
-  }, [getRecentSearches]);
+  const saveRecentSearch = useCallback(
+    (searchQuery: string) => {
+      if (typeof window === 'undefined' || !searchQuery.trim()) return;
+
+      try {
+        const recent = getRecentSearches();
+        const updated = [
+          searchQuery.trim(),
+          ...recent.filter(s => s !== searchQuery.trim()),
+        ].slice(0, 10); // Keep only last 10 searches
+
+        localStorage.setItem(
+          'opportunex_recent_searches',
+          JSON.stringify(updated)
+        );
+      } catch (error) {
+        console.error('Failed to save recent search:', error);
+      }
+    },
+    [getRecentSearches]
+  );
 
   // Generate autocomplete suggestions
-  const generateAutocompleteSuggestions = useCallback((searchQuery: string): SearchSuggestion[] => {
-    if (!searchQuery.trim()) return [];
+  const generateAutocompleteSuggestions = useCallback(
+    (searchQuery: string): SearchSuggestion[] => {
+      if (!searchQuery.trim()) return [];
 
-    const query = searchQuery.toLowerCase();
-    const suggestions: SearchSuggestion[] = [];
+      const query = searchQuery.toLowerCase();
+      const suggestions: SearchSuggestion[] = [];
 
-    // Add matching popular searches
-    popularSearches.forEach((search, index) => {
-      if (search.toLowerCase().includes(query) && search.toLowerCase() !== query) {
-        suggestions.push({
-          id: `popular-${index}`,
-          text: search,
-          type: 'popular',
-          count: Math.floor(Math.random() * 1000) + 100, // Mock popularity count
-        });
-      }
-    });
+      // Add matching popular searches
+      popularSearches.forEach((search, index) => {
+        if (
+          search.toLowerCase().includes(query) &&
+          search.toLowerCase() !== query
+        ) {
+          suggestions.push({
+            id: `popular-${index}`,
+            text: search,
+            type: 'popular',
+            count: Math.floor(Math.random() * 1000) + 100, // Mock popularity count
+          });
+        }
+      });
 
-    // Add matching recent searches
-    const recentSearches = getRecentSearches();
-    recentSearches.forEach((search, index) => {
-      if (search.toLowerCase().includes(query) && search.toLowerCase() !== query) {
-        suggestions.push({
-          id: `recent-${index}`,
-          text: search,
-          type: 'recent',
-        });
-      }
-    });
+      // Add matching recent searches
+      const recentSearches = getRecentSearches();
+      recentSearches.forEach((search, index) => {
+        if (
+          search.toLowerCase().includes(query) &&
+          search.toLowerCase() !== query
+        ) {
+          suggestions.push({
+            id: `recent-${index}`,
+            text: search,
+            type: 'recent',
+          });
+        }
+      });
 
-    // Generate contextual autocomplete suggestions
-    const contextualSuggestions = [
-      `${searchQuery} internships`,
-      `${searchQuery} hackathons`,
-      `${searchQuery} workshops`,
-      `${searchQuery} remote`,
-      `${searchQuery} 2024`,
-    ];
+      // Generate contextual autocomplete suggestions
+      const contextualSuggestions = [
+        `${searchQuery} internships`,
+        `${searchQuery} hackathons`,
+        `${searchQuery} workshops`,
+        `${searchQuery} remote`,
+        `${searchQuery} 2024`,
+      ];
 
-    contextualSuggestions.forEach((suggestion, index) => {
-      if (suggestion.toLowerCase() !== query) {
-        suggestions.push({
-          id: `autocomplete-${index}`,
-          text: suggestion,
-          type: 'autocomplete',
-        });
-      }
-    });
+      contextualSuggestions.forEach((suggestion, index) => {
+        if (suggestion.toLowerCase() !== query) {
+          suggestions.push({
+            id: `autocomplete-${index}`,
+            text: suggestion,
+            type: 'autocomplete',
+          });
+        }
+      });
 
-    // Remove duplicates and limit results
-    const uniqueSuggestions = suggestions.filter((suggestion, index, self) =>
-      index === self.findIndex(s => s.text.toLowerCase() === suggestion.text.toLowerCase())
-    );
+      // Remove duplicates and limit results
+      const uniqueSuggestions = suggestions.filter(
+        (suggestion, index, self) =>
+          index ===
+          self.findIndex(
+            s => s.text.toLowerCase() === suggestion.text.toLowerCase()
+          )
+      );
 
-    return uniqueSuggestions.slice(0, maxSuggestions);
-  }, [getRecentSearches, maxSuggestions]);
+      return uniqueSuggestions.slice(0, maxSuggestions);
+    },
+    [getRecentSearches, maxSuggestions]
+  );
 
   // Update suggestions when query changes
   useEffect(() => {
@@ -129,17 +148,19 @@ export function useSearchSuggestions({
     if (!query.trim()) {
       // Show recent searches when no query
       const recentSearches = getRecentSearches();
-      const recentSuggestions: SearchSuggestion[] = recentSearches.slice(0, 5).map((search, index) => ({
-        id: `recent-${index}`,
-        text: search,
-        type: 'recent',
-      }));
+      const recentSuggestions: SearchSuggestion[] = recentSearches
+        .slice(0, 5)
+        .map((search, index) => ({
+          id: `recent-${index}`,
+          text: search,
+          type: 'recent',
+        }));
       setSuggestions(recentSuggestions);
       return;
     }
 
     setLoading(true);
-    
+
     // Simulate API delay for autocomplete
     const timeoutId = setTimeout(() => {
       const newSuggestions = generateAutocompleteSuggestions(query);

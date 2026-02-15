@@ -123,7 +123,7 @@ class ErrorTracker extends EventEmitter {
     const now = new Date();
 
     let trackedError = this.errors.get(errorId);
-    
+
     if (trackedError) {
       // Update existing error
       trackedError.count++;
@@ -147,14 +147,15 @@ class ErrorTracker extends EventEmitter {
         resolved: false,
         tags: this.generateTags(error, context),
       };
-      
+
       this.errors.set(errorId, trackedError);
     }
 
     // Limit stored errors
     if (this.errors.size > this.maxErrors) {
-      const oldestError = Array.from(this.errors.values())
-        .sort((a, b) => a.lastSeen.getTime() - b.lastSeen.getTime())[0];
+      const oldestError = Array.from(this.errors.values()).sort(
+        (a, b) => a.lastSeen.getTime() - b.lastSeen.getTime()
+      )[0];
       this.errors.delete(oldestError.id);
     }
 
@@ -245,8 +246,8 @@ class ErrorTracker extends EventEmitter {
     const bySeverity = {} as Record<ErrorSeverity, number>;
 
     // Initialize counters
-    Object.values(ErrorCategory).forEach(cat => byCategory[cat] = 0);
-    Object.values(ErrorSeverity).forEach(sev => bySeverity[sev] = 0);
+    Object.values(ErrorCategory).forEach(cat => (byCategory[cat] = 0));
+    Object.values(ErrorSeverity).forEach(sev => (bySeverity[sev] = 0));
 
     let unresolved = 0;
     let recentErrors = 0;
@@ -254,7 +255,7 @@ class ErrorTracker extends EventEmitter {
     for (const error of allErrors) {
       byCategory[error.category]++;
       bySeverity[error.severity]++;
-      
+
       if (!error.resolved) unresolved++;
       if (error.lastSeen >= oneDayAgo) recentErrors++;
     }
@@ -304,7 +305,7 @@ class ErrorTracker extends EventEmitter {
   /**
    * Clear old errors
    */
-  clearOldErrors(olderThanDays: number = 30) {
+  clearOldErrors(olderThanDays = 30) {
     const cutoff = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
     const toDelete: string[] = [];
 
@@ -318,7 +319,10 @@ class ErrorTracker extends EventEmitter {
       this.errors.delete(id);
     }
 
-    logger.info('Cleared old errors', { count: toDelete.length, olderThanDays });
+    logger.info('Cleared old errors', {
+      count: toDelete.length,
+      olderThanDays,
+    });
   }
 
   /**
@@ -339,12 +343,12 @@ class ErrorTracker extends EventEmitter {
     }
 
     const fingerprint = components.join('|');
-    
+
     // Create a simple hash
     let hash = 0;
     for (let i = 0; i < fingerprint.length; i++) {
       const char = fingerprint.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
 
@@ -388,7 +392,7 @@ class ErrorTracker extends EventEmitter {
     // Critical errors alert
     this.addAlertConfig({
       name: 'critical_errors',
-      condition: (error) => error.severity === ErrorSeverity.CRITICAL,
+      condition: error => error.severity === ErrorSeverity.CRITICAL,
       severity: ErrorSeverity.CRITICAL,
       channels: [
         { type: AlertChannelType.EMAIL, config: {}, enabled: true },
@@ -401,11 +405,11 @@ class ErrorTracker extends EventEmitter {
     // High frequency errors alert
     this.addAlertConfig({
       name: 'high_frequency_errors',
-      condition: (error) => error.count >= 10 && error.lastSeen.getTime() - error.firstSeen.getTime() < 300000, // 10 errors in 5 minutes
+      condition: error =>
+        error.count >= 10 &&
+        error.lastSeen.getTime() - error.firstSeen.getTime() < 300000, // 10 errors in 5 minutes
       severity: ErrorSeverity.HIGH,
-      channels: [
-        { type: AlertChannelType.EMAIL, config: {}, enabled: true },
-      ],
+      channels: [{ type: AlertChannelType.EMAIL, config: {}, enabled: true }],
       throttle: 15, // 15 minutes
       enabled: true,
     });
@@ -413,11 +417,11 @@ class ErrorTracker extends EventEmitter {
     // Database errors alert
     this.addAlertConfig({
       name: 'database_errors',
-      condition: (error) => error.category === ErrorCategory.DATABASE && error.severity >= ErrorSeverity.MEDIUM,
+      condition: error =>
+        error.category === ErrorCategory.DATABASE &&
+        error.severity >= ErrorSeverity.MEDIUM,
       severity: ErrorSeverity.HIGH,
-      channels: [
-        { type: AlertChannelType.SLACK, config: {}, enabled: true },
-      ],
+      channels: [{ type: AlertChannelType.SLACK, config: {}, enabled: true }],
       throttle: 10, // 10 minutes
       enabled: true,
     });
@@ -436,8 +440,11 @@ class ErrorTracker extends EventEmitter {
       const throttleKey = `${config.name}_${error.id}`;
       const lastAlert = this.alertThrottles.get(throttleKey);
       const now = new Date();
-      
-      if (lastAlert && now.getTime() - lastAlert.getTime() < config.throttle * 60 * 1000) {
+
+      if (
+        lastAlert &&
+        now.getTime() - lastAlert.getTime() < config.throttle * 60 * 1000
+      ) {
         continue; // Still throttled
       }
 
@@ -452,7 +459,7 @@ class ErrorTracker extends EventEmitter {
    */
   private async createAlert(error: TrackedError, config: AlertConfig) {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const alert: Alert = {
       id: alertId,
       timestamp: new Date(),
@@ -468,7 +475,7 @@ class ErrorTracker extends EventEmitter {
     try {
       await this.sendAlert(alert, config);
       alert.sent = true;
-      
+
       logger.info('Alert sent', {
         alertId,
         errorId: error.id,
@@ -477,12 +484,16 @@ class ErrorTracker extends EventEmitter {
       });
     } catch (err) {
       alert.error = err instanceof Error ? err.message : 'Failed to send alert';
-      
-      logger.error('Failed to send alert', err, {
-        alertId,
-        errorId: error.id,
-        configName: config.name,
-      });
+
+      logger.error(
+        'Failed to send alert',
+        err instanceof Error ? err : new Error(String(err)),
+        {
+          alertId,
+          errorId: error.id,
+          configName: config.name,
+        }
+      );
     }
 
     this.emit('alert', alert);
@@ -531,10 +542,11 @@ class ErrorTracker extends EventEmitter {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ALERT_EMAIL_API_KEY}`,
+          Authorization: `Bearer ${process.env.ALERT_EMAIL_API_KEY}`,
         },
         body: JSON.stringify({
-          to: config.recipients || process.env.ALERT_EMAIL_RECIPIENTS?.split(','),
+          to:
+            config.recipients || process.env.ALERT_EMAIL_RECIPIENTS?.split(','),
           subject: `[OpportuneX Alert] ${alert.severity.toUpperCase()} - Error Detected`,
           body: alert.message,
           alert,
@@ -609,10 +621,11 @@ class ErrorTracker extends EventEmitter {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SMS_ALERT_API_KEY}`,
+          Authorization: `Bearer ${process.env.SMS_ALERT_API_KEY}`,
         },
         body: JSON.stringify({
-          to: config.phoneNumbers || process.env.ALERT_PHONE_NUMBERS?.split(','),
+          to:
+            config.phoneNumbers || process.env.ALERT_PHONE_NUMBERS?.split(','),
           message: `OpportuneX Alert: ${alert.severity.toUpperCase()} - ${alert.message.substring(0, 100)}...`,
         }),
       });
@@ -664,28 +677,27 @@ ${error.stack || 'No stack trace available'}
 export const errorTracker = new ErrorTracker();
 
 // Global error handlers
-process.on('uncaughtException', (error) => {
-  errorTracker.trackError(
-    error,
-    ErrorSeverity.CRITICAL,
-    ErrorCategory.SYSTEM,
-    { component: 'process', action: 'uncaughtException' }
-  );
+process.on('uncaughtException', error => {
+  errorTracker.trackError(error, ErrorSeverity.CRITICAL, ErrorCategory.SYSTEM, {
+    component: 'process',
+    action: 'uncaughtException',
+  });
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   const error = reason instanceof Error ? reason : new Error(String(reason));
-  errorTracker.trackError(
-    error,
-    ErrorSeverity.HIGH,
-    ErrorCategory.SYSTEM,
-    { component: 'process', action: 'unhandledRejection' }
-  );
+  errorTracker.trackError(error, ErrorSeverity.HIGH, ErrorCategory.SYSTEM, {
+    component: 'process',
+    action: 'unhandledRejection',
+  });
 });
 
 // Cleanup old errors daily
-setInterval(() => {
-  errorTracker.clearOldErrors(30); // Keep errors for 30 days
-}, 24 * 60 * 60 * 1000); // Run daily
+setInterval(
+  () => {
+    errorTracker.clearOldErrors(30); // Keep errors for 30 days
+  },
+  24 * 60 * 60 * 1000
+); // Run daily
 
 export default errorTracker;

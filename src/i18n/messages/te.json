@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "OpportuneX",
+    "search": "వెతుకు",
+    "filter": "ఫిల్టర్",
+    "loading": "లోడ్ అవుతోంది...",
+    "error": "లోపం",
+    "success": "విజయం",
+    "cancel": "రద్దు చేయి",
+    "save": "సేవ్ చేయి",
+    "delete": "తొలగించు",
+    "edit": "సవరించు",
+    "close": "మూసివేయి",
+    "back": "వెనుకకు",
+    "next": "తదుపరి",
+    "previous": "మునుపటి",
+    "submit": "సమర్పించు",
+    "reset": "రీసెట్ చేయి"
+  },
+  "header": {
+    "search": "వెతుకు",
+    "myRoadmaps": "నా రోడ్‌మ్యాప్‌లు",
+    "profile": "ప్రొఫైల్",
+    "signIn": "సైన్ ఇన్",
+    "getStarted": "ప్రారంభించు",
+    "analytics": "విశ్లేషణ",
+    "social": "సామాజిక"
+  },
+  "home": {
+    "title": "మీ తదుపరి అవకాశాన్ని కనుగొనండి",
+    "subtitle": "మీ కోసం హ్యాకథాన్‌లు, ఇంటర్న్‌షిప్‌లు మరియు వర్క్‌షాప్‌లను కనుగొనడానికి AI-ఆధారిత ప్లాట్‌ఫారమ్",
+    "searchPlaceholder": "అవకాశాల కోసం వెతకండి...",
+    "voiceSearch": "వాయిస్ సెర్చ్",
+    "featuredOpportunities": "ప్రత్యేక అవకాశాలు"
+  },
+  "search": {
+    "title": "అవకాశాలను వెతకండి",
+    "placeholder": "మీరు దేని కోసం వెతుకుతున్నారు?",
+    "voiceSearchButton": "వాయిస్ సెర్చ్ ఉపయోగించండి",
+    "filters": "ఫిల్టర్లు",
+    "results": "ఫలితాలు",
+    "noResults": "అవకాశాలు కనుగొనబడలేదు",
+    "tryDifferentSearch": "వేరే శోధన పదాన్ని ప్రయత్నించండి"
+  },
+  "filters": {
+    "type": "రకం",
+    "location": "స్థానం",
+    "skillLevel": "నైపుణ్య స్థాయి",
+    "remote": "రిమోట్",
+    "category": "వర్గం",
+    "deadline": "గడువు",
+    "clearAll": "అన్నీ క్లియర్ చేయి",
+    "apply": "ఫిల్టర్లను వర్తింపజేయండి"
+  },
+  "opportunity": {
+    "hackathon": "హ్యాకథాన్",
+    "internship": "ఇంటర్న్‌షిప్",
+    "workshop": "వర్క్‌షాప్",
+    "deadline": "గడువు",
+    "location": "స్థానం",
+    "remote": "రిమోట్",
+    "skillLevel": "నైపుణ్య స్థాయి",
+    "beginner": "ప్రారంభకుడు",
+    "intermediate": "మధ్యస్థ",
+    "advanced": "అధునాతన",
+    "viewDetails": "వివరాలను చూడండి",
+    "apply": "ఇప్పుడే దరఖాస్తు చేయండి",
+    "save": "సేవ్ చేయి"
+  },
+  "profile": {
+    "title": "నా ప్రొఫైల్",
+    "personalInfo": "వ్యక్తిగత సమాచారం",
+    "name": "పేరు",
+    "email": "ఇమెయిల్",
+    "phone": "ఫోన్",
+    "location": "స్థానం",
+    "skills": "నైపుణ్యాలు",
+    "interests": "ఆసక్తులు",
+    "education": "విద్య",
+    "experience": "అనుభవం",
+    "preferences": "ప్రాధాన్యతలు",
+    "notifications": "నోటిఫికేషన్ సెట్టింగ్‌లు",
+    "language": "భాష",
+    "theme": "థీమ్",
+    "saveChanges": "మార్పులను సేవ్ చేయండి"
+  },
+  "roadmap": {
+    "title": "నా రోడ్‌మ్యాప్‌లు",
+    "createNew": "కొత్త రోడ్‌మ్యాప్ సృష్టించండి",
+    "inProgress": "పురోగతిలో",
+    "completed": "పూర్తయింది",
+    "viewRoadmap": "రోడ్‌మ్యాప్ చూడండి",
+    "progress": "పురోగతి",
+    "steps": "దశలు",
+    "resources": "వనరులు"
+  },
+  "voice": {
+    "listening": "వింటోంది...",
+    "processing": "ప్రాసెస్ చేస్తోంది...",
+    "speak": "ఇప్పుడు మాట్లాడండి",
+    "tryAgain": "మళ్లీ ప్రయత్నించండి",
+    "error": "వాయిస్ ఇన్‌పుట్‌ను ప్రాసెస్ చేయలేకపోయింది",
+    "permissionDenied": "మైక్రోఫోన్ అనుమతి తిరస్కరించబడింది",
+    "notSupported": "ఈ బ్రౌజర్‌లో వాయిస్ సెర్చ్ మద్దతు లేదు"
+  },
+  "notifications": {
+    "title": "నోటిఫికేషన్‌లు",
+    "markAllRead": "అన్నింటినీ చదివినట్లు గుర్తించండి",
+    "noNotifications": "నోటిఫికేషన్‌లు లేవు",
+    "newOpportunity": "కొత్త అవకాశం మీ ఆసక్తులకు సరిపోతుంది",
+    "deadlineReminder": "గడువు సమీపిస్తోంది",
+    "applicationUpdate": "దరఖాస్తు స్థితి నవీకరించబడింది"
+  },
+  "footer": {
+    "about": "గురించి",
+    "contact": "సంప్రదించండి",
+    "privacy": "గోప్యతా విధానం",
+    "terms": "సేవా నిబంధనలు",
+    "help": "సహాయ కేంద్రం"
+  }
+}

@@ -23,7 +23,8 @@ const testUser = {
 const testOpportunity = {
   id: 'opp-456',
   title: 'AI Innovation Hackathon 2024',
-  description: 'Build the next generation of AI applications that solve real-world problems. Open to students and professionals.',
+  description:
+    'Build the next generation of AI applications that solve real-world problems. Open to students and professionals.',
   type: 'hackathon' as const,
   organizer: {
     name: 'TechCorp India',
@@ -43,7 +44,7 @@ async function testNotificationSystem() {
   try {
     // 1. Test Basic Notification Service
     console.log('1️⃣ Testing Basic Notification Service...');
-    
+
     const basicNotification = await notificationService.sendNotification({
       userId: testUser.id,
       type: 'new_opportunity',
@@ -56,34 +57,41 @@ async function testNotificationSystem() {
       priority: 'normal',
     });
 
-    console.log(`✅ Sent notification ${basicNotification.id} through ${basicNotification.channels.length} channels`);
+    console.log(
+      `✅ Sent notification ${basicNotification.id} through ${basicNotification.channels.length} channels`
+    );
     console.log(`   Deliveries: ${basicNotification.deliveries.length}`);
 
     // 2. Test User Preferences
     console.log('\n2️⃣ Testing User Preferences...');
-    
-    const preferences = await notificationService.updateUserPreferences(testUser.id, {
-      email: true,
-      sms: false,
-      inApp: true,
-      push: true,
-      frequency: 'immediate',
-      types: ['new_opportunity', 'deadline_reminder'],
-      quietHours: {
-        enabled: true,
-        start: '22:00',
-        end: '08:00',
-        timezone: 'Asia/Kolkata',
-      },
-    });
+
+    const preferences = await notificationService.updateUserPreferences(
+      testUser.id,
+      {
+        email: true,
+        sms: false,
+        inApp: true,
+        push: true,
+        frequency: 'immediate',
+        types: ['new_opportunity', 'deadline_reminder'],
+        quietHours: {
+          enabled: true,
+          start: '22:00',
+          end: '08:00',
+          timezone: 'Asia/Kolkata',
+        },
+      }
+    );
 
     console.log('✅ Updated user preferences:');
     console.log(`   Email: ${preferences.email}, SMS: ${preferences.sms}`);
-    console.log(`   Quiet hours: ${preferences.quietHours.start} - ${preferences.quietHours.end}`);
+    console.log(
+      `   Quiet hours: ${preferences.quietHours.start} - ${preferences.quietHours.end}`
+    );
 
     // 3. Test In-App Notifications
     console.log('\n3️⃣ Testing In-App Notifications...');
-    
+
     const inAppNotif = await inAppNotificationService.createNotification({
       userId: testUser.id,
       type: 'new_opportunity',
@@ -102,7 +110,7 @@ async function testNotificationSystem() {
 
     // 4. Test Deadline Reminders
     console.log('\n4️⃣ Testing Deadline Reminders...');
-    
+
     const reminder = await deadlineReminderService.createReminder({
       userId: testUser.id,
       opportunityId: testOpportunity.id,
@@ -114,11 +122,13 @@ async function testNotificationSystem() {
 
     console.log(`✅ Created deadline reminder ${reminder.id}`);
     console.log(`   Reminder times: ${reminder.reminderTimes.length}`);
-    console.log(`   Next reminder: ${reminder.reminderTimes[0]?.toLocaleString()}`);
+    console.log(
+      `   Next reminder: ${reminder.reminderTimes[0]?.toLocaleString()}`
+    );
 
     // 5. Test Opportunity Alerts
     console.log('\n5️⃣ Testing Opportunity Alerts...');
-    
+
     const alert = await opportunityAlertsService.createAlert({
       userId: testUser.id,
       name: 'AI & ML Opportunities',
@@ -137,37 +147,46 @@ async function testNotificationSystem() {
     console.log(`✅ Created opportunity alert ${alert.id}: "${alert.name}"`);
 
     // Test opportunity matching
-    const matches = await opportunityAlertsService.checkOpportunityAgainstAlerts(testOpportunity);
+    const matches =
+      await opportunityAlertsService.checkOpportunityAgainstAlerts(
+        testOpportunity
+      );
     console.log(`   Found ${matches.length} matching alerts`);
-    
+
     if (matches.length > 0) {
       console.log(`   Match score: ${matches[0].matchScore}%`);
-      console.log(`   Matched criteria: ${matches[0].matchedCriteria.join(', ')}`);
+      console.log(
+        `   Matched criteria: ${matches[0].matchedCriteria.join(', ')}`
+      );
     }
 
     // 6. Test Template System
     console.log('\n6️⃣ Testing Template System...');
-    
-    const templates = await notificationTemplateService.getTemplatesByType('new_opportunity');
+
+    const templates =
+      await notificationTemplateService.getTemplatesByType('new_opportunity');
     console.log(`✅ Found ${templates.length} templates for new opportunities`);
 
     if (templates.length > 0) {
       const template = templates[0];
-      const rendered = await notificationTemplateService.renderTemplate(template.id, {
-        variables: {
-          userName: testUser.name,
-          opportunityType: testOpportunity.type,
-          title: testOpportunity.title,
-          organizer: testOpportunity.organizer.name,
-          deadline: testOpportunity.deadline.toLocaleDateString(),
-          location: testOpportunity.location,
-          mode: testOpportunity.mode,
-          description: testOpportunity.description,
-          url: testOpportunity.url,
-          unsubscribeUrl: 'https://opportunex.com/unsubscribe/token123',
-          preferencesUrl: 'https://opportunex.com/preferences',
-        },
-      });
+      const rendered = await notificationTemplateService.renderTemplate(
+        template.id,
+        {
+          variables: {
+            userName: testUser.name,
+            opportunityType: testOpportunity.type,
+            title: testOpportunity.title,
+            organizer: testOpportunity.organizer.name,
+            deadline: testOpportunity.deadline.toLocaleDateString(),
+            location: testOpportunity.location,
+            mode: testOpportunity.mode,
+            description: testOpportunity.description,
+            url: testOpportunity.url,
+            unsubscribeUrl: 'https://opportunex.com/unsubscribe/token123',
+            preferencesUrl: 'https://opportunex.com/preferences',
+          },
+        }
+      );
 
       console.log(`   Rendered template: "${template.name}"`);
       console.log(`   Subject: ${rendered?.subject}`);
@@ -176,43 +195,61 @@ async function testNotificationSystem() {
 
     // 7. Test Delivery Tracking
     console.log('\n7️⃣ Testing Delivery Tracking...');
-    
-    const emailStats = await notificationDeliveryService.getChannelStats('email', 'day');
+
+    const emailStats = await notificationDeliveryService.getChannelStats(
+      'email',
+      'day'
+    );
     console.log(`✅ Email delivery stats (today):`);
-    console.log(`   Sent: ${emailStats.totalSent}, Delivered: ${emailStats.totalDelivered}`);
+    console.log(
+      `   Sent: ${emailStats.totalSent}, Delivered: ${emailStats.totalDelivered}`
+    );
     console.log(`   Delivery rate: ${emailStats.deliveryRate}%`);
 
-    const circuitBreakers = notificationDeliveryService.getCircuitBreakerStates();
-    console.log(`   Circuit breakers: ${circuitBreakers.filter(cb => cb.state === 'closed').length}/4 closed`);
+    const circuitBreakers =
+      notificationDeliveryService.getCircuitBreakerStates();
+    console.log(
+      `   Circuit breakers: ${circuitBreakers.filter(cb => cb.state === 'closed').length}/4 closed`
+    );
 
     // 8. Test Statistics
     console.log('\n8️⃣ Testing Statistics...');
-    
-    const notificationStats = await inAppNotificationService.getNotificationStats(testUser.id);
+
+    const notificationStats =
+      await inAppNotificationService.getNotificationStats(testUser.id);
     console.log(`✅ User notification stats:`);
-    console.log(`   Total: ${notificationStats.total}, Unread: ${notificationStats.unread}`);
+    console.log(
+      `   Total: ${notificationStats.total}, Unread: ${notificationStats.unread}`
+    );
     console.log(`   Read rate: ${notificationStats.readRate.toFixed(1)}%`);
 
-    const alertStats = await opportunityAlertsService.getAlertStats(testUser.id);
-    console.log(`   Alert stats: ${alertStats.totalAlerts} alerts, ${alertStats.totalMatches} matches`);
+    const alertStats = await opportunityAlertsService.getAlertStats(
+      testUser.id
+    );
+    console.log(
+      `   Alert stats: ${alertStats.totalAlerts} alerts, ${alertStats.totalMatches} matches`
+    );
 
     const templateStats = await notificationTemplateService.getTemplateStats();
-    console.log(`   Template stats: ${templateStats.totalTemplates} templates, ${templateStats.activeTemplates} active`);
+    console.log(
+      `   Template stats: ${templateStats.totalTemplates} templates, ${templateStats.activeTemplates} active`
+    );
 
     // 9. Test Cleanup Operations
     console.log('\n9️⃣ Testing Cleanup Operations...');
-    
+
     // Mark some notifications as read
     await inAppNotificationService.markAsRead(inAppNotif.id, testUser.id);
     console.log('✅ Marked notification as read');
 
     // Clean up expired notifications (simulate)
-    const cleanedCount = await inAppNotificationService.cleanupExpiredNotifications();
+    const cleanedCount =
+      await inAppNotificationService.cleanupExpiredNotifications();
     console.log(`   Cleaned up ${cleanedCount} expired notifications`);
 
     // 10. Test Error Handling
     console.log('\n🔟 Testing Error Handling...');
-    
+
     try {
       await notificationService.sendNotification({
         userId: '',
@@ -226,15 +263,18 @@ async function testNotificationSystem() {
     }
 
     try {
-      await notificationTemplateService.renderTemplate('non-existent-template', {
-        variables: {},
-      });
+      await notificationTemplateService.renderTemplate(
+        'non-existent-template',
+        {
+          variables: {},
+        }
+      );
     } catch (error) {
       console.log('✅ Properly handled non-existent template');
     }
 
     console.log('\n🎉 All notification system tests completed successfully!');
-    
+
     // Display summary
     console.log('\n📊 Test Summary:');
     console.log('================');
@@ -248,7 +288,6 @@ async function testNotificationSystem() {
     console.log('✅ Statistics and analytics');
     console.log('✅ Cleanup operations');
     console.log('✅ Error handling');
-
   } catch (error) {
     console.error('❌ Test failed:', error);
     process.exit(1);
@@ -266,7 +305,7 @@ if (require.main === module) {
       console.log('\n✨ Notification system test completed!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('💥 Test failed:', error);
       process.exit(1);
     });

@@ -29,7 +29,9 @@ const mockPrisma = {
 };
 
 // Mock the PrismaClient constructor
-(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(() => mockPrisma as any);
+(PrismaClient as jest.MockedClass<typeof PrismaClient>).mockImplementation(
+  () => mockPrisma as any
+);
 
 describe('UserService', () => {
   let userService: UserService;
@@ -101,8 +103,15 @@ describe('UserService', () => {
       expect(result.data?.name).toBe('Test User');
       expect(result.data?.location.city).toBe('Pune');
       expect(result.data?.location.tier).toBe(2);
-      expect(result.data?.skills.technical).toEqual(['JavaScript', 'React', 'Node.js']);
-      expect(result.data?.preferences.opportunityTypes).toEqual(['hackathon', 'internship']);
+      expect(result.data?.skills.technical).toEqual([
+        'JavaScript',
+        'React',
+        'Node.js',
+      ]);
+      expect(result.data?.preferences.opportunityTypes).toEqual([
+        'hackathon',
+        'internship',
+      ]);
       expect(result.data?.searchHistory).toHaveLength(1);
       expect(result.data?.favoriteOpportunities).toEqual(['opp-1']);
       expect(result.message).toBe('User profile retrieved successfully');
@@ -235,14 +244,20 @@ describe('UserService', () => {
     it('should successfully update user profile', async () => {
       mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
 
-      const result = await userService.updateUserProfile(mockUserId, updateData);
+      const result = await userService.updateUserProfile(
+        mockUserId,
+        updateData
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
       expect(result.data?.name).toBe('Updated User');
       expect(result.data?.location.city).toBe('Mumbai');
       expect(result.data?.location.tier).toBe(3);
-      expect(result.data?.skills.technical).toEqual(['Python', 'Machine Learning']);
+      expect(result.data?.skills.technical).toEqual([
+        'Python',
+        'Machine Learning',
+      ]);
       expect(result.data?.preferences.preferredMode).toBe('online');
       expect(result.message).toBe('User profile updated successfully');
 
@@ -271,7 +286,10 @@ describe('UserService', () => {
 
       mockPrisma.user.update.mockResolvedValue(partiallyUpdatedUser);
 
-      const result = await userService.updateUserProfile(mockUserId, partialUpdate);
+      const result = await userService.updateUserProfile(
+        mockUserId,
+        partialUpdate
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.name).toBe('Partially Updated User');
@@ -315,7 +333,10 @@ describe('UserService', () => {
       const dbError = new Error('Update failed');
       mockPrisma.user.update.mockRejectedValue(dbError);
 
-      const result = await userService.updateUserProfile(mockUserId, updateData);
+      const result = await userService.updateUserProfile(
+        mockUserId,
+        updateData
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to update user profile');
@@ -514,7 +535,9 @@ describe('UserService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(['opp-1', 'opp-2', 'opp-3']);
-      expect(result.message).toBe('Favorite opportunities retrieved successfully');
+      expect(result.message).toBe(
+        'Favorite opportunities retrieved successfully'
+      );
 
       expect(mockPrisma.userFavorite.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
@@ -554,10 +577,15 @@ describe('UserService', () => {
         createdAt: new Date(),
       });
 
-      const result = await userService.addToFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.addToFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Opportunity added to favorites successfully');
+      expect(result.message).toBe(
+        'Opportunity added to favorites successfully'
+      );
 
       expect(mockPrisma.userFavorite.findUnique).toHaveBeenCalledWith({
         where: {
@@ -583,7 +611,10 @@ describe('UserService', () => {
         createdAt: new Date(),
       });
 
-      const result = await userService.addToFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.addToFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Opportunity is already in favorites');
@@ -596,7 +627,10 @@ describe('UserService', () => {
       const dbError = new Error('Create failed');
       mockPrisma.userFavorite.create.mockRejectedValue(dbError);
 
-      const result = await userService.addToFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.addToFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to add opportunity to favorites');
@@ -610,10 +644,15 @@ describe('UserService', () => {
     it('should successfully remove opportunity from favorites', async () => {
       mockPrisma.userFavorite.deleteMany.mockResolvedValue({ count: 1 });
 
-      const result = await userService.removeFromFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.removeFromFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Opportunity removed from favorites successfully');
+      expect(result.message).toBe(
+        'Opportunity removed from favorites successfully'
+      );
 
       expect(mockPrisma.userFavorite.deleteMany).toHaveBeenCalledWith({
         where: {
@@ -626,7 +665,10 @@ describe('UserService', () => {
     it('should handle case when opportunity is not in favorites', async () => {
       mockPrisma.userFavorite.deleteMany.mockResolvedValue({ count: 0 });
 
-      const result = await userService.removeFromFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.removeFromFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Opportunity not found in favorites');
@@ -636,7 +678,10 @@ describe('UserService', () => {
       const dbError = new Error('Delete failed');
       mockPrisma.userFavorite.deleteMany.mockRejectedValue(dbError);
 
-      const result = await userService.removeFromFavorites(mockUserId, mockOpportunityId);
+      const result = await userService.removeFromFavorites(
+        mockUserId,
+        mockOpportunityId
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Failed to remove opportunity from favorites');

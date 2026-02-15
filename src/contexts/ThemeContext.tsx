@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -52,7 +53,7 @@ export function ThemeProvider({
     if (!isClient) return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const updateResolvedTheme = () => {
       if (theme === 'system') {
         setResolvedTheme(mediaQuery.matches ? 'dark' : 'light');
@@ -72,13 +73,13 @@ export function ThemeProvider({
     if (!isClient) return;
 
     const root = window.document.documentElement;
-    
+
     // Remove existing theme classes
     root.classList.remove('light', 'dark');
-    
+
     // Add current theme class
     root.classList.add(resolvedTheme);
-    
+
     // Update meta theme-color
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
@@ -91,7 +92,7 @@ export function ThemeProvider({
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    
+
     if (isClient) {
       try {
         localStorage.setItem(storageKey, newTheme);
@@ -109,18 +110,16 @@ export function ThemeProvider({
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
-  
+
   return context;
 }

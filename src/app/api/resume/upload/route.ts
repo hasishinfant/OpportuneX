@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const MAIN_SERVER_URL = process.env.MAIN_SERVER_URL || 'http://localhost:5001';
 
@@ -6,10 +7,10 @@ export async function POST(request: NextRequest) {
   try {
     console.log('Resume upload API called');
     console.log('MAIN_SERVER_URL:', MAIN_SERVER_URL);
-    
+
     const formData = await request.formData();
     console.log('FormData received, forwarding to main server...');
-    
+
     // Forward the form data to main server (which has resume upload functionality)
     const response = await fetch(`${MAIN_SERVER_URL}/api/resume/upload`, {
       method: 'POST',
@@ -21,7 +22,9 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Main server error:', errorData);
-      throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+      throw new Error(
+        errorData.error || `Server responded with status: ${response.status}`
+      );
     }
 
     const data = await response.json();

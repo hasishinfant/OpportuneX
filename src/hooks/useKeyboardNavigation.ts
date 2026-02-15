@@ -26,7 +26,10 @@ export function useKeyboardNavigation({
   }, [items]);
 
   const setActiveIndex = useCallback((index: number) => {
-    const validIndex = Math.max(-1, Math.min(index, itemsRef.current.length - 1));
+    const validIndex = Math.max(
+      -1,
+      Math.min(index, itemsRef.current.length - 1)
+    );
     currentIndexRef.current = validIndex;
 
     // Remove previous active states
@@ -64,44 +67,48 @@ export function useKeyboardNavigation({
     }
   }, [onSelect]);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!enabled || itemsRef.current.length === 0) return;
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!enabled || itemsRef.current.length === 0) return;
 
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        moveNext();
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        movePrevious();
-        break;
-      case 'Enter':
-        event.preventDefault();
-        selectCurrent();
-        break;
-      case 'Escape':
-        event.preventDefault();
-        if (onEscape) {
-          onEscape();
-        }
-        break;
-      case 'Home':
-        event.preventDefault();
-        setActiveIndex(0);
-        break;
-      case 'End':
-        event.preventDefault();
-        setActiveIndex(itemsRef.current.length - 1);
-        break;
-    }
-  }, [enabled, moveNext, movePrevious, selectCurrent, onEscape, setActiveIndex]);
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          moveNext();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          movePrevious();
+          break;
+        case 'Enter':
+          event.preventDefault();
+          selectCurrent();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          if (onEscape) {
+            onEscape();
+          }
+          break;
+        case 'Home':
+          event.preventDefault();
+          setActiveIndex(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          setActiveIndex(itemsRef.current.length - 1);
+          break;
+      }
+    },
+    [enabled, moveNext, movePrevious, selectCurrent, onEscape, setActiveIndex]
+  );
 
   useEffect(() => {
     if (enabled) {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
+    return undefined;
   }, [enabled, handleKeyDown]);
 
   return {
@@ -110,5 +117,5 @@ export function useKeyboardNavigation({
     moveNext,
     movePrevious,
     selectCurrent,
-  };
+  } as const;
 }
