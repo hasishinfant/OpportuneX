@@ -64,7 +64,7 @@
     "tailwindcss": "^3.4.0",
     "three": "^0.158.0",
     "typescript": "^5.0.0",
-    "zod": "^3.22.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",
