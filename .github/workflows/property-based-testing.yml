@@ -198,7 +198,7 @@ jobs:
           # This would typically parse test output and create summaries
 
       - name: Upload Property Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: property-test-results-${{ matrix.property-group }}
@@ -301,7 +301,7 @@ jobs:
           # Generate comprehensive report
 
       - name: Upload Extended Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: extended-property-test-results
@@ -355,7 +355,7 @@ jobs:
           # Add detailed results analysis
 
       - name: Upload summary report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: property-test-summary
           path: property-test-summary.md
